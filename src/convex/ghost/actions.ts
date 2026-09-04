@@ -92,7 +92,7 @@ export const runTask = action({
       }
 
       // ---------- 2. Engine selection: SambaNova LLM (free tier, optional key) or local engine ----------
-      const apiKey = process.env.SAMBANOVA_API_KEY;
+      const apiKey = process.env.SAMBANOVA_API_KEY ?? process.env.SAMBA_API_KEY;
       let engine: "sambanova" | "local" = "local";
       let llm: LlmPlan | null = null;
       if (apiKey) {
@@ -150,7 +150,7 @@ export const runTask = action({
       const engineNote =
         engine === "sambanova"
           ? "Engine: SambaNova Cloud (open model) — free tier, no credits consumed."
-          : "Engine: local free engine — add a SAMBANOVA_API_KEY in Keys to upgrade to an open LLM planner. No credits are ever required.";
+          : "Engine: local free engine — add a SAMBANOVA_API_KEY (or SAMBA_API_KEY) in Keys to upgrade to an open LLM planner. No credits are ever required.";
 
       const content = [
         script.summary,
