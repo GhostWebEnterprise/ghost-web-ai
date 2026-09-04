@@ -7,6 +7,10 @@ import {
   type ConversationRow,
 } from "@/components/ghost/ConversationsPanel";
 import { Composer } from "@/components/ghost/Composer";
+import {
+  GitHubSync,
+  type SyncedRepoPick,
+} from "@/components/ghost/GitHubSync";
 import { RunMessage, UserMessage } from "@/components/ghost/RunMessage";
 import { GhostMark } from "@/components/ghost/GhostMark";
 import { engineLabel, repoShort } from "@/lib/ghost-agents";
@@ -49,9 +53,38 @@ export default function Chat() {
     api.ghost.mutations.deleteConversation,
   );
   const runTask = useAction(api.ghost.actions.runTask);
+  const selectSyncedRepo = useMutation(api.github.mutations.selectSyncedRepo);
 
   const [sending, setSending] = useState(false);
+  // Repo picked from a synced GitHub account while no session exists yet.
+  const [pickedRepo, setPickedRepo] = useState<SyncedRepoPick | undefined>(
+    undefined,
+  );
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const handlePickRepo = async (repo: SyncedRepoPick) => {
+    if (activeId && activeIdValid) {
+      try {
+        await selectSyncedRepo({
+          conversationId: activeId as Id<"conversations">,
+          fullName: repo.fullName,
+          url: repo.url,
+          defaultBranch: repo.defaultBranch,
+          language: repo.language,
+          description: repo.description,
+          isPrivate: repo.private,
+        });
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Could not target the repo.",
+        );
+        return;
+      }
+      setPickedRepo(undefined);
+    } else {
+      setPickedRepo(repo);
+    }
+  };
 
   const chainRunning =
     sending || messages.some((m) => m.runStatus === "running");
@@ -78,6 +111,17 @@ export default function Chat() {
         id = await createConversation({ task, repoUrl });
         setMode("thread");
         setSearchParams({ c: id }, { replace: true });
+      }
+      if (pickedRepo && !conversation?.repoUrl) {
+        await selectSyncedRepo({
+          conversationId: id as Id<"conversations">,
+          fullName: pickedRepo.fullName,
+          url: pickedRepo.url,
+          defaultBranch: pickedRepo.defaultBranch,
+          language: pickedRepo.language,
+          description: pickedRepo.description,
+          isPrivate: pickedRepo.private,
+        });
       }
       const { runId, pipeline } = await startTask({
         conversationId: id as Id<"conversations">,
@@ -258,12 +302,26 @@ export default function Chat() {
             )}
           </div>
 
-          {/* composer — keyed by session so repo state resets per conversation */}
+          {/* GitHub connect + repo targeting */}
+          <GitHubSync
+            targetFullName={
+              conversation?.repo?.fullName ?? pickedRepo?.fullName ?? null
+            }
+            busy={chainRunning}
+            onPick={handlePickRepo}
+            onClear={
+              activeId ? undefined : () => setPickedRepo(undefined)
+            }
+          />
+
+          {/* composer — keyed by session + target so repo state resets */}
           <Composer
-            key={conversation?._id ?? "new"}
+            key={`${conversation?._id ?? "new"}:${
+              conversation?.repoUrl ?? pickedRepo?.url ?? ""
+            }`}
             onSubmit={startRun}
             busy={chainRunning}
-            defaultRepoUrl={conversation?.repoUrl ?? undefined}
+            defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url}
           />
         </div>
       </div>
