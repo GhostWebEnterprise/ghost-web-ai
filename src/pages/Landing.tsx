@@ -1,3 +1,4 @@
+// Landing route — kept as a single default export consumed by <Suspense> lazy import.
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { GhostMark, Wordmark } from "@/components/ghost/GhostMark";
