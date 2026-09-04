@@ -57,6 +57,15 @@ export const repoValidator = v.object({
 });
 export type RepoMeta = Infer<typeof repoValidator>;
 
+// A file Ghost generated for a task (path + full new content). Stored on the
+// assistant run message so the UI can render real diffs, not just logs.
+export const runFileValidator = v.object({
+  path: v.string(),
+  summary: v.optional(v.string()),
+  content: v.string(),
+});
+export type RunFile = Infer<typeof runFileValidator>;
+
 const schema = defineSchema(
   {
     // default auth tables using convex auth.
@@ -99,6 +108,7 @@ const schema = defineSchema(
       engine: v.optional(v.string()),
       pipeline: v.optional(v.array(stageValidator)), // run pipeline
       runStatus: v.optional(runStatusValidator), // running | done | error
+      files: v.optional(v.array(runFileValidator)), // generated file diffs
       error: v.optional(v.string()),
       createdAt: v.number(),
     }).index("by_conversation_seq", ["conversationId", "seq"]),

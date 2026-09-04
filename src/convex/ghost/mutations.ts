@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { mutation } from "../_generated/server";
 import { getCurrentUser } from "../users";
+import { runFileValidator } from "../schema";
 import { buildPipeline, parseRepoUrl, truncate, type PlanStage } from "./plan";
 
 const NOW = () => Date.now();
@@ -152,6 +153,7 @@ export const patchRun = mutation({
       v.union(v.literal("idle"), v.literal("running"), v.literal("done"), v.literal("error")),
     ),
     error: v.optional(v.string()),
+    files: v.optional(v.array(runFileValidator)),
   },
   handler: async (ctx, args) => {
     const user = await getCurrentUser(ctx);
@@ -171,6 +173,7 @@ export const patchRun = mutation({
     if (args.engine) patch.engine = args.engine;
     if (args.runStatus) patch.runStatus = args.runStatus;
     if (args.error !== undefined) patch.error = args.error;
+    if (args.files) patch.files = args.files;
 
     if (Object.keys(patch).length > 0) {
       await ctx.db.patch(args.runId, patch);

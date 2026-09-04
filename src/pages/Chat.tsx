@@ -208,6 +208,7 @@ export default function Chat() {
                         engine: message.engine,
                         runStatus: message.runStatus,
                         pipeline: message.pipeline,
+                        files: message.files,
                         content: message.content,
                         error: message.error,
                         createdAt: message.createdAt,

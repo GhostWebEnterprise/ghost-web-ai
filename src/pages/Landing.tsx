@@ -119,22 +119,90 @@ const FAQS = [
 const fakeRun: RunMessageData = {
   role: "assistant",
   agent: "core",
-  engine: "local",
+  engine: "sambanova",
   runStatus: "done",
   createdAt: Date.now() - 1000 * 60 * 3,
   content:
-    "Add a realtime chat feature to my repo and open the PR.\n\nTarget: ghostapp-ai/ghost (TypeScript) — MIT license.\nBranch: `feat/realtime-chat`\n\n  src/features/chat/\n  src/features/chat/index.ts\n  src/features/chat/chat.tsx\n  src/features/chat/hooks.ts\n\nCommit: feat: realtime chat\n\nResult is on branch `feat/realtime-chat` and pushed as a PR, ready for CI to verify.\n\nEngine: local free engine — no credits consumed.",
+    "Add a realtime chat feature to my repo and open the PR.\n\nTarget: ghostapp-ai/ghost (TypeScript) — MIT license.\nBranch: `feat/realtime-chat`\n\n  src/features/chat/\n  src/features/chat/index.ts\n  src/features/chat/chat.tsx\n  src/features/chat/hooks.ts\n\nCommit: feat: realtime chat\n\nResult is on branch `feat/realtime-chat` and pushed as a PR, ready for CI to verify.\n\n3 generated files with full contents attached above — drafted against the real tree, ready for review.\n\nEngine: SambaNova Cloud (open model) — free tier, no credits consumed.",
   pipeline: [
     { id: "scan", agent: "security", title: "Source & license gate", status: "done", detail: "Licence gate cleared — MIT compatible.", logs: ["ghost security: license detected → MIT (permissive, OK)"] },
     { id: "plan", agent: "core", title: "Parse task — execution plan", status: "done", detail: "Chat feature → 1 branch, ~4 files.", logs: ["ghost core: branch feat/realtime-chat registered"] },
     { id: "branch", agent: "git", title: "Branch + git state", status: "done", detail: "Working on feat/realtime-chat from main.", logs: ["$ git checkout -b feat/realtime-chat"] },
-    { id: "code", agent: "web", title: "Implement feature in web tree", status: "done", detail: "Wrote 4 files implementing the chat flow.", logs: ["ghost web: scaffold src/features/chat/"] },
+    { id: "code", agent: "web", title: "Implement feature in web tree", status: "done", detail: "Wrote 4 files from the real tree — full contents attached.", logs: ["ghost web: read src/ + 5 key files before writing", "ghost web: wrote src/features/chat/hooks.ts (+27 lines)", "ghost web: wrote src/features/chat/chat.tsx (+41 lines)"] },
     { id: "guard", agent: "core", title: "Guardian — detect & self-heal", status: "done", detail: "Found 1 issue — patched automatically.", logs: ["ghost guardian: fix applied — narrowed types + validation"] },
     { id: "build", agent: "ci", title: "CI gate — install → build → first error", status: "done", detail: "First real error caught — handed to fix loop.", logs: ["$ bun tsc -b --noEmit   ✖ (1 error, first real error)"] },
     { id: "fix", agent: "core", title: "Fix loop — resolve + re-run", status: "done", detail: "Error resolved in 1 iteration — re-run green.", logs: ["ghost core: ✓ fixed + self-verified"] },
     { id: "commit", agent: "git", title: "Commit + push branch", status: "done", detail: "Committed on feat/realtime-chat.", logs: ["$ git push -u origin feat/realtime-chat"] },
     { id: "pr", agent: "github", title: "Open PR — GitHub Actions", status: "done", detail: "PR opened — Actions queued.", logs: ["ghost github: PR created → base main"] },
     { id: "verify", agent: "ci", title: "Verify — checks green, preview live", status: "done", detail: "All gates green — ready for review.", logs: ["✓ all gates green — PR is ready for human review"] },
+  ],
+  files: [
+    {
+      path: "src/features/chat/index.ts",
+      summary: "Public entry — exports the component and its types.",
+      content: `export { RealtimeChat } from "./chat";
+export type { ChatMessage } from "./types";`,
+    },
+    {
+      path: "src/features/chat/hooks.ts",
+      summary: "Reactive room state via Convex + local draft handling.",
+      content: `import { useState } from "react";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+
+export function useRealtimeChat(roomId: string) {
+  const messages = useQuery(api.chat.list, { roomId }) ?? [];
+  const send = useMutation(api.chat.send);
+  const [draft, setDraft] = useState("");
+
+  const submit = async () => {
+    const text = draft.trim();
+    if (!text) return;
+    await send({ roomId, text });
+    setDraft("");
+  };
+
+  return { messages, draft, setDraft, submit };
+}`,
+    },
+    {
+      path: "src/features/chat/chat.tsx",
+      summary: "The room UI — optimistic list, scroll area, composer.",
+      content: `import { useRealtimeChat } from "./hooks";
+
+export function RealtimeChat({ roomId }: { roomId: string }) {
+  const { messages, draft, setDraft, submit } = useRealtimeChat(roomId);
+
+  return (
+    <section className="flex h-full flex-col gap-3">
+      <ul className="flex-1 space-y-2 overflow-y-auto">
+        {messages.map((m) => (
+          <li key={m._id} className="border-2 border-foreground bg-card px-2 py-1 text-sm">
+            <strong>{m.author}</strong> · {m.text}
+          </li>
+        ))}
+      </ul>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          void submit();
+        }}
+        className="flex gap-2"
+      >
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder="Say something…"
+          className="min-w-0 flex-1 border-2 border-foreground bg-background px-2 py-1 font-mono text-sm"
+        />
+        <button className="border-2 border-foreground bg-accent px-3 text-xs font-black uppercase tracking-wide">
+          Send
+        </button>
+      </form>
+    </section>
+  );
+}`,
+    },
   ],
 };
 

@@ -8,15 +8,80 @@ import {
   timeShort,
 } from "@/lib/ghost-agents";
 
+export interface RunFileData {
+  path: string;
+  summary?: string;
+  content: string;
+}
+
 export interface RunMessageData {
   role: "assistant" | "user";
   agent?: string;
   engine?: string;
   runStatus?: string;
   pipeline?: StageView[];
+  files?: RunFileData[];
   content: string;
   error?: string;
   createdAt: number;
+}
+
+const FILE_COLORS = ["bg-[#a5c8ff]", "bg-accent", "bg-[#b7e6a5]", "bg-[#ffd0a1]"];
+
+/** Real generated files with full contents — Ghost wrote these, not just logs. */
+function ChangesBlock({ files }: { files: RunFileData[] }) {
+  const totalLines = files.reduce(
+    (sum, f) => sum + Math.max(1, f.content.trim().split("\n").length),
+    0,
+  );
+  return (
+    <div className="border-t-2 border-foreground">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-foreground bg-[#ffd0a1] px-3 py-2">
+        <p className="flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-widest">
+          <span className="inline-block size-2 border border-foreground bg-foreground" />
+          Generated files · {files.length}
+        </p>
+        <p className="font-mono text-[10px] font-bold uppercase tracking-wider text-foreground/70">
+          +{totalLines} lines · full contents
+        </p>
+      </div>
+      <div className="divide-y divide-foreground/15">
+        {files.map((file, i) => {
+          const lines = Math.max(1, file.content.trim().split("\n").length);
+          return (
+            <details key={file.path} open={i === 0} className="group">
+              <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2 [&::-webkit-details-marker]:hidden">
+                <span
+                  className={`size-2.5 shrink-0 border border-foreground ${
+                    FILE_COLORS[i % FILE_COLORS.length]
+                  }`}
+                />
+                <span className="min-w-0 flex-1 truncate font-mono text-[11.5px] font-bold">
+                  {file.path}
+                </span>
+                {file.summary ? (
+                  <span className="hidden truncate text-[10px] text-muted-foreground md:inline">
+                    {file.summary}
+                  </span>
+                ) : null}
+                <span className="shrink-0 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground">
+                  +{lines}
+                </span>
+                <span className="shrink-0 font-mono text-[10px] text-muted-foreground transition-transform group-open:rotate-45">
+                  +
+                </span>
+              </summary>
+              <div className="border-t border-foreground/15 bg-[#fffdf2]">
+                <pre className="nb-scroll max-h-80 overflow-auto px-3 py-2.5 font-mono text-[11px] leading-[1.65] text-foreground/90">
+                  {file.content}
+                </pre>
+              </div>
+            </details>
+          );
+        })}
+      </div>
+    </div>
+  );
 }
 
 export function UserMessage({ content }: { content: string }) {
@@ -192,6 +257,11 @@ export function RunMessage({ message }: { message: RunMessageData }) {
           />
         ))}
       </div>
+
+      {/* real generated files */}
+      {message.files && message.files.length > 0 ? (
+        <ChangesBlock files={message.files} />
+      ) : null}
 
       {/* error banner */}
       {message.runStatus === "error" && message.error ? (
