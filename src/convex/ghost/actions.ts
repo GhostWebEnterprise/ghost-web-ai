@@ -283,27 +283,42 @@ Return ONLY strict JSON (no markdown fences) with this exact shape:
   "risks": ["2-3 short risk notes"]
 }`;
 
-  const res = await fetch("https://api.sambanova.ai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      model: "meta-llama/Llama-3.3-70B-Instruct",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
-      max_tokens: 1400,
-    }),
-    signal: AbortSignal.timeout(45000),
-  });
-  if (!res.ok) {
-    throw new Error(`SambaNova ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  // Current catalog id first; fall back to the legacy org-prefixed id in case
+  // the deployment still routes it (SambaNova changed naming over time).
+  const MODELS = ["Meta-Llama-3.3-70B-Instruct", "meta-llama/Llama-3.3-70B-Instruct"];
+  let lastErr: Error | null = null;
+  let raw = "";
+  for (const model of MODELS) {
+    try {
+      const res = await fetch("https://api.sambanova.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.3,
+          max_tokens: 1400,
+        }),
+        signal: AbortSignal.timeout(45000),
+      });
+      if (!res.ok) {
+        lastErr = new Error(`SambaNova ${res.status}: ${(await res.text()).slice(0, 200)}`);
+        continue;
+      }
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+      };
+      raw = data.choices?.[0]?.message?.content ?? "";
+      lastErr = null;
+      break;
+    } catch (err) {
+      lastErr = err instanceof Error ? err : new Error(String(err));
+    }
   }
-  const data = (await res.json()) as {
-    choices?: { message?: { content?: string } }[];
-  };
-  const raw = data.choices?.[0]?.message?.content ?? "";
+  if (lastErr) throw lastErr;
   const jsonText = raw
     .replace(/```json/gi, "")
     .replace(/```/g, "")
