@@ -1,4 +1,4 @@
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AppNav } from "@/components/ghost/AppNav";
 import { Button } from "@/components/ui/button";
@@ -15,16 +15,67 @@ import {
   ArrowRight,
   Github,
   Layers,
-  Link2,
+  Loader2,
   Play,
   Terminal,
 } from "lucide-react";
-import { Link, useNavigate } from "react-router";
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const accounts = (useQuery(api.github.queries.listAccounts) ?? []) as {
+    _id: string;
+    username: string;
+    avatarUrl?: string;
+    profileUrl: string;
+  }[];
+  const connected = accounts[0];
+  const startConnect = useMutation(api.github.mutations.startConnect);
+  const disconnect = useMutation(api.github.mutations.disconnect);
+  const [connecting, setConnecting] = useState(false);
+
+  // OAuth callback lands on /dashboard?gh=connected|error
+  useEffect(() => {
+    const status = searchParams.get("gh");
+    const ghUser = searchParams.get("user");
+    if (status === "connected") {
+      toast.success(`GitHub connected as @${ghUser ?? "you"}`);
+    }
+    if (status === "error") {
+      toast.error("GitHub connection failed — check the OAuth setup and retry.");
+    }
+    if (status) setSearchParams({}, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  const handleConnect = async () => {
+    setConnecting(true);
+    try {
+      const { authorizeUrl } = await startConnect({
+        origin: window.location.origin,
+      });
+      // Send the user to GitHub's authorize screen; the callback returns here.
+      window.location.assign(authorizeUrl);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Could not start GitHub connect.",
+      );
+      setConnecting(false);
+    }
+  };
+
+  const handleDisconnect = async () => {
+    try {
+      await disconnect();
+      toast.success("GitHub disconnected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not disconnect.");
+    }
+  };
   const conversations =
     (useQuery(api.ghost.queries.listConversations) as ConversationRow[] | undefined) ??
     [];
@@ -205,22 +256,90 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* connect repo card */}
+            {/* connect GitHub card */}
             <div className="mt-4 border-2 border-foreground bg-foreground p-4 text-background">
               <div className="flex items-center gap-2">
                 <Github className="size-4" />
                 <h3 className="text-[13px] font-black uppercase tracking-wide">
-                  Target a repo
+                  Connect GitHub
                 </h3>
+                {connected && (
+                  <span className="border border-background/50 bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black">
+                    live
+                  </span>
+                )}
               </div>
-              <p className="mt-2 text-[12px] leading-5 text-background/75">
-                Paste any GitHub URL in the console to plan against the real
-                stack — license gate included.
-              </p>
-              <Link to="/chat">
-                <Button className="mt-3 w-full gap-2 border-2 border-foreground bg-accent text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]">
-                  <Link2 className="size-3.5" /> Point the chain at a repo
-                </Button>
+              {connected ? (
+                <>
+                  <p className="mt-2 flex items-center gap-2 text-[12px] leading-5 text-background/80">
+                    {connected.avatarUrl ? (
+                      <img
+                        src={connected.avatarUrl}
+                        alt=""
+                        className="size-5 border border-background/60"
+                      />
+                    ) : (
+                      <span className="flex size-5 items-center justify-center border border-background/60 bg-accent font-mono text-[9px] font-black text-black">
+                        {(connected.username ?? "?")[0].toUpperCase()}
+                      </span>
+                    )}
+                    <a
+                      href={connected.profileUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="font-black underline underline-offset-2 hover:bg-accent hover:text-black"
+                    >
+                      @{connected.username}
+                    </a>
+                    — runs against your repos push branches + PRs for real.
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <Link to="/chat">
+                      <Button className="gap-2 border-2 border-foreground bg-accent text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]">
+                        Run in the console <ArrowRight className="size-3.5" />
+                      </Button>
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={handleDisconnect}
+                      className="border-2 border-background/60 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-background/80 hover:bg-[#ff8b82] hover:text-black"
+                    >
+                      Disconnect
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p className="mt-2 text-[12px] leading-5 text-background/80">
+                    One click links your GitHub account. Runs that target your
+                    repos then push a real branch and open the pull request —
+                    no token to paste.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleConnect}
+                    disabled={connecting}
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-accent px-3 py-2.5 text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {connecting ? (
+                      <Loader2 className="size-3.5 animate-spin" />
+                    ) : (
+                      <Github className="size-3.5" />
+                    )}
+                    {connecting ? "Sending you to GitHub…" : "Connect GitHub"}
+                  </button>
+                  <p className="mt-2 font-mono text-[9px] uppercase leading-4 tracking-wider text-background/50">
+                    Needs GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET in Keys
+                    (GitHub OAuth app). Prefer a key? Paste GITHUB_PAT instead
+                    for the same live pushes.
+                  </p>
+                </>
+              )}
+              <Link
+                to="/chat"
+                className="mt-3 block font-mono text-[10px] uppercase tracking-wider text-background/60 underline underline-offset-2 hover:text-background"
+              >
+                …or point the chain at any repo URL in the console →
               </Link>
             </div>
           </section>

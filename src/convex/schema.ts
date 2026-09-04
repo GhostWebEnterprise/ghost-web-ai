@@ -92,12 +92,37 @@ const schema = defineSchema(
       engine: v.optional(v.string()), // "local" | "sambanova"
       status: v.optional(runStatusValidator), // status of last run
       runCount: v.number(), // how many agent runs happened
+      liveGithub: v.optional(v.boolean()), // a real branch/PR was pushed for this repo
       createdAt: v.number(),
       updatedAt: v.number(),
       lastRunAt: v.optional(v.number()),
     })
       .index("by_owner", ["ownerId"])
       .index("by_owner_updated", ["ownerId", "updatedAt"]),
+
+    // GitHub OAuth — user-connected GitHub account (token used by the engine
+    // to push branches + open PRs for real).
+    githubAccounts: defineTable({
+      ownerId: v.id("users"), // app user who owns the connection
+      githubId: v.string(), // GitHub numeric id
+      username: v.string(), // GitHub login
+      name: v.optional(v.string()),
+      avatarUrl: v.optional(v.string()),
+      profileUrl: v.string(),
+      accessToken: v.string(), // OAuth token — used server-side only
+      tokenScopes: v.optional(v.string()),
+      connectedAt: v.number(),
+      updatedAt: v.number(),
+      lastSyncedAt: v.optional(v.number()),
+    }).index("by_owner", ["ownerId"]),
+
+    // Single-use CSRF state rows for the GitHub OAuth web flow.
+    githubOauthStates: defineTable({
+      state: v.string(),
+      ownerId: v.id("users"),
+      redirectTo: v.string(),
+      createdAt: v.number(),
+    }).index("by_state", ["state"]),
 
     messages: defineTable({
       conversationId: v.id("conversations"),
@@ -109,6 +134,7 @@ const schema = defineSchema(
       pipeline: v.optional(v.array(stageValidator)), // run pipeline
       runStatus: v.optional(runStatusValidator), // running | done | error
       files: v.optional(v.array(runFileValidator)), // generated file diffs
+      prUrl: v.optional(v.string()), // real PR opened on GitHub for this run
       error: v.optional(v.string()),
       createdAt: v.number(),
     }).index("by_conversation_seq", ["conversationId", "seq"]),

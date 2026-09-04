@@ -23,6 +23,7 @@ export interface RunMessageData {
   files?: RunFileData[];
   content: string;
   error?: string;
+  prUrl?: string;
   createdAt: number;
 }
 
@@ -233,6 +234,16 @@ export function RunMessage({ message }: { message: RunMessageData }) {
           <span className="hidden font-mono text-[9px] uppercase tracking-wider text-background/50 sm:inline">
             {timeShort(message.createdAt)}
           </span>
+          {message.prUrl ? (
+            <a
+              href={message.prUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="border border-background/60 bg-accent px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground hover:bg-[#ffd600]"
+            >
+              PR ↗
+            </a>
+          ) : null}
         </div>
       </div>
 

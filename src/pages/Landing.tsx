@@ -100,7 +100,7 @@ const FAQS = [
   },
   {
     q: "Which repos can it build against?",
-    a: "Any GitHub repo — paste its URL into the console. The agent fetches public repo metadata (stack, licence, default branch), builds the plan against it, and opens the PR for you to review.",
+    a: "Any GitHub repo — paste its URL into the console. The agent fetches repo metadata (stack, licence, default branch) and reads key files live so it codes against the real tree. Add a GITHUB_PAT in Keys and the chain pushes a real branch and opens the pull request — including private repos you grant the token.",
   },
   {
     q: "How does the licence gate work?",

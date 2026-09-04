@@ -179,6 +179,14 @@ export default function Chat() {
               <span className="border border-foreground bg-[#d6d3cd] px-1.5 py-0.5">
                 {engineLabel(conversation?.engine)}
               </span>
+              {conversation?.liveGithub && (
+                <span
+                  title="A real branch + PR were pushed to this repo"
+                  className="inline-flex items-center gap-1 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 text-black"
+                >
+                  <Github className="size-3" /> PR live
+                </span>
+              )}
               <span className="hidden border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 text-black sm:inline">
                 {chainRunning ? "chain live" : "idle"}
               </span>
@@ -211,6 +219,7 @@ export default function Chat() {
                         files: message.files,
                         content: message.content,
                         error: message.error,
+                        prUrl: message.prUrl,
                         createdAt: message.createdAt,
                       }}
                     />
@@ -232,7 +241,8 @@ export default function Chat() {
                     Describe a feature — optionally paste a GitHub repo URL.
                     Ghost Web AI runs the whole chain: license gate, plan,
                     branch, code, guardian self-heal, CI, fix loop, commit,
-                    PR and verify.
+                    PR and verify. Add a GITHUB_PAT in Keys and the commit +
+                    PR stages push a real branch and pull request to that repo.
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center justify-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-widest text-muted-foreground">

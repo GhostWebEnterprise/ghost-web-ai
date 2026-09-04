@@ -193,6 +193,18 @@ export const patchRun = mutation({
   },
 });
 
+/** Flag a conversation whose repo received a real pushed branch + PR. */
+export const markGithubLive = mutation({
+  args: { conversationId: v.id("conversations") },
+  handler: async (ctx, args) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return;
+    const conversation = await ctx.db.get(args.conversationId);
+    if (!conversation || conversation.ownerId !== user._id) return;
+    await ctx.db.patch(args.conversationId, { liveGithub: true });
+  },
+});
+
 /** Store enriched repo metadata discovered by the action (GitHub API). */
 export const updateRepo = mutation({
   args: {
