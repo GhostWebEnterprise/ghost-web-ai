@@ -212,6 +212,11 @@ export default function Dashboard() {
                           {engineLabel(conversation.engine)} · {timeAgo(conversation.updatedAt)}
                         </span>
                       </span>
+                      {conversation.liveGithub && (
+                        <span className="shrink-0 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-black">
+                          live PR
+                        </span>
+                      )}
                       <span
                         className={`shrink-0 border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider ${status.cls}`}
                       >

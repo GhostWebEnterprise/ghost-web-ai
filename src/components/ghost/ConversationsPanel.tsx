@@ -16,6 +16,7 @@ export interface ConversationRow {
   engine?: string;
   status?: string;
   runCount: number;
+  liveGithub?: boolean;
   updatedAt: number;
 }
 
@@ -71,6 +72,11 @@ export function SessionRows({
               <span className="mt-1 flex items-center gap-1.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
                 {conversation.repo?.fullName ?? repoShort(conversation.repoUrl)}
                 {conversation.repo?.fullName || conversation.repoUrl ? " · " : ""}
+                {conversation.liveGithub && (
+                  <span className="mr-1 border border-foreground bg-[#b7e6a5] px-1 font-black normal-case text-black">
+                    live PR
+                  </span>
+                )}
                 {engineLabel(conversation.engine)} · {timeAgo(conversation.updatedAt)}
               </span>
             </span>
