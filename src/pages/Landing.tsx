@@ -1,51 +1,476 @@
-// TODO: REPLACE THIS LANDING PAGE WITH AN ELEGANT, THEMATIC, AND WELL-DESIGNED LANDING PAGE RELEVANT TO THE PROJECT
 import { motion } from "framer-motion";
-import { Loader } from "lucide-react";
-import logo from "@/assets/logo.svg";
+import { Button } from "@/components/ui/button";
+import { GhostMark, Wordmark } from "@/components/ghost/GhostMark";
+import { RunMessage, type RunMessageData } from "@/components/ghost/RunMessage";
+import { AGENTS } from "@/lib/ghost-agents";
+import { Link } from "react-router";
+import {
+  ArrowRight,
+  GitBranch,
+  Github,
+  Scale,
+  ShieldCheck,
+  Sparkles,
+  Zap,
+} from "lucide-react";
+
+const CHAIN = [
+  {
+    n: "01",
+    agent: "core",
+    title: "Parse the task",
+    text: "Your one-liner becomes an epic: scope, plan, and a target branch.",
+  },
+  {
+    n: "02",
+    agent: "security",
+    title: "Licence gate",
+    text: "Every open-source source and asset is licence-checked before anything is copied in.",
+  },
+  {
+    n: "03",
+    agent: "git",
+    title: "Branch + commit",
+    text: "The Git agent owns branch, diff, commit, push and rollback.",
+  },
+  {
+    n: "04",
+    agent: "web",
+    title: "Build the code",
+    text: "Web, Android or desktop agent writes the feature into the working tree.",
+  },
+  {
+    n: "05",
+    agent: "ci",
+    title: "CI gate",
+    text: "install → build → typecheck. The first real error is captured on purpose.",
+  },
+  {
+    n: "06",
+    agent: "core",
+    title: "Fix loop",
+    text: "Detect → diagnose → fix → re-run, until every gate is green.",
+  },
+  {
+    n: "07",
+    agent: "github",
+    title: "PR + Actions",
+    text: "The GitHub agent opens the pull request and lets Actions verify it.",
+  },
+  {
+    n: "08",
+    agent: "github",
+    title: "Verify & ship",
+    text: "Checks green, preview live, release drafted. You just review.",
+  },
+];
+
+const FEATURES = [
+  {
+    icon: GitBranch,
+    color: "bg-[#a5c8ff]",
+    title: "Git & GitHub native",
+    text: "Branches, commits, PRs, GitHub Actions, releases and artifacts — all driven from plain language. No terminal hopping.",
+  },
+  {
+    icon: Zap,
+    color: "bg-accent",
+    title: "Guardian self-heal",
+    text: "A background loop reviews the diff, updates, debugs, detects issues and solves them inside the app before you ever see the error.",
+  },
+  {
+    icon: ShieldCheck,
+    color: "bg-[#b7e6a5]",
+    title: "Open source, legal",
+    text: "The Security/Licence agent combs the open web for source, verifies licences, and only integrates what is fully legal to use.",
+  },
+  {
+    icon: Scale,
+    color: "bg-[#ff8b82]",
+    title: "Zero credits",
+    text: "No credit system, no token meter, no paywall to run the chain. Free engines run out of the box — bring your own key to upgrade.",
+  },
+];
+
+const FAQS = [
+  {
+    q: "Is Ghost Web AI really free?",
+    a: "Yes. There is no credit system at all. A local engine runs the full agent chain with zero keys. If you want an open LLM to write the plan, paste a SAMBANOVA_API_KEY into Keys — usage is metered by SambaNova's own free tier, never by us.",
+  },
+  {
+    q: "Which repos can it build against?",
+    a: "Any GitHub repo — paste its URL into the console. The agent fetches public repo metadata (stack, licence, default branch), builds the plan against it, and opens the PR for you to review.",
+  },
+  {
+    q: "How does the licence gate work?",
+    a: "Before any open-source code or asset is integrated, the Security/Licence agent checks its licence against your project's. Non-permissive or unverifiable sources are blocked and reported.",
+  },
+  {
+    q: "Can it build mobile or desktop apps?",
+    a: "Yes. The chain swaps in an Android agent (gradle build + unit tests) or a desktop/compatibility agent spanning macOS Big Sur → current, Windows and Linux, based on what the task asks for.",
+  },
+  {
+    q: "Do I need to jump between GitHub, terminal and CI?",
+    a: "No. That is the point. One prompt runs plan → branch → code → build → fix → commit → Actions → verify → release end to end. You review the PR and hit merge.",
+  },
+];
+
+const fakeRun: RunMessageData = {
+  role: "assistant",
+  agent: "core",
+  engine: "local",
+  runStatus: "done",
+  createdAt: Date.now() - 1000 * 60 * 3,
+  content:
+    "Add a realtime chat feature to my repo and open the PR.\n\nTarget: ghostapp-ai/ghost (TypeScript) — MIT license.\nBranch: `feat/realtime-chat`\n\n  src/features/chat/\n  src/features/chat/index.ts\n  src/features/chat/chat.tsx\n  src/features/chat/hooks.ts\n\nCommit: feat: realtime chat\n\nResult is on branch `feat/realtime-chat` and pushed as a PR, ready for CI to verify.\n\nEngine: local free engine — no credits consumed.",
+  pipeline: [
+    { id: "scan", agent: "security", title: "Source & license gate", status: "done", detail: "Licence gate cleared — MIT compatible.", logs: ["ghost security: license detected → MIT (permissive, OK)"] },
+    { id: "plan", agent: "core", title: "Parse task — execution plan", status: "done", detail: "Chat feature → 1 branch, ~4 files.", logs: ["ghost core: branch feat/realtime-chat registered"] },
+    { id: "branch", agent: "git", title: "Branch + git state", status: "done", detail: "Working on feat/realtime-chat from main.", logs: ["$ git checkout -b feat/realtime-chat"] },
+    { id: "code", agent: "web", title: "Implement feature in web tree", status: "done", detail: "Wrote 4 files implementing the chat flow.", logs: ["ghost web: scaffold src/features/chat/"] },
+    { id: "guard", agent: "core", title: "Guardian — detect & self-heal", status: "done", detail: "Found 1 issue — patched automatically.", logs: ["ghost guardian: fix applied — narrowed types + validation"] },
+    { id: "build", agent: "ci", title: "CI gate — install → build → first error", status: "done", detail: "First real error caught — handed to fix loop.", logs: ["$ bun tsc -b --noEmit   ✖ (1 error, first real error)"] },
+    { id: "fix", agent: "core", title: "Fix loop — resolve + re-run", status: "done", detail: "Error resolved in 1 iteration — re-run green.", logs: ["ghost core: ✓ fixed + self-verified"] },
+    { id: "commit", agent: "git", title: "Commit + push branch", status: "done", detail: "Committed on feat/realtime-chat.", logs: ["$ git push -u origin feat/realtime-chat"] },
+    { id: "pr", agent: "github", title: "Open PR — GitHub Actions", status: "done", detail: "PR opened — Actions queued.", logs: ["ghost github: PR created → base main"] },
+    { id: "verify", agent: "ci", title: "Verify — checks green, preview live", status: "done", detail: "All gates green — ready for review.", logs: ["✓ all gates green — PR is ready for human review"] },
+  ],
+};
+
+const SECTION_LINK = "/auth?returnTo=/chat";
+
+function GhostSticker({ label }: { label: string }) {
+  return (
+    <span className="absolute -top-3 right-4 -rotate-3 border-2 border-foreground bg-accent px-2 py-1 font-mono text-[10px] font-black uppercase tracking-wider text-foreground shadow-[3px_3px_0_0_var(--ink)]">
+      {label}
+    </span>
+  );
+}
 
 export default function Landing() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="min-h-screen flex flex-col"
-    >
+    <div className="nb-grid-paper min-h-screen bg-background text-foreground">
+      {/* header */}
+      <header className="sticky top-0 z-40 border-b-2 border-foreground bg-background/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+          <Link to="/" aria-label="Ghost Web AI home">
+            <Wordmark markSize="h-8 w-8" />
+          </Link>
+          <nav className="hidden items-center gap-5 font-mono text-[11px] font-bold uppercase tracking-widest md:flex">
+            <a className="hover:underline" href="#chain">Chain</a>
+            <a className="hover:underline" href="#agents">Agents</a>
+            <a className="hover:underline" href="#features">Git &amp; GitHub</a>
+            <a className="hover:underline" href="#faq">FAQ</a>
+          </nav>
+          <div className="flex items-center gap-2">
+            <Link to="/auth">
+              <Button
+                variant="ghost"
+                className="border-2 border-foreground bg-card text-xs font-black uppercase tracking-wide text-foreground hover:bg-accent"
+              >
+                Log in
+              </Button>
+            </Link>
+            <Link to={SECTION_LINK}>
+              <Button className="gap-2 border-2 border-foreground bg-accent text-xs font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]">
+                Console <ArrowRight className="size-3.5" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </header>
 
-      
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <div className="max-w-5xl mx-auto relative px-4">
-        {/* TODO: landing page goes here; replace with the landing page */}
-        <div className="flex justify-center">
-          <img
-            src={logo}
-            alt="Lock Icon"
-            width={64}
-            height={64}
-            className="rounded-lg mb-8 mt-24"
-          />
+      <main>
+        {/* ------------------------------ hero ------------------------------ */}
+        <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-14 lg:pt-20">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]"
+          >
+            <div>
+              <p className="nb-overline mb-4 inline-flex items-center gap-2 border-2 border-foreground bg-card px-2 py-1">
+                <GhostMark className="size-3.5" />
+                One dev team, in your browser
+              </p>
+              <h1 className="text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl xl:text-7xl">
+                Say what to
+                <br />
+                build.
+                <br />
+                <span className="mt-2 inline-block border-4 border-foreground bg-accent px-3 shadow-[6px_6px_0_0_var(--ink)]">
+                  Agents build it.
+                </span>
+              </h1>
+              <p className="mt-6 max-w-xl text-[15px] leading-7 text-foreground/80">
+                Ghost Web AI is a fused chain of agents — Git, GitHub, web,
+                Android, desktop, API and CI — that plans, codes, tests,
+                self-heals, commits and opens the pull request for you. It
+                combs open source for building blocks, only integrates what the
+                licence gate approves, and never asks for a credit.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link to={SECTION_LINK}>
+                  <Button
+                    size="lg"
+                    className="gap-2 border-2 border-foreground bg-foreground text-[15px] font-black uppercase tracking-wide text-background shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#2a2a2a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                  >
+                    Start building — free <ArrowRight className="size-4" />
+                  </Button>
+                </Link>
+                <a
+                  href="#chain"
+                  className="border-2 border-foreground bg-card px-4 py-2.5 text-sm font-black uppercase tracking-wide hover:bg-accent"
+                >
+                  See the chain
+                </a>
+              </div>
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 border border-foreground bg-[#b7e6a5]" /> No credits
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 border border-foreground bg-accent" /> Licence gate on
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <span className="size-2 border border-foreground bg-[#a5c8ff]" /> PRs to your repo
+                </span>
+              </div>
+            </div>
+
+            {/* sample run console */}
+            <div className="relative lg:sticky lg:top-24">
+              <GhostSticker label="Live preview · not a mockup of a mockup" />
+              <div className="mb-3 flex items-center gap-2">
+                <span className="border-2 border-foreground bg-[#ffd0a1] px-2 py-1 font-mono text-[10px] font-black uppercase">
+                  Example run
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  task → PR · ~30s
+                </span>
+              </div>
+              <RunMessage message={fakeRun} />
+            </div>
+          </motion.div>
+        </section>
+
+        {/* ------------------------------ the chain ------------------------------ */}
+        <section id="chain" className="border-y-2 border-foreground bg-card">
+          <div className="mx-auto max-w-6xl px-4 py-16">
+            <p className="nb-overline text-muted-foreground">The chain</p>
+            <h2 className="mt-2 max-w-2xl text-4xl font-black uppercase tracking-tight sm:text-5xl">
+              From one sentence to a merged PR
+            </h2>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-foreground/75">
+              One prompt walks the whole delivery path. Each agent is a coloured
+              gate in the line — hand-offs are automatic, and the Guardian loop
+              keeps reviewing, debugging and healing in the background.
+            </p>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {CHAIN.map((step) => (
+                <div
+                  key={step.n}
+                  className="nb-card nb-shadow-raise border-2 border-foreground bg-card p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-2xl font-black text-foreground/20">
+                      {step.n}
+                    </span>
+                    <span
+                      className={
+                        "border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider " +
+                        (AGENTS.find((a) => a.key === step.agent)?.chip ?? "bg-muted")
+                      }
+                    >
+                      {AGENTS.find((a) => a.key === step.agent)?.tag ?? step.agent}
+                    </span>
+                  </div>
+                  <h3 className="mt-3 text-sm font-black uppercase tracking-wide">
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[12.5px] leading-5 text-foreground/70">
+                    {step.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ agents ------------------------------ */}
+        <section id="agents" className="bg-background">
+          <div className="mx-auto max-w-6xl px-4 py-16">
+            <p className="nb-overline text-muted-foreground">The squad</p>
+            <h2 className="mt-2 text-4xl font-black uppercase tracking-tight sm:text-5xl">
+              Nine agents, one fused system
+            </h2>
+            <div className="mt-10 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+              {AGENTS.map((agent) => (
+                <div
+                  key={agent.key}
+                  className="group flex items-start gap-3 border-2 border-foreground bg-card p-3.5 transition-transform hover:-translate-y-0.5"
+                >
+                  <span
+                    className={
+                      "mt-0.5 flex size-9 shrink-0 items-center justify-center border-2 border-foreground font-mono text-[10px] font-black uppercase " +
+                      agent.chip
+                    }
+                  >
+                    {agent.tag}
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="text-[13px] font-black uppercase tracking-wide">
+                      {agent.label}
+                    </h3>
+                    <p className="mt-1 text-[12px] leading-5 text-foreground/70">
+                      {agent.blurb}
+                    </p>
+                  </div>
+                </div>
+              ))}
+              {/* fuse card */}
+              <div className="relative border-2 border-foreground bg-foreground p-3.5 text-background">
+                <GhostSticker label="the fusion" />
+                <h3 className="text-[13px] font-black uppercase tracking-wide">
+                  Sammansvetsat — fused, not bolted on
+                </h3>
+                <p className="mt-1 text-[12px] leading-5 text-background/75">
+                  Every agent shares one context: the repo, the plan and the
+                  gates. No hand-offs between tools, no copy-paste between
+                  GitHub, terminal and CI.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ features ------------------------------ */}
+        <section id="features" className="border-y-2 border-foreground bg-card">
+          <div className="mx-auto max-w-6xl px-4 py-16">
+            <p className="nb-overline text-muted-foreground">Why it works</p>
+            <h2 className="mt-2 max-w-2xl text-4xl font-black uppercase tracking-tight sm:text-5xl">
+              Git-native, self-healing, legal, and free
+            </h2>
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              {FEATURES.map((feature) => (
+                <div
+                  key={feature.title}
+                  className="nb-card nb-shadow-raise border-2 border-foreground p-5"
+                >
+                  <span
+                    className={
+                      "flex size-10 items-center justify-center border-2 border-foreground " +
+                      feature.color
+                    }
+                  >
+                    <feature.icon className="size-5" />
+                  </span>
+                  <h3 className="mt-4 text-base font-black uppercase tracking-wide">
+                    {feature.title}
+                  </h3>
+                  <p className="mt-2 text-[13px] leading-6 text-foreground/75">
+                    {feature.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            {/* repo bar */}
+            <div className="mt-12 border-2 border-foreground bg-background p-5 shadow-[8px_8px_0_0_var(--ink)]">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h3 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight">
+                    <Github className="size-5" />
+                    Give it your repo
+                  </h3>
+                  <p className="mt-1 text-[13px] text-foreground/70">
+                    Paste any GitHub URL into the console. Ghost clones the
+                    context, checks the licence, plans against your actual
+                    stack — then opens the PR.
+                  </p>
+                </div>
+                <Link to={SECTION_LINK} className="shrink-0">
+                  <Button className="gap-2 border-2 border-foreground bg-[#a5c8ff] px-5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#8ab7ff]">
+                    Point it at a repo <ArrowRight className="size-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ FAQ ------------------------------ */}
+        <section id="faq" className="bg-background">
+          <div className="mx-auto max-w-3xl px-4 py-16">
+            <p className="nb-overline text-center text-muted-foreground">FAQ</p>
+            <h2 className="mt-2 text-center text-4xl font-black uppercase tracking-tight">
+              Straight answers
+            </h2>
+            <div className="mt-10 flex flex-col gap-3">
+              {FAQS.map((faq) => (
+                <details
+                  key={faq.q}
+                  className="group border-2 border-foreground bg-card open:bg-[#fffdf2]"
+                >
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3.5 text-sm font-black uppercase tracking-wide [&::-webkit-details-marker]:hidden">
+                    {faq.q}
+                    <span className="border-2 border-foreground bg-accent px-2 font-mono text-xs leading-6 transition-transform group-open:rotate-45">
+                      +
+                    </span>
+                  </summary>
+                  <p className="border-t-2 border-foreground px-4 py-3.5 text-[13px] leading-6 text-foreground/75">
+                    {faq.a}
+                  </p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ------------------------------ final CTA ------------------------------ */}
+        <section className="border-t-2 border-foreground bg-accent">
+          <div className="nb-stripes-ink h-2.5 w-full opacity-10" />
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 px-4 py-16 text-center">
+            <GhostMark className="size-12 text-foreground" />
+            <h2 className="text-4xl font-black uppercase tracking-tight sm:text-5xl">
+              One sentence. A whole shipped feature.
+            </h2>
+            <p className="max-w-xl text-sm leading-6 text-foreground/80">
+              The agent chain is running on this site — plan, code, self-heal,
+              commit, PR, verify. No credits to buy, no keys to start.
+            </p>
+            <Link to={SECTION_LINK}>
+              <Button
+                size="lg"
+                className="gap-2 border-2 border-foreground bg-foreground px-8 text-[15px] font-black uppercase tracking-wide text-background shadow-[6px_6px_0_0_var(--ink)] hover:bg-[#2a2a2a]"
+              >
+                <Sparkles className="size-4" />
+                Open the console — free
+              </Button>
+            </Link>
+            <p className="font-mono text-[10px] uppercase tracking-widest text-foreground/60">
+              Optional: connect your own AI key in Keys for an open-LLM planner
+            </p>
+          </div>
+        </section>
+      </main>
+
+      {/* footer */}
+      <footer className="border-t-2 border-foreground bg-card">
+        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-4 py-8 sm:flex-row">
+          <Wordmark markSize="h-6 w-6" />
+          <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+            Ghost Web AI · Git · GitHub · web · android · desktop · CI — one chain
+          </p>
+          <div className="flex gap-4 font-mono text-[10px] font-bold uppercase tracking-widest">
+            <a className="hover:underline" href="#chain">Chain</a>
+            <a className="hover:underline" href="#agents">Agents</a>
+            <a className="hover:underline" href="#faq">FAQ</a>
+            <a className="hover:underline" href={SECTION_LINK}>Console</a>
+          </div>
         </div>
-        <div className="flex items-center justify-center text-foreground">
-          <Loader className="h-8 w-8 animate-spin mr-4 shrink-0" />
-          <span className="text-base">
-            <a
-              href="https://freebuff.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline hover:text-primary/80 transition-colors font-medium"
-            >
-              freebuff.com
-            </a>
-            {" "}is generating your project...
-          </span>
-        </div>
-        <p className="text-center text-muted-foreground py-6 text-sm mt-2">
-          Check progress on your project page.
-        </p>
-        
-        </div>
-      </div>
-    </motion.div>
+      </footer>
+    </div>
   );
 }
