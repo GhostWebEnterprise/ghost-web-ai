@@ -127,3 +127,9 @@ src/
 | `/auth` | Sign in (email OTP / guest) |
 | `/chat` | The console — sessions, live agent runs, task composer |
 | `/dashboard` | Build HQ — stats, recent runs, GitHub connect |
+
+## Contact
+
+Questions, feature ideas, or partnership inquiries?
+
+[ghostweb@ghostbin.cfd](mailto:ghostweb@ghostbin.cfd)
