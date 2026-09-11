@@ -1,5 +1,6 @@
 // Ghost Web AI — pure planning + local engine logic.
 // No Convex imports here so the same helpers can be reasoned about server-side.
+// NOTE: also used client-side by the /build wizard for the live chain preview.
 
 export type StageStatus =
   | "pending"
