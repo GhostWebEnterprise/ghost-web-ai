@@ -50,7 +50,7 @@ export function SessionRows({
               "group flex cursor-pointer items-start gap-2 border-2 border-foreground px-2.5 py-2 transition-colors",
               active
                 ? "bg-accent shadow-[3px_3px_0_0_var(--ink)]"
-                : "bg-card hover:bg-[#fff8dd]",
+                : "bg-card hover:bg-[#0f2417]",
             )}
             onClick={() => onSelect(conversation._id)}
             role="button"
@@ -73,7 +73,7 @@ export function SessionRows({
                 {conversation.repo?.fullName ?? repoShort(conversation.repoUrl)}
                 {conversation.repo?.fullName || conversation.repoUrl ? " · " : ""}
                 {conversation.liveGithub && (
-                  <span className="mr-1 border border-foreground bg-[#b7e6a5] px-1 font-black normal-case text-black">
+                  <span className="mr-1 border border-foreground bg-[#00ff41] px-1 font-black normal-case text-black">
                     live PR
                   </span>
                 )}
@@ -87,7 +87,7 @@ export function SessionRows({
                 e.stopPropagation();
                 onDelete(conversation._id);
               }}
-              className="shrink-0 self-start border border-foreground bg-background p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-[#ff8b82] hover:text-black group-hover:opacity-100"
+              className="shrink-0 self-start border border-foreground bg-background p-1 text-muted-foreground opacity-0 transition-opacity hover:bg-[#ff5c49] hover:text-black group-hover:opacity-100"
             >
               <Trash2 className="size-3" />
             </button>
@@ -124,7 +124,7 @@ export function ConversationsPanel({
       <Button
         type="button"
         onClick={onNew}
-        className="gap-2 border-2 border-foreground bg-accent text-foreground text-xs font-black uppercase tracking-wide shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]"
+        className="gap-2 border-2 border-foreground bg-accent text-foreground text-xs font-black uppercase tracking-wide shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166]"
       >
         <Plus className="size-4" />
         New build

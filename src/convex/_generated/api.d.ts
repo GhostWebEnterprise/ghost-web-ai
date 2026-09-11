@@ -14,12 +14,18 @@ import type * as ghost_actions from "../ghost/actions.js";
 import type * as ghost_mutations from "../ghost/mutations.js";
 import type * as ghost_plan from "../ghost/plan.js";
 import type * as ghost_queries from "../ghost/queries.js";
+import type * as ghost_team from "../ghost/team.js";
+import type * as ghost_teamActions from "../ghost/teamActions.js";
+import type * as ghost_teamMutations from "../ghost/teamMutations.js";
+import type * as ghost_teamQueries from "../ghost/teamQueries.js";
 import type * as github_actions from "../github/actions.js";
 import type * as github_helpers from "../github/helpers.js";
 import type * as github_mutations from "../github/mutations.js";
 import type * as github_oauth from "../github/oauth.js";
 import type * as github_queries from "../github/queries.js";
 import type * as http from "../http.js";
+import type * as mcp from "../mcp.js";
+import type * as mcpTools from "../mcpTools.js";
 import type * as users from "../users.js";
 
 import type {
@@ -35,12 +41,18 @@ declare const fullApi: ApiFromModules<{
   "ghost/mutations": typeof ghost_mutations;
   "ghost/plan": typeof ghost_plan;
   "ghost/queries": typeof ghost_queries;
+  "ghost/team": typeof ghost_team;
+  "ghost/teamActions": typeof ghost_teamActions;
+  "ghost/teamMutations": typeof ghost_teamMutations;
+  "ghost/teamQueries": typeof ghost_teamQueries;
   "github/actions": typeof github_actions;
   "github/helpers": typeof github_helpers;
   "github/mutations": typeof github_mutations;
   "github/oauth": typeof github_oauth;
   "github/queries": typeof github_queries;
   http: typeof http;
+  mcp: typeof mcp;
+  mcpTools: typeof mcpTools;
   users: typeof users;
 }>;
 

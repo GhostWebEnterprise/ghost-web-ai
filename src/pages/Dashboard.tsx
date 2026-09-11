@@ -92,17 +92,17 @@ export default function Dashboard() {
     {
       label: "Agent runs",
       value: stats ? String(stats.runs) : "–",
-      color: "bg-[#a5c8ff]",
+      color: "bg-[#4dd8e6]",
     },
     {
       label: "Repos targeted",
       value: stats ? String(stats.reposConnected) : "–",
-      color: "bg-[#b7e6a5]",
+      color: "bg-[#00ff41]",
     },
     {
       label: "Last run",
       value: lastRun ? timeAgo(lastRun) : "none yet",
-      color: "bg-[#ffd0a1]",
+      color: "bg-[#ff9e64]",
     },
   ];
 
@@ -127,7 +127,7 @@ export default function Dashboard() {
           <Link to="/chat">
             <Button
               size="lg"
-              className="gap-2 border-2 border-foreground bg-foreground text-sm font-black uppercase tracking-wide text-background shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#2a2a2a]"
+              className="gap-2 border-2 border-foreground bg-foreground text-sm font-black uppercase tracking-wide text-background shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#04140a]"
             >
               <Play className="size-4" /> New run
             </Button>
@@ -195,7 +195,7 @@ export default function Dashboard() {
                       key={conversation._id}
                       type="button"
                       onClick={() => navigate(`/chat?c=${conversation._id}`)}
-                      className="group flex items-center gap-3 border-2 border-foreground bg-card px-3 py-2.5 text-left transition-colors hover:bg-[#fff8dd]"
+                      className="group flex items-center gap-3 border-2 border-foreground bg-card px-3 py-2.5 text-left transition-colors hover:bg-[#0f2417]"
                     >
                       <span
                         className={`inline-block size-2.5 shrink-0 border border-black ${status.cls}`}
@@ -213,7 +213,7 @@ export default function Dashboard() {
                         </span>
                       </span>
                       {conversation.liveGithub && (
-                        <span className="shrink-0 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-black">
+                        <span className="shrink-0 border border-foreground bg-[#00ff41] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-black">
                           live PR
                         </span>
                       )}
@@ -254,7 +254,7 @@ export default function Dashboard() {
                   <span className="min-w-0 flex-1 truncate text-[12px] font-bold uppercase tracking-wide">
                     {agent.label}
                   </span>
-                  <span className="hidden border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black sm:inline">
+                  <span className="hidden border border-foreground bg-[#00ff41] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black sm:inline">
                     ready
                   </span>
                 </div>
@@ -269,7 +269,7 @@ export default function Dashboard() {
                   Connect GitHub
                 </h3>
                 {connected && (
-                  <span className="border border-background/50 bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black">
+                  <span className="border border-background/50 bg-[#00ff41] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black">
                     live
                   </span>
                 )}
@@ -300,14 +300,14 @@ export default function Dashboard() {
                   </p>
                   <div className="mt-3 flex flex-wrap gap-2">
                     <Link to="/chat">
-                      <Button className="gap-2 border-2 border-foreground bg-accent text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]">
+                      <Button className="gap-2 border-2 border-foreground bg-accent text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166]">
                         Run in the console <ArrowRight className="size-3.5" />
                       </Button>
                     </Link>
                     <button
                       type="button"
                       onClick={handleDisconnect}
-                      className="border-2 border-background/60 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-background/80 hover:bg-[#ff8b82] hover:text-black"
+                      className="border-2 border-background/60 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-background/80 hover:bg-[#ff5c49] hover:text-black"
                     >
                       Disconnect
                     </button>
@@ -324,7 +324,7 @@ export default function Dashboard() {
                     type="button"
                     onClick={handleConnect}
                     disabled={connecting}
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-accent px-3 py-2.5 text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600] disabled:cursor-not-allowed disabled:opacity-60"
+                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-accent px-3 py-2.5 text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {connecting ? (
                       <Loader2 className="size-3.5 animate-spin" />
@@ -351,9 +351,9 @@ export default function Dashboard() {
         </div>
 
         {/* free band */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-2 border-foreground bg-[#fff8dd] px-4 py-3">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-2 border-foreground bg-[#0f2417] px-4 py-3">
           <p className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-wider">
-            <span className="border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 text-black">
+            <span className="border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black">
               No credits
             </span>
             The free engine runs every run. Add a SAMBANOVA key anytime for an

@@ -20,27 +20,19 @@ import AuthPage from "./pages/Auth.tsx";
 import Chat from "./pages/Chat.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import BuildWizard from "./pages/BuildWizard.tsx";
+import TeamBoard from "./pages/TeamBoard.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 // The managed workspace can recycle without re-linking the Convex deployment,
-// leaving VITE_CONVEX_URL empty. ConvexReactClient would then throw
-// "No address provided" synchronously and white-screen the whole app — guard
-// the URL and render a clear recovery notice instead.
-const CONVEX_URL = import.meta.env.VITE_CONVEX_URL as string | undefined;
-const convex = CONVEX_URL ? new ConvexReactClient(CONVEX_URL) : null;
-
-function ConvexUnavailableNotice() {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-3 bg-background p-8 text-center text-foreground">
-      <h1 className="text-lg font-semibold">Backend not connected</h1>
-      <p className="max-w-md text-sm text-muted-foreground">
-        The Convex backend URL (<code className="font-mono">VITE_CONVEX_URL</code>)
-        is not set in this environment. Reload the preview once the dev backend
-        is linked, or set the variable in Settings → Environment.
-      </p>
-    </div>
-  );
-}
+// leaving VITE_CONVEX_URL empty — ConvexReactClient would then throw "No
+// address provided" synchronously and white-screen the whole app. Fall back
+// to the project's linked cloud deployment (fully deployed, RSA-keyed for
+// Convex Auth) so the app stays functional through workspace drift; the
+// injected variable always wins when present (local dev backend in preview).
+const FALLBACK_CONVEX_URL = "https://dutiful-chihuahua-732.eu-west-1.convex.cloud";
+const CONVEX_URL =
+  (import.meta.env.VITE_CONVEX_URL as string | undefined) || FALLBACK_CONVEX_URL;
+const convex = new ConvexReactClient(CONVEX_URL);
 
 
 
@@ -100,6 +92,14 @@ const app = (
           </RequireAuth>
         }
       />
+      <Route
+        path="/team"
+        element={
+          <RequireAuth>
+            <TeamBoard />
+          </RequireAuth>
+        }
+      />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
@@ -109,14 +109,10 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <VlyToolbar />
     <InstrumentationProvider>
-      {convex ? (
-        <ConvexAuthProvider client={convex}>
-          {app}
-          <Toaster />
-        </ConvexAuthProvider>
-      ) : (
-        <ConvexUnavailableNotice />
-      )}
+      <ConvexAuthProvider client={convex}>
+        {app}
+        <Toaster />
+      </ConvexAuthProvider>
     </InstrumentationProvider>
   </StrictMode>,
 );

@@ -66,6 +66,40 @@ export const runFileValidator = v.object({
 });
 export type RunFile = Infer<typeof runFileValidator>;
 
+// ---------------- Multi-agent task force (15-agent team runs) ----------------
+
+export const teamNodeValidator = v.object({
+  id: v.string(),
+  agent: v.string(),
+  title: v.string(),
+  kind: v.union(v.literal("plan"), v.literal("work"), v.literal("gate")),
+  deps: v.array(v.string()),
+  writes: v.array(v.string()),
+  status: v.union(
+    v.literal("pending"),
+    v.literal("running"),
+    v.literal("awaiting"),
+    v.literal("done"),
+    v.literal("error"),
+    v.literal("skipped"),
+  ),
+  approved: v.optional(v.boolean()),
+  detail: v.optional(v.string()),
+  logs: v.array(v.string()),
+});
+export type TeamNodeRow = Infer<typeof teamNodeValidator>;
+
+export const teamSharedValidator = v.object({
+  branch: v.optional(v.string()),
+  plan: v.optional(v.string()),
+  files: v.array(v.string()),
+  commit: v.optional(v.string()),
+  prUrl: v.optional(v.string()),
+  apk: v.optional(v.string()),
+  notes: v.array(v.string()),
+});
+export type TeamSharedRow = Infer<typeof teamSharedValidator>;
+
 const schema = defineSchema(
   {
     // default auth tables using convex auth.
@@ -138,6 +172,34 @@ const schema = defineSchema(
       error: v.optional(v.string()),
       createdAt: v.number(),
     }).index("by_conversation_seq", ["conversationId", "seq"]),
+
+    // Multi-agent task-force runs: one row per team execution, holding the
+    // shared task state, the full task graph and the append-only event log.
+    ghostTeams: defineTable({
+      ownerId: v.id("users"),
+      conversationId: v.optional(v.id("conversations")), // origin session, if any
+      task: v.string(),
+      status: v.union(
+        v.literal("running"),
+        v.literal("awaiting"),
+        v.literal("done"),
+        v.literal("error"),
+        v.literal("stopped"),
+      ),
+      nodes: v.array(teamNodeValidator), // the shared task graph
+      shared: teamSharedValidator, // ONE shared state all agents read/write
+      events: v.array(
+        v.object({
+          at: v.number(),
+          agent: v.string(),
+          text: v.string(),
+        }),
+      ),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+      .index("by_owner_updated", ["ownerId", "updatedAt"])
+      .index("by_conversation", ["conversationId"]),
   },
   {
     schemaValidation: false,

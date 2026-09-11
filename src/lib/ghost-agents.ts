@@ -45,8 +45,8 @@ export const AGENTS: AgentMeta[] = [
     label: "Git Agent",
     tag: "GIT",
     blurb: "Branch, diff, commit, push and rollback — every change is a clean commit.",
-    chip: "bg-[#a5c8ff] text-black",
-    swatch: "bg-[#a5c8ff]",
+    chip: "bg-[#4dd8e6] text-black",
+    swatch: "bg-[#4dd8e6]",
   },
   {
     key: "github",
@@ -61,48 +61,48 @@ export const AGENTS: AgentMeta[] = [
     label: "Web Agent",
     tag: "WEB",
     blurb: "Builds and ships web features straight into the working tree.",
-    chip: "bg-[#b7e6a5] text-black",
-    swatch: "bg-[#b7e6a5]",
+    chip: "bg-[#00ff41] text-black",
+    swatch: "bg-[#00ff41]",
   },
   {
     key: "android",
     label: "Android Agent",
     tag: "DROID",
     blurb: "Builds and tests Android modules when the task targets mobile.",
-    chip: "bg-[#ffd0a1] text-black",
-    swatch: "bg-[#ffd0a1]",
+    chip: "bg-[#ff9e64] text-black",
+    swatch: "bg-[#ff9e64]",
   },
   {
     key: "desktop",
     label: "Compatibility Agent",
     tag: "COMPAT",
     blurb: "Desktop/web compatibility — macOS Big Sur → current, Windows and Linux.",
-    chip: "bg-[#d9c6ff] text-black",
-    swatch: "bg-[#d9c6ff]",
+    chip: "bg-[#b083f0] text-black",
+    swatch: "bg-[#b083f0]",
   },
   {
     key: "api",
     label: "API / Provider Agent",
     tag: "API",
     blurb: "Multiple AI providers with automatic fallback — bring your own key, never a credit wall.",
-    chip: "bg-[#a5f0e0] text-black",
-    swatch: "bg-[#a5f0e0]",
+    chip: "bg-[#7ef0d4] text-black",
+    swatch: "bg-[#7ef0d4]",
   },
   {
     key: "security",
     label: "Security / Licence Agent",
     tag: "LEGAL",
     blurb: "Verifies open-source licences before any code or asset is integrated.",
-    chip: "bg-[#ffb4ae] text-black",
-    swatch: "bg-[#ffb4ae]",
+    chip: "bg-[#ff5c49] text-black",
+    swatch: "bg-[#ff5c49]",
   },
   {
     key: "ci",
     label: "CI Agent",
     tag: "CI",
     blurb: "build → test → first real error → fix → commit → CI → verify → next gate.",
-    chip: "bg-[#d6d3cd] text-black",
-    swatch: "bg-[#d6d3cd]",
+    chip: "bg-[#9aa5a0] text-black",
+    swatch: "bg-[#9aa5a0]",
   },
 ];
 
@@ -142,11 +142,11 @@ export function runStatusCopy(
 ): { label: string; cls: string } {
   switch (status) {
     case "running":
-      return { label: "RUNNING", cls: "bg-[#ffe01b] text-black" };
+      return { label: "RUNNING", cls: "bg-[#ffd166] text-black" };
     case "done":
-      return { label: "DONE", cls: "bg-[#b7e6a5] text-black" };
+      return { label: "DONE", cls: "bg-[#00ff41] text-black" };
     case "error":
-      return { label: "ERROR", cls: "bg-[#ff8b82] text-black" };
+      return { label: "ERROR", cls: "bg-[#ff5c49] text-black" };
     default:
       return { label: runCount > 0 ? "READY" : "NEW", cls: "bg-muted text-foreground" };
   }

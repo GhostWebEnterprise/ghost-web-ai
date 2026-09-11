@@ -1,6 +1,7 @@
 import { httpRouter } from "convex/server";
 import { auth } from "./auth";
 import { githubCallback } from "./github/oauth";
+import { mcpManifest, mcpInvoke, agentCard } from "./mcp";
 
 const http = httpRouter();
 
@@ -12,5 +13,11 @@ http.route({
   method: "GET",
   handler: githubCallback,
 });
+
+// MCP tool interface + A2A agent card discovery.
+http.route({ path: "/mcp", method: "GET", handler: mcpManifest });
+http.route({ path: "/mcp", method: "POST", handler: mcpInvoke });
+http.route({ path: "/.well-known/agent-card.json", method: "GET", handler: agentCard });
+http.route({ path: "/a2a", method: "GET", handler: agentCard });
 
 export default http;

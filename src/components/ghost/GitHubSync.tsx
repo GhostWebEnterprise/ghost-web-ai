@@ -95,7 +95,7 @@ export function GitHubSync({
   return (
     <div className="nb-card border-2 border-foreground bg-card">
       {/* header row */}
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-foreground bg-[#d9c6ff] px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-foreground bg-[#b083f0] px-3 py-2">
         <p className="flex items-center gap-2 font-mono text-[10px] font-black uppercase tracking-[0.18em]">
           <Github className="size-3.5" />
           GitHub sync
@@ -110,7 +110,7 @@ export function GitHubSync({
               />
             ) : null}
             <span className="max-w-[110px] truncate">@{account.username}</span>
-            <span className="border border-foreground bg-[#b7e6a5] px-1 text-black">
+            <span className="border border-foreground bg-[#00ff41] px-1 text-black">
               connected
             </span>
           </span>
@@ -128,7 +128,7 @@ export function GitHubSync({
               type="button"
               onClick={handleConnect}
               disabled={connecting}
-              className="inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-foreground px-3 py-2 text-[11px] font-black uppercase tracking-wide text-background shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#2a2a2a] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-foreground px-3 py-2 text-[11px] font-black uppercase tracking-wide text-background shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#04140a] disabled:cursor-not-allowed disabled:opacity-60"
             >
               {connecting ? (
                 <Loader2 className="size-3.5 animate-spin" />
@@ -146,12 +146,12 @@ export function GitHubSync({
           <div className="flex flex-col gap-2">
             {/* current target */}
             {targetFullName ? (
-              <div className="flex items-center gap-2 border-2 border-foreground bg-[#fff8dd] px-2 py-1.5">
-                <span className="inline-block size-2 shrink-0 bg-[#b7e6a5]" />
+              <div className="flex items-center gap-2 border-2 border-foreground bg-[#0f2417] px-2 py-1.5">
+                <span className="inline-block size-2 shrink-0 bg-[#00ff41]" />
                 <span className="min-w-0 flex-1 truncate font-mono text-[11px] font-bold">
                   {targetFullName}
                 </span>
-                <span className="shrink-0 border border-foreground bg-[#b7e6a5] px-1 font-mono text-[8px] font-black uppercase tracking-wider text-black">
+                <span className="shrink-0 border border-foreground bg-[#00ff41] px-1 font-mono text-[8px] font-black uppercase tracking-wider text-black">
                   target
                 </span>
                 {onClear && (
@@ -176,7 +176,7 @@ export function GitHubSync({
                 type="button"
                 onClick={handleSync}
                 disabled={syncing}
-                className="inline-flex items-center gap-1.5 border-2 border-foreground bg-[#a5c8ff] px-2.5 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-foreground hover:bg-[#8ab7ff] disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center gap-1.5 border-2 border-foreground bg-[#4dd8e6] px-2.5 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider text-foreground hover:bg-[#4dd8e6] disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {syncing ? (
                   <Loader2 className="size-3.5 animate-spin" />
@@ -226,7 +226,7 @@ export function GitHubSync({
                       <span
                         className={cn(
                           "size-2 shrink-0 border border-foreground",
-                          repo.private ? "bg-[#ff8b82]" : "bg-[#b7e6a5]",
+                          repo.private ? "bg-[#ff5c49]" : "bg-[#00ff41]",
                         )}
                         title={repo.private ? "private" : "public"}
                       />

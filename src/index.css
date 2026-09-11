@@ -43,79 +43,91 @@
 }
 
 /* ------------------------------------------------------------------ */
-/* Ghost Web AI — Neobrutalism Minimalism theme                        */
-/* Square corners · flat color blocks · hard 2px ink borders ·         */
-/* bold-but-controlled contrast. Light-only by design.                 */
+/* Ghost Web AI — Matrix terminal theme (app-wide)                     */
+/* The /build wizard's phosphor-green CRT aesthetic applied to every   */
+/* route via the SAME token system: square corners, hard borders and   */
+/* flat blocks stay — the palette is now dark phosphor green.          */
 /* ------------------------------------------------------------------ */
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
   --radius: 0px;
-  --ink: oklch(0.17 0.012 60); /* near-black warm ink */
-  --paper: oklch(0.968 0.006 85); /* warm bone paper */
-  --card: oklch(1 0 0);
-  --card-foreground: var(--ink);
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --popover: oklch(1 0 0);
-  --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: oklch(0.99 0.002 85);
-  --secondary: oklch(0.93 0.008 85);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.938 0.008 85);
-  --muted-foreground: oklch(0.47 0.014 70);
-  --accent: oklch(0.905 0.19 97); /* acid yellow */
-  --accent-foreground: var(--ink);
-  --destructive: oklch(0.585 0.205 26);
-  --destructive-foreground: oklch(0.99 0.002 85);
-  --border: oklch(0.89 0.01 85); /* light hairline */
-  --input: oklch(0.92 0.01 85);
-  --ring: var(--ink);
-  --chart-1: oklch(0.905 0.19 97); /* acid */
-  --chart-2: oklch(0.62 0.17 244); /* cobalt */
-  --chart-3: oklch(0.62 0.2 28); /* red */
-  --chart-4: oklch(0.76 0.15 152); /* mint */
-  --chart-5: oklch(0.68 0.16 292); /* violet */
-  --sidebar: oklch(0.988 0.004 85);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink);
-  --sidebar-primary-foreground: oklch(0.99 0.002 85);
-  --sidebar-accent: var(--ink);
-  --sidebar-accent-foreground: oklch(0.99 0.002 85);
-  --sidebar-border: var(--ink);
-  --sidebar-ring: var(--ink);
+  /* Structural colors (from the wizard's .mx-* system) */
+  --mx-bg: #060a07;
+  --mx-panel: #0b130d;
+  --mx-panel-2: #0e1810;
+  --mx-green: #00ff41;
+  --mx-green-soft: #57e389;
+  --mx-green-dim: #3f9e5f;
+  --mx-border: rgba(0, 255, 65, 0.28);
+  --mx-border-strong: rgba(0, 255, 65, 0.55);
+
+  /* App tokens remapped onto the matrix palette */
+  --ink: #0e3f22; /* deep phosphor — hard shadows + stripes stay visible on dark */
+  --paper: var(--mx-bg);
+  --card: var(--mx-panel);
+  --card-foreground: var(--mx-green-soft);
+  --background: var(--mx-bg);
+  --foreground: var(--mx-green-soft);
+  --popover: var(--mx-panel);
+  --popover-foreground: var(--mx-green-soft);
+  --primary: var(--mx-green);
+  --primary-foreground: #04140a;
+  --secondary: var(--mx-panel-2);
+  --secondary-foreground: var(--mx-green-soft);
+  --muted: var(--mx-panel-2);
+  --muted-foreground: var(--mx-green-dim);
+  --accent: rgba(0, 255, 65, 0.14);
+  --accent-foreground: var(--mx-green-soft);
+  --destructive: #ff5c49;
+  --destructive-foreground: #1a0503;
+  --border: var(--mx-border);
+  --input: rgba(0, 255, 65, 0.1);
+  --ring: rgba(0, 255, 65, 0.5);
+  --chart-1: #00ff41; /* phosphor */
+  --chart-2: #57e389; /* soft green */
+  --chart-3: #ffd166; /* terminal amber */
+  --chart-4: #4dd8e6; /* cyan */
+  --chart-5: #ff5c49; /* alert red */
+  --sidebar: var(--mx-panel);
+  --sidebar-foreground: var(--mx-green-soft);
+  --sidebar-primary: var(--mx-green);
+  --sidebar-primary-foreground: #04140a;
+  --sidebar-accent: var(--mx-panel-2);
+  --sidebar-accent-foreground: var(--mx-green-soft);
+  --sidebar-border: var(--mx-border);
+  --sidebar-ring: var(--mx-border-strong);
 }
 
 .dark {
-  color-scheme: light;
-  --background: var(--paper);
-  --foreground: var(--ink);
-  --card: oklch(1 0 0);
-  --card-foreground: var(--ink);
-  --popover: oklch(1 0 0);
-  --popover-foreground: var(--ink);
-  --primary: var(--ink);
-  --primary-foreground: oklch(0.99 0.002 85);
-  --secondary: oklch(0.93 0.008 85);
-  --secondary-foreground: var(--ink);
-  --muted: oklch(0.938 0.008 85);
-  --muted-foreground: oklch(0.47 0.014 70);
-  --accent: oklch(0.905 0.19 97);
-  --accent-foreground: var(--ink);
-  --destructive: oklch(0.585 0.205 26);
-  --border: oklch(0.89 0.01 85);
-  --input: oklch(0.92 0.01 85);
-  --ring: var(--ink);
-  --sidebar: oklch(0.988 0.004 85);
-  --sidebar-foreground: var(--ink);
-  --sidebar-primary: var(--ink);
-  --sidebar-primary-foreground: oklch(0.99 0.002 85);
-  --sidebar-accent: var(--ink);
-  --sidebar-accent-foreground: oklch(0.99 0.002 85);
-  --sidebar-border: var(--ink);
-  --sidebar-ring: var(--ink);
+  color-scheme: dark;
+  --background: var(--mx-bg);
+  --foreground: var(--mx-green-soft);
+  --card: var(--mx-panel);
+  --card-foreground: var(--mx-green-soft);
+  --popover: var(--mx-panel);
+  --popover-foreground: var(--mx-green-soft);
+  --primary: var(--mx-green);
+  --primary-foreground: #04140a;
+  --secondary: var(--mx-panel-2);
+  --secondary-foreground: var(--mx-green-soft);
+  --muted: var(--mx-panel-2);
+  --muted-foreground: var(--mx-green-dim);
+  --accent: rgba(0, 255, 65, 0.14);
+  --accent-foreground: var(--mx-green-soft);
+  --destructive: #ff5c49;
+  --border: var(--mx-border);
+  --input: rgba(0, 255, 65, 0.1);
+  --ring: rgba(0, 255, 65, 0.5);
+  --sidebar: var(--mx-panel);
+  --sidebar-foreground: var(--mx-green-soft);
+  --sidebar-primary: var(--mx-green);
+  --sidebar-primary-foreground: #04140a;
+  --sidebar-accent: var(--mx-panel-2);
+  --sidebar-accent-foreground: var(--mx-green-soft);
+  --sidebar-border: var(--mx-border);
+  --sidebar-ring: var(--mx-border-strong);
 }
 
 @layer base {
@@ -135,8 +147,30 @@
     cursor: pointer;
   }
   ::selection {
-    background: var(--accent);
-    color: var(--ink);
+    background: var(--mx-green);
+    color: #04140a;
+  }
+  /* Global CRT scanline overlay — the wizard's terminal feel on every page.
+     Pointer-transparent, extremely subtle, disabled for reduced motion. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.12) 0px,
+      rgba(0, 0, 0, 0.12) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    mix-blend-mode: multiply;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    body::after {
+      display: none;
+    }
   }
   :focus-visible {
     outline-offset: 0px;
@@ -177,8 +211,8 @@
 }
 @utility nb-grid-paper {
   background-image:
-    linear-gradient(color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in oklab, var(--mx-green) 7%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--mx-green) 7%, transparent) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 @utility nb-stripes-acid {
@@ -355,20 +389,11 @@
   .mx-dim {
     color: var(--mx-green-dim);
   }
-  /* Re-skins standard-token components (e.g. GitHubSync) inside the matrix
-     page by remapping the app's CSS variables for their subtree. */
+  /* Legacy scope from when the matrix theme was wizard-only. The global
+     tokens now carry the same palette, so this is a no-op kept for
+     backwards compatibility with existing markup. */
   .mx-embed {
-    --background: #060a07;
-    --card: #0b130d;
-    --card-foreground: #57e389;
-    --foreground: #57e389;
-    --muted-foreground: #3f9e5f;
-    --accent: rgba(0, 255, 65, 0.14);
-    --accent-foreground: #57e389;
-    --border: rgba(0, 255, 65, 0.28);
-    --input: rgba(0, 255, 65, 0.1);
-    --ring: rgba(0, 255, 65, 0.5);
-    --ink: #000000;
+    /* inherits the global matrix tokens */
   }
 }
 

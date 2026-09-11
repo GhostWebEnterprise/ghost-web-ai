@@ -70,7 +70,7 @@ const CHAIN = [
 const FEATURES = [
   {
     icon: GitBranch,
-    color: "bg-[#a5c8ff]",
+    color: "bg-[#4dd8e6]",
     title: "Git & GitHub native",
     text: "Branches, commits, PRs, GitHub Actions, releases and artifacts — all driven from plain language. No terminal hopping.",
   },
@@ -82,13 +82,13 @@ const FEATURES = [
   },
   {
     icon: ShieldCheck,
-    color: "bg-[#b7e6a5]",
+    color: "bg-[#00ff41]",
     title: "Open source, legal",
     text: "The Security/Licence agent combs the open web for source, verifies licences, and only integrates what is fully legal to use.",
   },
   {
     icon: Scale,
-    color: "bg-[#ff8b82]",
+    color: "bg-[#ff5c49]",
     title: "Zero credits",
     text: "No credit system, no token meter, no paywall to run the chain. Free engines run out of the box — bring your own key to upgrade.",
   },
@@ -245,7 +245,7 @@ export default function Landing() {
               </Button>
             </Link>
             <Link to={SECTION_LINK}>
-              <Button className="gap-2 border-2 border-foreground bg-accent text-xs font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd600]">
+              <Button className="gap-2 border-2 border-foreground bg-accent text-xs font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166]">
                 Console <ArrowRight className="size-3.5" />
               </Button>
             </Link>
@@ -287,7 +287,7 @@ export default function Landing() {
                 <Link to={BUILD_LINK}>
                   <Button
                     size="lg"
-                    className="gap-2 border-2 border-foreground bg-accent text-[15px] font-black uppercase tracking-wide text-foreground shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#ffd600] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    className="gap-2 border-2 border-foreground bg-accent text-[15px] font-black uppercase tracking-wide text-foreground shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#ffd166] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
                     <Wand2 className="size-4" />
                     Start the guided build — free
@@ -316,13 +316,13 @@ export default function Landing() {
               </p>
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <span className="size-2 border border-foreground bg-[#b7e6a5]" /> No credits
+                  <span className="size-2 border border-foreground bg-[#00ff41]" /> No credits
                 </span>
                 <span className="flex items-center gap-1.5">
                   <span className="size-2 border border-foreground bg-accent" /> Licence gate on
                 </span>
                 <span className="flex items-center gap-1.5">
-                  <span className="size-2 border border-foreground bg-[#a5c8ff]" /> PRs to your repo
+                  <span className="size-2 border border-foreground bg-[#4dd8e6]" /> PRs to your repo
                 </span>
               </div>
             </div>
@@ -331,7 +331,7 @@ export default function Landing() {
             <div className="relative lg:sticky lg:top-24">
               <GhostSticker label="Live preview · not a mockup of a mockup" />
               <div className="mb-3 flex items-center gap-2">
-                <span className="border-2 border-foreground bg-[#ffd0a1] px-2 py-1 font-mono text-[10px] font-black uppercase">
+                <span className="border-2 border-foreground bg-[#ff9e64] px-2 py-1 font-mono text-[10px] font-black uppercase">
                   Example run
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -479,7 +479,7 @@ export default function Landing() {
                   </p>
                 </div>
                 <Link to={SECTION_LINK} className="shrink-0">
-                  <Button className="gap-2 border-2 border-foreground bg-[#a5c8ff] px-5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#8ab7ff]">
+                  <Button className="gap-2 border-2 border-foreground bg-[#4dd8e6] px-5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#4dd8e6]">
                     Point it at a repo <ArrowRight className="size-4" />
                   </Button>
                 </Link>
@@ -499,7 +499,7 @@ export default function Landing() {
               {FAQS.map((faq) => (
                 <details
                   key={faq.q}
-                  className="group border-2 border-foreground bg-card open:bg-[#fffdf2]"
+                  className="group border-2 border-foreground bg-card open:bg-[#0f2417]"
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3.5 text-sm font-black uppercase tracking-wide [&::-webkit-details-marker]:hidden">
                     {faq.q}
@@ -531,7 +531,7 @@ export default function Landing() {
             <Link to={BUILD_LINK}>
               <Button
                 size="lg"
-                className="gap-2 border-2 border-foreground bg-foreground px-8 text-[15px] font-black uppercase tracking-wide text-background shadow-[6px_6px_0_0_var(--ink)] hover:bg-[#2a2a2a]"
+                className="gap-2 border-2 border-foreground bg-foreground px-8 text-[15px] font-black uppercase tracking-wide text-background shadow-[6px_6px_0_0_var(--ink)] hover:bg-[#04140a]"
               >
                 <Wand2 className="size-4" />
                 Start the guided build — free

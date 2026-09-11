@@ -143,7 +143,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
           <h1 className="mt-4 text-4xl font-black uppercase leading-[1.02] tracking-tight xl:text-5xl">
             The agent chain<br />
             waits for<br />
-            <span className="border-4 border-foreground bg-[#a5c8ff] px-2">your repo.</span>
+            <span className="border-4 border-foreground bg-[#4dd8e6] px-2">your repo.</span>
           </h1>
           <p className="mt-5 max-w-md text-sm leading-6 text-foreground/75">
             One prompt runs the whole delivery path. No credits, no paywall,
@@ -202,14 +202,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       />
                     </div>
                     {error && (
-                      <p className="border-2 border-foreground bg-[#ff8b82]/30 px-2 py-1.5 text-[12px] font-semibold">
+                      <p className="border-2 border-foreground bg-[#ff5c49]/30 px-2 py-1.5 text-[12px] font-semibold">
                         {error}
                       </p>
                     )}
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="mt-1 gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd600]"
+                      className="mt-1 gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd166]"
                     >
                       {isLoading ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -234,7 +234,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                     variant="outline"
                     onClick={handleGuestLogin}
                     disabled={isLoading}
-                    className="w-full gap-2 border-2 border-foreground bg-background py-2.5 text-xs font-black uppercase tracking-wide text-foreground hover:bg-[#fff8dd]"
+                    className="w-full gap-2 border-2 border-foreground bg-background py-2.5 text-xs font-black uppercase tracking-wide text-foreground hover:bg-[#0f2417]"
                   >
                     <UserX className="size-4" />
                     Continue as guest
@@ -281,14 +281,14 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                       </InputOTP>
                     </div>
                     {error && (
-                      <p className="border-2 border-foreground bg-[#ff8b82]/30 px-2 py-1.5 text-center text-[12px] font-semibold">
+                      <p className="border-2 border-foreground bg-[#ff5c49]/30 px-2 py-1.5 text-center text-[12px] font-semibold">
                         {error}
                       </p>
                     )}
                     <Button
                       type="submit"
                       disabled={isLoading || otp.length !== 6}
-                      className="gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd600]"
+                      className="gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd166]"
                     >
                       {isLoading ? (
                         <Loader2 className="size-4 animate-spin" />

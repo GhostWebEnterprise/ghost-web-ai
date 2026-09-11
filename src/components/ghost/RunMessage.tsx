@@ -27,7 +27,7 @@ export interface RunMessageData {
   createdAt: number;
 }
 
-const FILE_COLORS = ["bg-[#a5c8ff]", "bg-accent", "bg-[#b7e6a5]", "bg-[#ffd0a1]"];
+const FILE_COLORS = ["bg-[#4dd8e6]", "bg-accent", "bg-[#00ff41]", "bg-[#ff9e64]"];
 
 /** Real generated files with full contents — Ghost wrote these, not just logs. */
 function ChangesBlock({ files }: { files: RunFileData[] }) {
@@ -37,7 +37,7 @@ function ChangesBlock({ files }: { files: RunFileData[] }) {
   );
   return (
     <div className="border-t-2 border-foreground">
-      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-foreground bg-[#ffd0a1] px-3 py-2">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-foreground bg-[#ff9e64] px-3 py-2">
         <p className="flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-widest">
           <span className="inline-block size-2 border border-foreground bg-foreground" />
           Generated files · {files.length}
@@ -65,14 +65,14 @@ function ChangesBlock({ files }: { files: RunFileData[] }) {
                     {file.summary}
                   </span>
                 ) : null}
-                <span className="shrink-0 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground">
+                <span className="shrink-0 border border-foreground bg-[#00ff41] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground">
                   +{lines}
                 </span>
                 <span className="shrink-0 font-mono text-[10px] text-muted-foreground transition-transform group-open:rotate-45">
                   +
                 </span>
               </summary>
-              <div className="border-t border-foreground/15 bg-[#fffdf2]">
+              <div className="border-t border-foreground/15 bg-[#0f2417]">
                 <pre className="nb-scroll max-h-80 overflow-auto px-3 py-2.5 font-mono text-[11px] leading-[1.65] text-foreground/90">
                   {file.content}
                 </pre>
@@ -107,11 +107,11 @@ function Glyph({ status }: { status: string }) {
       );
     case "done":
       return (
-        <span className={cn(base, "bg-[#b7e6a5] text-foreground")}>✓</span>
+        <span className={cn(base, "bg-[#00ff41] text-foreground")}>✓</span>
       );
     case "error":
       return (
-        <span className={cn(base, "bg-[#ff8b82] text-foreground")}>✕</span>
+        <span className={cn(base, "bg-[#ff5c49] text-foreground")}>✕</span>
       );
     case "skipped":
       return (
@@ -130,7 +130,7 @@ function LogConsole({ lines, live }: { lines: string[]; live: boolean }) {
           key={i}
           className={cn(
             "whitespace-pre",
-            i === lines.length - 1 && live && "text-[#f2f2d8]",
+            i === lines.length - 1 && live && "text-[#0f2417]",
           )}
         >
           {line}
@@ -225,8 +225,8 @@ export function RunMessage({ message }: { message: RunMessageData }) {
               running
                 ? "bg-accent text-foreground"
                 : message.runStatus === "error"
-                  ? "bg-[#ff8b82] text-foreground"
-                  : "bg-[#b7e6a5] text-foreground",
+                  ? "bg-[#ff5c49] text-foreground"
+                  : "bg-[#00ff41] text-foreground",
             )}
           >
             {running ? "running" : message.runStatus === "error" ? "error" : "done"}
@@ -239,7 +239,7 @@ export function RunMessage({ message }: { message: RunMessageData }) {
               href={message.prUrl}
               target="_blank"
               rel="noreferrer"
-              className="border border-background/60 bg-accent px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground hover:bg-[#ffd600]"
+              className="border border-background/60 bg-accent px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-foreground hover:bg-[#ffd166]"
             >
               PR ↗
             </a>
@@ -276,7 +276,7 @@ export function RunMessage({ message }: { message: RunMessageData }) {
 
       {/* error banner */}
       {message.runStatus === "error" && message.error ? (
-        <div className="border-t-2 border-foreground bg-[#ff8b82]/30 px-3 py-2 text-[12px] font-semibold">
+        <div className="border-t-2 border-foreground bg-[#ff5c49]/30 px-3 py-2 text-[12px] font-semibold">
           ✕ {message.error}
         </div>
       ) : null}

@@ -105,24 +105,22 @@ export interface TaskProfile {
 
 export function classifyTask(task: string): TaskProfile {
   const t = task.toLowerCase();
+  // \b word boundaries: substrings like "ui" ⊂ "build" or "auth" ⊂ "author"
+  // used to misroute tasks. \w* suffixes keep stems productive (auth →
+  // authentication, data → database) without matching inside unrelated words.
   return {
     slug: slugify(task),
     title: truncate(task.replace(/\s+/g, " ").trim(), 72),
-    wantsWeb: /web|page|ui|site|frontend|react|dashboard|component|landing|browser/.test(
+    wantsWeb: /\b(web|page|ui|site|frontend|react|dashboard|component|landing|browser)\b/.test(
       t,
     ),
-    wantsAndroid:
-      /android|apk|mobile app|gradle|kotlin|compose/.test(t),
-    wantsDesktop:
-      /desktop|electron|tauri|windows|macos|linux|native app/.test(t),
-    wantsApi: /api|provider|llm|model|agent|endpoint|webhook|integration/.test(
-      t,
-    ),
-    wantsDeploy:
-      /deploy|release|publish|ship|production|gh-pages|artifact/.test(t),
-    wantsChat: /chat|message|conversation|inbox|agent/.test(t),
-    wantsAuth: /auth|login|sign in|sign up|oauth|sso/.test(t),
-    wantsData: /data|database|schema|mutation|query|storage|table/.test(t),
+    wantsAndroid: /\b(android|apk|mobile app|gradle|kotlin|compose)\b/.test(t),
+    wantsDesktop: /\b(desktop|electron|tauri|windows|macos|linux|native app)\b/.test(t),
+    wantsApi: /\b(api|provider|llm|model|agent|endpoint|webhook|integration)\b/.test(t),
+    wantsDeploy: /\b(deploy|release|publish|ship|production|gh-pages|artifact)\b/.test(t),
+    wantsChat: /\b(chat|message|conversation|inbox|agent)\b/.test(t),
+    wantsAuth: /\b(auth\w*|login|sign in|sign up|oauth|sso)\b/.test(t),
+    wantsData: /\b(data\w*|database|schema|mutation|query|storage|table)\b/.test(t),
   };
 }
 

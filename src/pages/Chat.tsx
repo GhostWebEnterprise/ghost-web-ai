@@ -201,7 +201,7 @@ export default function Chat() {
                     {conversation.title}
                   </span>
                   {conversation.repo && (
-                    <span className="hidden shrink-0 items-center gap-1 border border-foreground bg-[#a5c8ff] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-black md:inline-flex">
+                    <span className="hidden shrink-0 items-center gap-1 border border-foreground bg-[#4dd8e6] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-black md:inline-flex">
                       <Github className="size-3" />
                       {repoShort(conversation.repo.fullName)}
                       {conversation.repo.license ? ` · ${conversation.repo.license}` : ""}
@@ -216,22 +216,22 @@ export default function Chat() {
             </div>
             <div className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-wider">
               {conversation?.repo?.language && (
-                <span className="border border-foreground bg-[#ffd0a1] px-1.5 py-0.5 text-black">
+                <span className="border border-foreground bg-[#ff9e64] px-1.5 py-0.5 text-black">
                   {conversation.repo.language}
                 </span>
               )}
-              <span className="border border-foreground bg-[#d6d3cd] px-1.5 py-0.5">
+              <span className="border border-foreground bg-[#9aa5a0] px-1.5 py-0.5">
                 {engineLabel(conversation?.engine)}
               </span>
               {conversation?.liveGithub && (
                 <span
                   title="A real branch + PR were pushed to this repo"
-                  className="inline-flex items-center gap-1 border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 text-black"
+                  className="inline-flex items-center gap-1 border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black"
                 >
                   <Github className="size-3" /> PR live
                 </span>
               )}
-              <span className="hidden border border-foreground bg-[#b7e6a5] px-1.5 py-0.5 text-black sm:inline">
+              <span className="hidden border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black sm:inline">
                 {chainRunning ? "chain live" : "idle"}
               </span>
             </div>

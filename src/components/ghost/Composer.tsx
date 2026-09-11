@@ -37,7 +37,7 @@ export function Composer({
   return (
     <div className="nb-card bg-card">
       <div className="border-b-2 border-foreground px-3 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
-        <span className="mr-2 inline-block size-2 animate-pulse bg-[#b7e6a5] align-middle" />
+        <span className="mr-2 inline-block size-2 animate-pulse bg-[#00ff41] align-middle" />
         Ghost terminal — describe the build
       </div>
       <div className="p-3">
@@ -52,7 +52,7 @@ export function Composer({
           }}
           rows={2}
           placeholder='Try: "Add a neobrutalist landing page to my GitHub repo and push it as a PR"'
-          className="w-full resize-none border-2 border-foreground bg-background px-3 py-2.5 text-[14px] leading-6 outline-none placeholder:text-muted-foreground focus:bg-[#fffdf2]"
+          className="w-full resize-none border-2 border-foreground bg-background px-3 py-2.5 text-[14px] leading-6 outline-none placeholder:text-muted-foreground focus:bg-[#0f2417]"
         />
 
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center">
@@ -81,7 +81,7 @@ export function Composer({
             <button
               type="button"
               onClick={() => setShowRepo(true)}
-              className="inline-flex shrink-0 items-center gap-1.5 border-2 border-foreground bg-[#d9c6ff] px-2.5 py-2 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground hover:bg-[#cdb4f5]"
+              className="inline-flex shrink-0 items-center gap-1.5 border-2 border-foreground bg-[#b083f0] px-2.5 py-2 font-mono text-[10.5px] font-bold uppercase tracking-wider text-foreground hover:bg-[#b083f0]"
             >
               <Link2 className="size-3.5" />
               Target a GitHub repo
@@ -93,7 +93,7 @@ export function Composer({
             size="lg"
             disabled={!canSubmit}
             onClick={handleSubmit}
-            className="shrink-0 gap-2 border-2 border-foreground bg-accent px-5 text-sm font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd600] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
+            className="shrink-0 gap-2 border-2 border-foreground bg-accent px-5 text-sm font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd166] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-60"
           >
             {busy ? (
               <Loader2 className="size-4 animate-spin" />
@@ -107,7 +107,7 @@ export function Composer({
         {/* hint bar */}
         <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
           <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            <span className="inline-block border border-foreground bg-[#b7e6a5] px-1 text-foreground">
+            <span className="inline-block border border-foreground bg-[#00ff41] px-1 text-foreground">
               100% free
             </span>
             no credits · no paywall · open models · bring-your-own-key optional
