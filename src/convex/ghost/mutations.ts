@@ -70,6 +70,24 @@ export const startTask = mutation({
   args: {
     conversationId: v.id("conversations"),
     task: v.string(),
+    // Optional custom chain (from the /build wizard). The engine action
+    // executes exactly this array, so toggles genuinely change what runs.
+    pipeline: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          agent: v.string(),
+          title: v.string(),
+          status: v.union(
+            v.literal("pending"),
+            v.literal("running"),
+            v.literal("done"),
+            v.literal("error"),
+            v.literal("skipped"),
+          ),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args): Promise<StartTaskResult> => {
     const user = await getCurrentUser(ctx);
@@ -91,7 +109,10 @@ export const startTask = mutation({
     const seq = (last?.seq ?? 0) + 1;
     const now = NOW();
 
-    const pipeline: PlanStage[] = buildPipeline(task);
+    const pipeline: PlanStage[] =
+      args.pipeline && args.pipeline.length > 0
+        ? args.pipeline
+        : buildPipeline(task);
 
     await ctx.db.insert("messages", {
       conversationId: args.conversationId,

@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "./GhostMark";
 import { useAuth } from "@/hooks/use-auth";
-import { LogOut, Terminal, LayoutGrid } from "lucide-react";
+import { LogOut, Terminal, LayoutGrid, Wand2 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { cn } from "@/lib/utils";
 
-export function AppNav({ active }: { active?: "chat" | "dashboard" }) {
+export function AppNav({ active }: { active?: "chat" | "dashboard" | "build" }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
@@ -37,6 +37,20 @@ export function AppNav({ active }: { active?: "chat" | "dashboard" }) {
             >
               <Terminal className="size-4" />
               Console
+            </Button>
+          </Link>
+          <Link to="/build">
+            <Button
+              variant="ghost"
+              className={cn(
+                "gap-2 border-2 border-foreground text-xs font-bold uppercase tracking-wide",
+                active === "build"
+                  ? "bg-accent text-foreground shadow-[3px_3px_0_0_var(--ink)]"
+                  : "bg-card text-foreground hover:bg-accent",
+              )}
+            >
+              <Wand2 className="size-4" />
+              Build
             </Button>
           </Link>
           <Link to="/dashboard">

@@ -12,6 +12,7 @@ import {
   Scale,
   ShieldCheck,
   Sparkles,
+  Wand2,
   Zap,
 } from "lucide-react";
 
@@ -207,6 +208,9 @@ export function RealtimeChat({ roomId }: { roomId: string }) {
 };
 
 const SECTION_LINK = "/auth?returnTo=/chat";
+// Guided wizard entry — auth first with the wizard as the post-sign-in
+// destination (signed-in users are bounced straight through to /build).
+const BUILD_LINK = "/auth?returnTo=/build";
 
 function GhostSticker({ label }: { label: string }) {
   return (
@@ -280,21 +284,36 @@ export default function Landing() {
                 licence gate approves, and never asks for a credit.
               </p>
               <div className="mt-8 flex flex-wrap items-center gap-3">
-                <Link to={SECTION_LINK}>
+                <Link to={BUILD_LINK}>
                   <Button
                     size="lg"
-                    className="gap-2 border-2 border-foreground bg-foreground text-[15px] font-black uppercase tracking-wide text-background shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#2a2a2a] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    className="gap-2 border-2 border-foreground bg-accent text-[15px] font-black uppercase tracking-wide text-foreground shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#ffd600] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                   >
-                    Start building — free <ArrowRight className="size-4" />
+                    <Wand2 className="size-4" />
+                    Start the guided build — free
                   </Button>
+                </Link>
+                <Link
+                  to={SECTION_LINK}
+                  className="border-2 border-foreground bg-card px-4 py-2.5 text-sm font-black uppercase tracking-wide hover:bg-accent"
+                >
+                  Open the console
                 </Link>
                 <a
                   href="#chain"
-                  className="border-2 border-foreground bg-card px-4 py-2.5 text-sm font-black uppercase tracking-wide hover:bg-accent"
+                  className="font-mono text-[11px] font-bold uppercase tracking-widest underline-offset-4 hover:underline"
                 >
-                  See the chain
+                  See the chain ↓
                 </a>
               </div>
+              <p className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <span className="border border-foreground bg-card px-1.5 py-0.5">01 task</span>
+                <span className="text-foreground/40">→</span>
+                <span className="border border-foreground bg-card px-1.5 py-0.5">02 chain</span>
+                <span className="text-foreground/40">→</span>
+                <span className="border border-foreground bg-card px-1.5 py-0.5">03 launch</span>
+                <span className="ml-1 text-foreground/60">guided mode · toggles change the real run</span>
+              </p>
               <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 <span className="flex items-center gap-1.5">
                   <span className="size-2 border border-foreground bg-[#b7e6a5]" /> No credits
@@ -509,14 +528,20 @@ export default function Landing() {
               The agent chain is running on this site — plan, code, self-heal,
               commit, PR, verify. No credits to buy, no keys to start.
             </p>
-            <Link to={SECTION_LINK}>
+            <Link to={BUILD_LINK}>
               <Button
                 size="lg"
                 className="gap-2 border-2 border-foreground bg-foreground px-8 text-[15px] font-black uppercase tracking-wide text-background shadow-[6px_6px_0_0_var(--ink)] hover:bg-[#2a2a2a]"
               >
-                <Sparkles className="size-4" />
-                Open the console — free
+                <Wand2 className="size-4" />
+                Start the guided build — free
               </Button>
+            </Link>
+            <Link
+              to={SECTION_LINK}
+              className="font-mono text-[11px] font-bold uppercase tracking-widest underline underline-offset-4 hover:no-underline"
+            >
+              or open the console directly
             </Link>
             <p className="font-mono text-[10px] uppercase tracking-widest text-foreground/60">
               Optional: connect your own AI key in Keys for an open-LLM planner
@@ -537,6 +562,12 @@ export default function Landing() {
             <a className="hover:underline" href="#agents">Agents</a>
             <a className="hover:underline" href="#faq">FAQ</a>
             <a className="hover:underline" href={SECTION_LINK}>Console</a>
+            <a
+              className="hover:underline"
+              href="mailto:ghost@ghostbin.cfd"
+            >
+              Contact
+            </a>
           </div>
         </div>
       </footer>
