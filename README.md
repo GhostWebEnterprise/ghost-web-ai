@@ -1,135 +1,349 @@
-# Ghost Web AI
+<div align="center">
 
-**Say what to build. Agents build it.**
+# 👻 Ghost Web AI
 
-Ghost Web AI is a fused system of AI agents that takes a plain-language task and
-drives it through the entire delivery path — planning, real code generation,
-self-healing, and a real pull request on GitHub — without credit meters,
-paywalls, or terminal hopping.
+**Say what to build. Agents build it. Plan. Code. Test. Heal. Ship.**
+
+A privacy-focused, zero-credit AI software delivery client that turns a plain-language request into real repository changes, automated verification, and a GitHub pull request.
+
+[![CI](https://github.com/TempleEU/ghost-web-ai/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TempleEU/ghost-web-ai/actions/workflows/ci.yml?query=branch%3Amain)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev/)
+[![Convex](https://img.shields.io/badge/Backend-Convex-ff6b6b)](https://www.convex.dev/)
+
+</div>
 
 ---
 
-## The AI chain
+## 👻 Ghost Web AI
 
-One prompt walks the whole path. Each agent is a gate in the line, and hand-offs
-are automatic:
+Ghost Web AI follows one principle: **one request should be able to travel through the complete software-delivery path without forcing the user to jump between a chatbot, terminal, editor and GitHub.**
 
-| # | Agent | Stage |
-|---|-------|-------|
-| 01 | Security/Licence | **Source & licence gate** — every open-source source is checked before anything is integrated |
-| 02 | AI Core | **Plan** — the task is classified and an execution plan is locked |
-| 03 | Git | **Branch** — a feature branch is created off the repo's default branch |
-| 04 | Web/Android/Desktop | **Implement** — real files are written against the repository's actual tree |
-| 05 | Guardian (AI Core) | **Detect & self-heal** — the diff is reviewed; issues are patched before CI |
-| 06 | CI | **Build gate** — install → build → typecheck; the first real error is captured |
-| 07 | AI Core | **Fix loop** — detect → diagnose → fix → re-run until every gate is green |
-| 08 | Git | **Commit & push** — the feature is committed and the branch is pushed |
-| 09 | GitHub | **Pull request** — a PR is opened for human review |
-| 10 | CI/GitHub | **Verify** — checks green, preview live, ready to merge |
+The system coordinates specialized stages for planning, source/licence checks, repository-aware implementation, self-healing, CI verification, Git operations and pull-request delivery.
 
-## AI abilities
+> **Plan → branch → implement → inspect → build → first real error → fix → verify → commit → PR.**
 
-**Real repository context.** The planner reads the repo's actual tree and its
-most relevant files (config, entry points, sources — ranked, size-capped) and
-plans against what really exists. Prompt-injection markers keep repo contents
-treated as data, never as instructions. With a connected GitHub account this
-extends to **private repositories**.
+## ✨ What it does
 
-**Real generated files.** When an open LLM is configured, the model returns
-complete file contents — not plans or stubs. Generated files are stored on the
-run and rendered as expandable diffs in the console while the rest of the chain
-executes.
+| Area | Ghost Web AI |
+| --- | --- |
+| 🧠 Planning | Classifies the task and locks an execution plan |
+| 👥 Agent chain | Coordinated 10-stage delivery pipeline |
+| 🔐 Source gate | Security and open-source licence checks before integration |
+| 📂 Repository context | Plans against the repository's real files and structure |
+| 🛠️ Implementation | Generates complete files rather than placeholder plans |
+| 🛡️ Guardian | Reviews generated changes before CI |
+| 🔄 Self-healing | Detect → diagnose → fix → re-run until gates pass |
+| 🧪 CI | Install → build → typecheck and first-error capture |
+| 🐙 GitHub | Branches, commits, repository sync and pull requests |
+| 🔑 Providers | Local deterministic engine with optional open-LLM upgrade |
+| 💳 Pricing model | Zero credit meter / no built-in token paywall |
+| 🌐 Client | React + TypeScript + Vite web application |
 
-**Live GitHub operations.** With a connected account (or a PAT), the engine
-creates the branch, uploads the files, commits as you, and opens the pull
-request on GitHub — pure REST, no git binary required. Every pushed run carries
-its PR link.
+## 🤖 The AI chain
 
-**Self-healing loop.** The Guardian agent scans the generated surface before
-CI, and the fix loop re-runs until the build and typecheck gates are green.
+Every task moves through explicit delivery gates:
 
-**Zero-credit by design.** There is no credit system, token meter, or paywall.
-A deterministic local engine runs the full chain with zero keys. Configuring an
-open LLM is an optional upgrade that uses the provider's own free tier.
+```text
+Request
+   ↓
+01 Security / Licence
+   ↓
+02 AI Core — Plan
+   ↓
+03 Git — Branch
+   ↓
+04 Web / Android / Desktop — Implement
+   ↓
+05 Guardian — Detect & self-heal
+   ↓
+06 CI — Build gate
+   ↓
+07 AI Core — Fix loop
+   ↓
+08 Git — Commit & push
+   ↓
+09 GitHub — Pull request
+   ↓
+10 CI / GitHub — Verify
+   ↓
+Ready to merge
+```
 
-## Connect & sync GitHub
+### Agent responsibilities
 
-- **Connect** your GitHub account with one click (OAuth) — account, avatar and
-  scopes are stored server-side; the access token never reaches the browser.
-- **Sync** your repositories (owner, collaborator and organization repos) and
-  target any of them as the build's repo with a click.
-- **Ship** — runs against a synced repo produce a real branch, commit and pull
-  request.
+1. **Security/Licence** — checks source, licence and integration risks.
+2. **AI Core** — classifies the request and produces the implementation plan.
+3. **Git** — creates an isolated feature branch from the repository default branch.
+4. **Web/Android/Desktop** — implements against the actual repository tree.
+5. **Guardian** — reviews the generated surface and patches obvious issues before CI.
+6. **CI** — installs, builds, typechecks and captures the first actionable failure.
+7. **AI Core** — runs the targeted repair loop until required gates pass.
+8. **Git** — commits and pushes the verified implementation.
+9. **GitHub** — opens a real pull request for review.
+10. **CI/GitHub** — confirms checks, preview and merge readiness.
 
-## Settings (project Keys)
+## 🔥 Real repository context
 
-Configure via the project's **Keys / API keys** settings. All keys are
-optional; the product runs fully free without them.
+Ghost Web AI does not plan against an imaginary project. The planner reads the repository's actual tree and relevant configuration, entry points and source files before implementation.
+
+Repository content is treated as **data, not instructions**, with prompt-injection markers used to prevent repository text from silently becoming agent instructions.
+
+With GitHub connected, the same workflow can target repositories available to the authenticated account, including private repositories where the connection has access.
+
+## 🛠️ Real generated files
+
+When an open LLM is configured, Ghost Web AI can generate complete file contents rather than returning a plan or stub. Generated changes are stored with the run and exposed as reviewable diffs while the pipeline continues.
+
+The implementation stage is therefore tied to the real repository tree rather than being a standalone code-generation chat.
+
+## 🐙 GitHub workflow
+
+Ghost Web AI is designed to perform the full GitHub delivery loop:
+
+```text
+Connected repository
+       ↓
+Feature branch
+       ↓
+Real file changes
+       ↓
+Build + typecheck
+       ↓
+First real CI error
+       ↓
+Targeted repair
+       ↓
+Commit + push
+       ↓
+Pull request
+       ↓
+Green checks / review
+```
+
+GitHub operations use REST APIs; the application does not require a local `git` binary for the live publish path.
+
+## 🔐 Security & licence gates
+
+Security and licence verification are part of the delivery pipeline rather than optional documentation.
+
+- 🔒 GitHub credentials remain server-side during OAuth flows.
+- 🛡️ Repository contents are treated as untrusted data.
+- 📜 Open-source sources are checked before integration.
+- 🔍 Generated changes receive Guardian review before CI.
+- 🧾 Diffs and pipeline stages remain reviewable.
+- 🚦 Required CI gates must pass before release/merge readiness.
+- ❌ Secrets must never be committed to the repository.
+
+## 🔑 Providers & zero-credit operation
+
+All provider keys are optional.
+
+Ghost Web AI includes a deterministic local engine that can run the complete chain without an LLM key. An optional open LLM provider can upgrade planning and generation using the provider's own free tier where available.
+
+### Project keys
 
 | Variable | Purpose | Required? |
-|----------|---------|-----------|
-| `SAMBANOVA_API_KEY` (or `SAMBA_API_KEY`) | Upgrades the planner to an open LLM (`Meta-Llama-3.3-70B-Instruct` via SambaNova Cloud) that generates real file contents. Falls back to the local engine automatically. | Optional |
-| `GITHUB_CLIENT_ID` | GitHub OAuth App client ID — powers one-click account connect. | For OAuth connect |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth App client secret. | For OAuth connect |
-| `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative to OAuth — classic or fine-grained token with `repo` scope for live pushes. | Alternative |
-| `SITE_URL` | HTTPS base URL of the Convex site; the GitHub OAuth callback is served at `{SITE_URL}/github/callback`. | Managed |
+| --- | --- | --- |
+| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Optional open-LLM planning and file generation | No |
+| `GITHUB_CLIENT_ID` | GitHub OAuth application ID | OAuth only |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth application secret | OAuth only |
+| `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative authenticated GitHub access | Alternative to OAuth |
+| `SITE_URL` | Convex site URL used for the OAuth callback | Managed |
 
-### Setting up GitHub OAuth
+> Never place API keys, OAuth secrets or personal access tokens directly in source code.
 
-1. Create an OAuth App at **github.com/settings/developers**.
-2. Set the **Authorization callback URL** to exactly:
-   `https://<your-convex-site-url>.convex.site/github/callback`
-3. Add `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` to project Keys.
-4. The app requests `repo`, `read:user` and `read:org` scopes when the user
-   connects.
+## 🔌 Connect & sync GitHub
 
-## Development
+### Connect
+
+Connect a GitHub account through OAuth. The account, avatar and requested scopes are stored server-side; the access token is not sent to the browser.
+
+### Sync
+
+Sync repositories owned by the user, collaborators and organizations available to the authenticated account.
+
+### Ship
+
+Choose a synchronized repository, run a task, and Ghost Web AI can create the feature branch, push generated files, commit the change and open the pull request.
+
+### GitHub OAuth setup
+
+1. Create an OAuth App in GitHub Developer Settings.
+2. Set the callback URL to:
+
+```text
+https://<your-convex-site-url>.convex.site/github/callback
+```
+
+3. Configure `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in project Keys.
+4. Connect the account from Ghost Web AI.
+
+The application requests `repo`, `read:user` and `read:org` scopes for the GitHub connection.
+
+## 🚀 Quick Start
+
+Clone the repository and install dependencies:
 
 ```bash
-bun install                 # dependencies
-bun convex dev --once       # generate types + push Convex functions
-bun tsc -b --noEmit         # typecheck
-bun run dev                 # local dev server
+git clone https://github.com/TempleEU/ghost-web-ai.git
+cd ghost-web-ai
+bun install
 ```
 
-## Stack
+Generate Convex types and push the development functions:
 
-React 19 · TypeScript · Vite · Convex (backend + database) · Convex Auth ·
-Tailwind CSS v4 · shadcn/ui · Framer Motion
-
-## Project layout
-
-```
-src/
-├── convex/
-│   ├── ghost/          # AI engine: planner, chain orchestration, mutations
-│   │   ├── plan.ts     # task classification + local engine
-│   │   ├── actions.ts  # run orchestrator (repo context → stages → live push)
-│   │   └── mutations.ts# conversations, runs, pipeline patches
-│   ├── github/         # GitHub OAuth, account sync, publish-to-PR actions
-│   │   ├── oauth.ts    # OAuth callback HTTP route
-│   │   ├── helpers.ts  # GitHub REST: sync repos + push branch/commit/PR
-│   │   └── ...
-│   └── schema.ts       # conversations, runs, messages, github accounts
-├── components/ghost/   # Console UI: run console, composer, GitHub sync
-└── pages/
-    ├── Landing.tsx     # /
-    ├── Auth.tsx        # /auth
-    ├── Chat.tsx        # /chat — the agent console
-    └── Dashboard.tsx   # /dashboard — Build HQ
+```bash
+bun convex dev --once
 ```
 
-## Routes
+Run type checking:
+
+```bash
+bun tsc -b --noEmit
+```
+
+Start the development server:
+
+```bash
+bun run dev
+```
+
+## 🧪 Verification & CI
+
+Ghost Web AI uses gate-based verification rather than treating a successful code generation step as completion.
+
+| Gate | Verification |
+| --- | --- |
+| 01 | Source / licence gate |
+| 02 | Task classification and plan |
+| 03 | Feature branch creation |
+| 04 | Repository-aware implementation |
+| 05 | Guardian review / pre-CI repair |
+| 06 | Install + build + typecheck |
+| 07 | First real error → targeted fix loop |
+| 08 | Commit + push |
+| 09 | Pull request creation |
+| 10 | CI / preview / merge-readiness verification |
+
+**Green CI is a delivery gate, not merely a status badge.**
+
+## 🧭 Architecture
+
+```text
+┌──────────────────────────────────────────────┐
+│              Ghost Web AI Client             │
+│      Landing · Chat · Dashboard · Console    │
+└──────────────────────┬───────────────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────────────┐
+│             Ghost Agent Engine               │
+│       Plan · Context · Chain · Fix loop      │
+└──────────────┬───────────────┬───────────────┘
+               │               │
+               ▼               ▼
+        Repository Context   Guardian
+               │               │
+               └───────┬───────┘
+                       ▼
+┌──────────────────────────────────────────────┐
+│              CI / Verification               │
+│       install · build · typecheck · fix      │
+└──────────────────────┬───────────────────────┘
+                       │
+                       ▼
+┌──────────────────────────────────────────────┐
+│             GitHub Integration               │
+│       branch · files · commit · pull request │
+└──────────────────────────────────────────────┘
+```
+
+## 🧱 Tech stack
+
+- **React 19** — web UI
+- **TypeScript** — application and type safety
+- **Vite** — frontend build tooling
+- **Convex** — backend, database and functions
+- **Convex Auth** — authentication
+- **Tailwind CSS v4** — styling
+- **shadcn/ui** — interface components
+- **Framer Motion** — motion and interaction
+
+## 📁 Project structure
+
+```text
+ghost-web-ai/
+├── src/
+│   ├── convex/
+│   │   ├── ghost/
+│   │   │   ├── plan.ts
+│   │   │   ├── actions.ts
+│   │   │   └── mutations.ts
+│   │   ├── github/
+│   │   │   ├── oauth.ts
+│   │   │   ├── helpers.ts
+│   │   │   └── ...
+│   │   └── schema.ts
+│   ├── components/ghost/
+│   └── pages/
+│       ├── Landing.tsx
+│       ├── Auth.tsx
+│       ├── Chat.tsx
+│       └── Dashboard.tsx
+├── package.json
+└── README.md
+```
+
+## 🌐 Routes
 
 | Route | Purpose |
-|-------|---------|
-| `/` | Landing — product, chain, squad, FAQ |
-| `/auth` | Sign in (email OTP / guest) |
-| `/chat` | The console — sessions, live agent runs, task composer |
-| `/dashboard` | Build HQ — stats, recent runs, GitHub connect |
+| --- | --- |
+| `/` | Landing page — product, chain, squad and FAQ |
+| `/auth` | Email OTP / guest authentication |
+| `/chat` | Agent console and live task runs |
+| `/dashboard` | Build HQ, run statistics and GitHub connection |
 
-## Contact
+## ⚠️ Important limitations
 
-Questions, feature ideas, or partnership inquiries?
+- The local deterministic engine does not replace the quality of a strong hosted/open LLM for every task.
+- GitHub operations require an authenticated account or PAT with sufficient repository permissions.
+- CI verification depends on the target repository's own build and test configuration.
+- A generated pull request still requires appropriate human review before merging production changes.
+- Provider availability, rate limits and free-tier terms are controlled by the provider.
 
-[ghostweb@ghostbin.cfd](mailto:ghostweb@ghostbin.cfd)
+## 🗺️ Roadmap
+
+- [x] 10-stage AI delivery chain
+- [x] Repository-aware planning
+- [x] Guardian pre-CI review
+- [x] First-real-error repair loop
+- [x] GitHub branch / commit / PR workflow
+- [x] Zero-credit local execution path
+- [x] Optional open-LLM integration
+- [ ] Expanded automated test coverage
+- [ ] Richer browser/E2E verification
+- [ ] More provider integrations
+- [ ] MCP / A2A tool integrations
+- [ ] Expanded Android/Desktop implementation workflows
+- [ ] Hardened release automation
+- [ ] Verified release artifacts
+
+## 🤝 Contributing
+
+Issues, improvements and pull requests are welcome. Keep changes focused, preserve the security/licence gates, avoid hard-coded credentials, and keep CI green.
+
+## 📬 Contact
+
+Questions, feature ideas or partnership inquiries:
+
+**ghostweb@ghostbin.cfd**
+
+---
+
+<div align="center">
+
+**Ghost Web AI** · plan → build → heal → verify → ship 👻
+
+</div>
