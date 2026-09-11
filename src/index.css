@@ -219,3 +219,161 @@
     @apply font-mono text-[11px] font-bold uppercase tracking-[0.18em];
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Matrix terminal theme (wizard mode) — phosphor green on near-black. */
+/* Scoped to the /build wizard via .mx-* classes; the rest of the app   */
+/* keeps the neobrutalism tokens untouched.                            */
+/* ------------------------------------------------------------------ */
+
+:root {
+  --mx-bg: #060a07;
+  --mx-panel: #0b130d;
+  --mx-panel-2: #0e1810;
+  --mx-green: #00ff41;
+  --mx-green-soft: #57e389;
+  --mx-green-dim: #3f9e5f;
+  --mx-border: rgba(0, 255, 65, 0.28);
+  --mx-border-strong: rgba(0, 255, 65, 0.55);
+}
+
+@layer components {
+  .mx-page {
+    background-color: var(--mx-bg);
+    color: var(--mx-green-soft);
+    font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    position: relative;
+  }
+  /* CRT scanlines + vignette overlay, pointer-transparent. */
+  .mx-page::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    background:
+      repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.18) 0px,
+        rgba(0, 0, 0, 0.18) 1px,
+        transparent 1px,
+        transparent 3px
+      ),
+      radial-gradient(ellipse at 50% 0%, transparent 55%, rgba(0, 0, 0, 0.45) 100%);
+  }
+  .mx-glow {
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
+  }
+  .mx-card {
+    position: relative;
+    z-index: 2;
+    background-color: var(--mx-panel);
+    border: 1px solid var(--mx-border);
+  }
+  .mx-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--mx-border);
+    background-color: var(--mx-panel-2);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--mx-green);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.35);
+  }
+  .mx-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border: 1px solid var(--mx-border);
+    background-color: rgba(0, 255, 65, 0.06);
+    padding: 0.1rem 0.4rem;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--mx-green-soft);
+  }
+  .mx-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--mx-border-strong);
+    background-color: rgba(0, 255, 65, 0.12);
+    padding: 0.55rem 1.1rem;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--mx-green);
+    text-shadow: 0 0 8px rgba(0, 255, 65, 0.45);
+    cursor: pointer;
+    transition: background-color 120ms ease, box-shadow 120ms ease;
+  }
+  .mx-btn:hover:not(:disabled) {
+    background-color: rgba(0, 255, 65, 0.22);
+    box-shadow: 0 0 18px rgba(0, 255, 65, 0.25);
+  }
+  .mx-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .mx-btn-primary {
+    background-color: var(--mx-green);
+    color: #04140a;
+    text-shadow: none;
+    font-weight: 800;
+  }
+  .mx-btn-primary:hover:not(:disabled) {
+    background-color: #4bff74;
+    box-shadow: 0 0 24px rgba(0, 255, 65, 0.45);
+  }
+  .mx-btn-ghost {
+    background-color: transparent;
+  }
+  .mx-input {
+    width: 100%;
+    background-color: rgba(0, 255, 65, 0.04);
+    border: 1px solid var(--mx-border);
+    color: var(--mx-green);
+    padding: 0.6rem 0.8rem;
+    outline: none;
+    caret-color: var(--mx-green);
+  }
+  .mx-input::placeholder {
+    color: var(--mx-green-dim);
+  }
+  .mx-input:focus {
+    border-color: var(--mx-border-strong);
+    box-shadow: 0 0 12px rgba(0, 255, 65, 0.18);
+  }
+  .mx-dim {
+    color: var(--mx-green-dim);
+  }
+  /* Re-skins standard-token components (e.g. GitHubSync) inside the matrix
+     page by remapping the app's CSS variables for their subtree. */
+  .mx-embed {
+    --background: #060a07;
+    --card: #0b130d;
+    --card-foreground: #57e389;
+    --foreground: #57e389;
+    --muted-foreground: #3f9e5f;
+    --accent: rgba(0, 255, 65, 0.14);
+    --accent-foreground: #57e389;
+    --border: rgba(0, 255, 65, 0.28);
+    --input: rgba(0, 255, 65, 0.1);
+    --ring: rgba(0, 255, 65, 0.5);
+    --ink: #000000;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mx-rain {
+    display: none;
+  }
+}
