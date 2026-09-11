@@ -6,11 +6,11 @@
 
 A privacy-focused, zero-credit AI software delivery client that turns a plain-language request into real repository changes, automated verification, and a GitHub pull request.
 
-[![CI](https://github.com/TempleEU/ghost-web-ai/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TempleEU/ghost-web-ai/actions/workflows/ci.yml?query=branch%3Amain)
+[![Ghost Web AI](https://img.shields.io/badge/Ghost%20Web%20AI-Agent%20Delivery-39d353?logo=github&logoColor=white)](https://github.com/TempleEU/ghost-web-ai)
 [![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev/)
-[![Convex](https://img.shields.io/badge/Backend-Convex-ff6b6b)](https://www.convex.dev/)
+[![Backend](https://img.shields.io/badge/Backend-Convex-ff6b6b)](https://www.convex.dev/)
 
 </div>
 
