@@ -401,7 +401,7 @@ Issues, improvements and pull requests are welcome. Keep changes focused, preser
 
 Questions, feature ideas or partnership inquiries:
 
-**ghost@ghostbin.cfd**
+## **ghostweb@ghostbin.cfd**
 
 ---
 
