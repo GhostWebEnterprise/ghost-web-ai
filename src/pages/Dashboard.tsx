@@ -35,6 +35,10 @@ export default function Dashboard() {
     profileUrl: string;
   }[];
   const connected = accounts[0];
+  // Truthful sync readiness: OAuth connected, or deployment PAT covers it.
+  const syncStatus = useQuery(api.github.queries.syncStatus) as
+    | { oauthConnected: boolean; patFallback: boolean }
+    | undefined;
   const startConnect = useMutation(api.github.mutations.startConnect);
   const disconnect = useMutation(api.github.mutations.disconnect);
   const [connecting, setConnecting] = useState(false);
@@ -334,9 +338,22 @@ export default function Dashboard() {
                     {connecting ? "Sending you to GitHub…" : "Connect GitHub"}
                   </button>
                   <p className="mt-2 font-mono text-[9px] uppercase leading-4 tracking-wider text-background/50">
-                    Needs GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET in Keys
-                    (GitHub OAuth app). Prefer a key? Paste GITHUB_PAT instead
-                    for the same live pushes.
+                    {syncStatus?.patFallback ? (
+                      <>
+                        <span className="border border-background/50 bg-[#4dd8e6] px-1 text-black">
+                          pat active
+                        </span>{" "}
+                        A GITHUB_PAT is configured — repo sync and live PR
+                        publishing already work. OAuth just adds your avatar
+                        and per-account connection.
+                      </>
+                    ) : (
+                      <>
+                        Needs GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET in Keys
+                        (GitHub OAuth app). Prefer a key? Paste GITHUB_PAT
+                        instead for the same live pushes.
+                      </>
+                    )}
                   </p>
                 </>
               )}

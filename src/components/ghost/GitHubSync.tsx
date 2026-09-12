@@ -44,6 +44,10 @@ export function GitHubSync({
       profileUrl: string;
     }[];
   const account = accounts[0];
+  // Truthful readiness: OAuth connected, or the deployment PAT covers sync.
+  const syncStatus = useQuery(api.github.queries.syncStatus) as
+    | { oauthConnected: boolean; patFallback: boolean }
+    | undefined;
   const startConnect = useMutation(api.github.mutations.startConnect);
   const syncRepos = useAction(api.github.actions.syncRepos);
 
@@ -51,6 +55,7 @@ export function GitHubSync({
   const [syncing, setSyncing] = useState(false);
   const [repos, setRepos] = useState<RepoRow[] | null>(null);
   const [open, setOpen] = useState(false);
+  const [patUser, setPatUser] = useState<string | null>(null);
 
   const handleConnect = async () => {
     setConnecting(true);
@@ -73,8 +78,21 @@ export function GitHubSync({
     setSyncing(true);
     try {
       const result = (await syncRepos()) as
-        | { connected: false; reason?: string }
+        | { connected: false; patSync?: false; reason?: string }
+        | { connected: false; patSync: true; profile: { username: string }; repos: RepoRow[] }
         | { connected: true; repos: RepoRow[] };
+      if ("patSync" in result && result.patSync) {
+        // PAT fallback: the deployment's GITHUB_PAT/GITHUB_TOKEN acted as its
+        // own identity. Syncing works — it is just not an OAuth connection.
+        setRepos(result.repos);
+        setPatUser(result.profile?.username ?? null);
+        setOpen(true);
+        toast.success(
+          `${result.repos.length} repo${result.repos.length === 1 ? "" : "s"} synced via PAT (@${result.profile?.username ?? "token"})`,
+        );
+        return;
+      }
+      setPatUser(null);
       if (!result.connected) {
         setRepos(null);
         toast.error(result.reason ?? "Not connected — reconnect your GitHub account.");
@@ -113,6 +131,17 @@ export function GitHubSync({
             <span className="border border-foreground bg-[#00ff41] px-1 text-black">
               connected
             </span>
+          </span>
+        ) : patUser ? (
+          <span className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-wider">
+            <span className="max-w-[110px] truncate">@{patUser}</span>
+            <span className="border border-foreground bg-[#4dd8e6] px-1 text-black">
+              pat sync
+            </span>
+          </span>
+        ) : syncStatus?.patFallback ? (
+          <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+            GITHUB_PAT detected — hit “Sync repos”
           </span>
         ) : (
           <span className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">

@@ -26,6 +26,28 @@ export const listAccounts = query({
   },
 });
 
+/**
+ * Sync readiness for the UI: is an OAuth account connected, and does the
+ * deployment environment provide a PAT fallback (GITHUB_PAT / GITHUB_TOKEN)?
+ * Lets the UI show a truthful "PAT" badge instead of implying OAuth failed.
+ */
+export const syncStatus = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await getCurrentUser(ctx);
+    if (!user) return { oauthConnected: false, patFallback: false };
+    const account = await ctx.db
+      .query("githubAccounts")
+      .withIndex("by_owner", (q) => q.eq("ownerId", user._id))
+      .first();
+    return {
+      oauthConnected: !!account,
+      patFallback:
+        !account && !!(process.env.GITHUB_PAT ?? process.env.GITHUB_TOKEN),
+    };
+  },
+});
+
 /** Internal: full account row (including access token) for a user id. */
 export const accountByOwnerId = internalQuery({
   args: { ownerId: v.id("users") },

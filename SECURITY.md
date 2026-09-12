@@ -8,16 +8,19 @@ receives security updates; older releases are documented for reference only.
 
 | Version  | Supported          | Notes                                              |
 | -------- | ------------------ | -------------------------------------------------- |
-| 0.1.x    | :white_check_mark: | Latest line — includes v0.1.2 (responsive + PAT)    |
-| 0.1.0    | :white_check_mark: | Superseded by v0.1.2; security fixes ride forward  |
+| 0.1.x    | :white_check_mark: | Latest line — responsive UI, PAT fallback sync, desktop installers |
+| 0.1.0    | :white_check_mark: | Superseded; security fixes ride forward            |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
 The current release train is **v0.1.2**: typecheck, tests and build verified,
 APK assembled on GitHub runners and attached alongside its checksum manifest.
 This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
-live publishing, a fully responsive mobile/desktop UI, a per-user Settings
-tab (engine mode, plan-only publishing, repo defaults), and **Ghost
-Securities ©** — the background protection engine described below.
+live publishing (with truthful sync status and actionable 401/403/404 error
+hints in the UI), a fully responsive mobile/desktop UI, a per-user Settings
+tab (engine mode, plan-only publishing, repo defaults), **iOS/macOS/Linux
+desktop compatibility shells** and **desktop installer packaging** (macOS
+.dmg/.zip, Windows .exe, Linux .AppImage/.deb) in the release pipeline, and
+**Ghost Securities ©** — the background protection engine described below.
 
 ## Reporting a Vulnerability
 
@@ -48,7 +51,8 @@ vulnerabilities, and never attach real credentials or API keys to a report.
 - The Ghost Web AI web client (React + TypeScript + Vite)
 - The Convex backend: agent engine, task force, MCP/A2A surface and GitHub
   OAuth/sync/publish functions (`src/convex/**`)
-- The Capacitor Android APK shell and its release workflow artifacts
+- The Capacitor Android APK shell, the Capacitor iOS shell and the Electron
+desktop shells and their release-workflow artifacts
 - The release pipeline itself (`.github/workflows/`), including artifact
   integrity and checksum verification
 
@@ -75,6 +79,9 @@ vulnerabilities, and never attach real credentials or API keys to a report.
   GitHub release (see `artifacts.sha256` on each release).
 - ❌ Secrets must never be committed. Provider and OAuth keys are configured
   through environment variables / project Keys settings only.
+- 🐙 The `GITHUB_PAT`/`GITHUB_TOKEN` fallback never leaves the server: sync
+  and publish run as the token's identity server-side, and the UI only ever
+  sees the derived username — never the token itself.
 - 👻 **Ghost Securities ©** runs the background protection engine below on
   every deployment.
 
@@ -118,5 +125,12 @@ must pass before the maintenance release tag moves.
   (`/github/callback`) resolves to your deployment only.
 - Verify APK releases against the attached `artifacts.sha256` before
   installing on a device.
+- Desktop installers (.dmg/.zip/.exe/.AppImage/.deb) are unsigned by default;
+  verify them against `artifacts.sha256` and prefer the checksummed release
+  tag over mirrors. Add code-signing certificates as CI secrets before
+  shipping to end users.
+- The `electron/`, `android/` and `ios/` platform shells are scaffolded at
+  build time and never committed — audit the committed
+  `capacitor.config.json` plus the scaffold workflow instead.
 - Rebuild from a clean checkout and pin the release tag when auditing
   shipped artifacts.

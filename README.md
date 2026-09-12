@@ -47,6 +47,8 @@ The system coordinates specialized stages for planning, source/licence checks, r
 | 🛡️ Ghost Securities © | Background protection engine: secrets, supply-chain, integrity, injection and release-hygiene scans with a 14-day automatic update cadence |
 | 🌐 Client | React + TypeScript + Vite web application |
 | 📱 Responsive | Auto-fits phones, tablets and desktops — safe-area aware, fluid type |
+| 🐙 GitHub sync | OAuth account **or** deployment PAT — sync repos and open real PRs either way |
+| 💻 Desktop installers | macOS (.dmg/.zip), Windows (.exe) and Linux (.AppImage/.deb) built by the release pipeline |
 
 ## 🤖 The AI chain
 
@@ -205,9 +207,11 @@ which runs the complete chain and task force with zero keys.
 
 Connect a GitHub account through OAuth. The account, avatar and requested scopes are stored server-side; the access token is not sent to the browser.
 
+No OAuth app? A deployment-wide **`GITHUB_PAT` / `GITHUB_TOKEN`** works as a fallback: repo sync runs as the token's own identity (badged **pat sync** in the UI) and live publishing uses the same token. The UI tells you which path is active — a 401/403/404 from GitHub is surfaced with a hint about the exact scope or expiry problem.
+
 ### Sync
 
-Sync repositories owned by the user, collaborators and organizations available to the authenticated account.
+Sync repositories owned by the user, collaborators and organizations available to the authenticated account (OAuth connection) or the deployment PAT (fallback).
 
 ### Ship
 
@@ -284,7 +288,7 @@ Ghost Web AI uses gate-based verification rather than treating a successful code
 
 **Green CI is a delivery gate, not merely a status badge.**
 
-This repository applies the same discipline to itself: `.github/workflows/ci.yml` runs **typecheck → tests → build → sha256 artifact manifest** on every push and pull request, and tagging `v*` triggers `.github/workflows/release.yml` — a gated build whose artifacts are checksum-verified before being attached to a GitHub release.
+This repository applies the same discipline to itself: `.github/workflows/ci.yml` runs **typecheck → tests → build → sha256 artifact manifest** on every push and pull request, and tagging `v*` triggers `.github/workflows/release.yml` — a gated build whose artifacts are checksum-verified before being attached to a GitHub release, alongside the **Android APK**, **desktop installers (macOS/Windows/Linux)** and the **iOS Xcode workspace**.
 
 ## 🧭 Architecture
 
@@ -346,7 +350,7 @@ ghost-web-ai/
 │   │   ├── crons.ts             # background protection tick (hourly)
 │   │   ├── mcp.ts               # MCP manifest / A2A card / tool execution
 │   │   ├── mcpTools.ts          # shared tool definitions
-│   │   ├── github/              # OAuth, sync, publish-to-PR
+│   │   ├── github/              # OAuth, PAT-fallback sync, publish-to-PR
 │   │   └── schema.ts
 │   ├── components/ghost/
 │   └── pages/
@@ -361,8 +365,9 @@ ghost-web-ai/
 ├── scripts/
 │   ├── e2e-smoke.sh             # 18-check smoke suite
 │   ├── gen-manifest.sh          # release artifact manifest
-│   └── gen-icons.sh             # matrix icon set → web PNGs + Android launcher
-├── .github/workflows/           # ci.yml + release.yml
+│   ├── gen-icons.sh             # matrix icon set → web PNGs + Android launcher
+│   └── gen-desktop-icons.sh     # matrix icon set → electron-builder sizes
+├── .github/workflows/           # ci.yml + release.yml (web + APK + desktop + iOS)
 ├── package.json
 └── README.md
 ```
@@ -386,16 +391,52 @@ ghost-web-ai/
 | --- | --- |
 | 🌐 **Web (PWA)** — any modern browser on desktop & mobile | ✅ Supported |
 | 🤖 **Android** — Capacitor shell, APK built by the release pipeline | ✅ Supported |
-| 🍎 **iOS** — Capacitor iOS shell | 🚧 In development |
-| 💻 **macOS** — desktop app (Capacitor Electron / Tauri shell) | 🚧 In development |
-| 🐧 **Linux** — desktop app (Capacitor Electron / Tauri shell) | 🚧 In development |
-| 🪟 **Windows** — desktop app | 🗓️ Planned |
+| 🍎 **iOS** — Capacitor iOS shell, Xcode workspace verified in the release pipeline | 🚧 In development |
+| 💻 **macOS** — desktop installer (.dmg/.zip) via Capacitor Electron + electron-builder | 🚧 In development |
+| 🐧 **Linux** — desktop installer (.AppImage/.deb) via Capacitor Electron + electron-builder | 🚧 In development |
+| 🪟 **Windows** — desktop installer (.exe) via Capacitor Electron + electron-builder | 🚧 In development |
 
 The web client is the primary target and adapts automatically from phone to
-desktop (fluid type, safe-area insets, single-column mobile layout). The
-Android APK ships from the release workflow today; iOS, macOS and Linux shells
-are in active development on the same Capacitor codebase — the Compatibility
-Agent (desktop + web environment validation) owns their environment gates.
+desktop (fluid type, safe-area insets, single-column mobile layout). The same
+Capacitor codebase drives every shell; the Compatibility Agent (desktop + web
+environment validation) owns their environment gates.
+
+### iOS (in development)
+
+```bash
+bun run cap:add:ios      # one-time scaffold (needs macOS + Xcode)
+bun run cap:sync:ios     # copy web assets into the iOS shell
+```
+
+The release workflow (`ios-shell` job) scaffolds and verifies the Xcode
+workspace on every tag; signed `.ipa` builds for TestFlight/App Store require
+Apple certificates and are the next step.
+
+### macOS, Linux & Windows desktop installers (in development)
+
+The desktop shells use the Capacitor Electron platform with electron-builder
+packaging:
+
+```bash
+bun run cap:add:electron   # one-time scaffold (electron/ + npm toolchain)
+bun run desktop:dev        # run the desktop app against the built web assets
+bun run desktop:make       # package installers via electron-builder
+```
+
+The release workflow (`desktop-installers` job) builds **macOS .dmg/.zip**,
+**Windows .exe (NSIS)** and **Linux .AppImage/.deb** installers on their native
+runners for every tag and attaches them to the GitHub release. Unsigned builds
+distribute fine via GitHub Releases; code-signing keys can be added as secrets
+later.
+
+### Desktop shell notes
+
+- `electron/` is scaffolded at build time and gitignored, exactly like
+  `android/` and `ios/` — only `capacitor.config.json` is committed.
+- Desktop icons render from `public/icon.svg` through
+  `scripts/gen-desktop-icons.sh` into the sizes electron-builder expects.
+- A splash screen ships with the platform so the window never appears frozen
+  while plugins load.
 
 ## ⚠️ Important limitations
 
@@ -423,9 +464,11 @@ Agent (desktop + web environment validation) owns their environment gates.
 - [x] Verified release artifacts
 - [x] Responsive mobile + desktop UI fit
 - [x] Per-user settings tab (engine mode, plan-only publishing, defaults)
-- [ ] iOS / macOS / Linux shells (in development)
+- [x] GitHub PAT-fallback sync with truthful UI status + actionable error hints
+- [x] Desktop installer packaging (macOS / Windows / Linux) in the release pipeline
+- [ ] iOS / macOS / Linux shells (in development — scaffolds + installers ship from CI)
 - [ ] App-store distribution for Android APKs
-- [ ] Desktop installer packaging
+- [ ] Code-signed desktop + iOS builds
 
 ## 🤝 Contributing
 

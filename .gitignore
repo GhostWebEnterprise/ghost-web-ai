@@ -18,10 +18,13 @@ isolate/
 # bun.lock is the canonical lockfile (see AGENTS.md)
 package-lock.json
 
-# Android shell is scaffolded by CI at build time (capacitor.config.json is committed)
+# Android/iOS shells are scaffolded by CI at build time (capacitor.config.json is committed)
 android/
 ios/
 capacitor.build/
+
+# Electron desktop shell is scaffolded at build time by `cap add @capawesome/capacitor-electron`
+electron/
 
 # Editor directories and files
 .vscode/*

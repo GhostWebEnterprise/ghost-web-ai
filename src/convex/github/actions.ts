@@ -40,11 +40,19 @@ interface SyncedRepo {
   pushedAt?: string;
 }
 
+/**
+ * Result of a repo sync. Three shapes:
+ * - OAuth connected: a githubAccounts row exists and the token works.
+ * - PAT sync: no OAuth row, but the deployment GITHUB_PAT/GITHUB_TOKEN acts
+ *   as its own identity — syncing works, badged differently in the UI.
+ * - Not connected: no usable token, `reason` explains what to fix.
+ */
 interface SyncResult {
   connected: boolean;
+  patSync?: boolean;
   reason?: string;
   profile?: { username: string; name?: string; avatarUrl?: string };
-  repos?: SyncedRepo[];
+  repos: SyncedRepo[];
   syncedAt?: number;
 }
 
@@ -65,11 +73,20 @@ function envPat(): string | undefined {
   return process.env.GITHUB_PAT ?? process.env.GITHUB_TOKEN ?? undefined;
 }
 
-/** Fetch the connected account's profile + repos straight from GitHub. */
+function ghErrorHint(status: number): string {
+  if (status === 401)
+    return "GitHub rejected the token (401) — it was revoked or has expired. Generate a new PAT and update Keys.";
+  if (status === 403)
+    return "GitHub refused the request (403) — classic PATs need the `repo` scope; fine-grained PATs need Contents + Metadata read on the target repos.";
+  if (status === 404)
+    return "GitHub returned 404 — the token can see no repositories (missing `repo` scope, or SSO not authorized on the org).";
+  return `GitHub returned ${status} — see https://docs.github.com/rest for the meaning.`;
+}
+
 async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
   const userId = await getAuthUserId(ctx);
   if (userId === null) {
-    return { connected: false, repos: [] };
+    return { connected: false, repos: [], reason: "Sign in first." };
   }
   const account = await fetchAccountForUser(ctx, userId);
   // Token priority: the user's connected OAuth account, else the deployment
@@ -78,9 +95,9 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
   if (!token) {
     return {
       connected: false,
-      reason:
-        "No GitHub connection — connect an account or set GITHUB_PAT in Keys.",
       repos: [],
+      reason:
+        "No GitHub connection — connect an account (Dashboard) or set GITHUB_PAT in Keys.",
     };
   }
 
@@ -90,16 +107,16 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     avatar_url?: string;
     html_url?: string;
   }>(`${GH_API}/user`, token);
-  if (!userRes.ok) {
+  if (!userRes.ok || !userRes.data?.login) {
     return {
       connected: false,
-      reason: account
-        ? "Token invalid or revoked."
-        : "GITHUB_PAT is set but invalid or expired.",
       repos: [],
+      reason: account
+        ? ghErrorHint(userRes.status)
+        : `GITHUB_PAT/GITHUB_TOKEN is set but unusable. ${ghErrorHint(userRes.status)}`,
     };
   }
-  const username = userRes.data?.login ?? account?.username ?? "pat";
+  const username = userRes.data.login;
 
   const repoRes = await gh<
     {
@@ -116,6 +133,13 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     `${GH_API}/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member`,
     token,
   );
+  if (!repoRes.ok) {
+    return {
+      connected: false,
+      repos: [],
+      reason: `Listed the profile but not the repos. ${ghErrorHint(repoRes.status)}`,
+    };
+  }
 
   const repos: SyncedRepo[] = (repoRes.data ?? [])
     .map((r) => ({
@@ -140,12 +164,28 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     }
   }
 
+  // PAT-fallback path: act as the PAT's own identity so "Sync repos" works
+  // immediately, without requiring an OAuth app to exist.
+  if (!account) {
+    return {
+      connected: false,
+      patSync: true,
+      profile: {
+        username,
+        name: userRes.data.name ?? undefined,
+        avatarUrl: userRes.data.avatar_url ?? undefined,
+      },
+      repos,
+      syncedAt: Date.now(),
+    };
+  }
+
   return {
     connected: true,
     profile: {
       username,
-      name: userRes.data?.name ?? account?.name,
-      avatarUrl: userRes.data?.avatar_url ?? account?.avatarUrl,
+      name: userRes.data.name ?? account.name,
+      avatarUrl: userRes.data.avatar_url ?? account.avatarUrl,
     },
     repos,
     syncedAt: Date.now(),
@@ -156,6 +196,26 @@ export const syncRepos = action({
   args: {},
   handler: syncReposHandler,
 });
+
+/**
+ * Resolve the token to use for live publishing: the user's OAuth account when
+ * connected, else the deployment PAT. Returns the actor login too, so the
+ * publish path can build correct `owner:branch` head refs.
+ */
+async function resolvePublishToken(
+  ctx: ActionCtx,
+  userId: Id<"users">,
+): Promise<{ token: string; actor: string | null; account: Doc<"githubAccounts"> | null }> {
+  const account = await fetchAccountForUser(ctx, userId);
+  if (account?.accessToken) {
+    return { token: account.accessToken, actor: account.username, account };
+  }
+  const pat = envPat();
+  if (pat) return { token: pat, actor: null, account: null };
+  throw new Error(
+    "Connect your GitHub account first (Dashboard → Connect GitHub), or set GITHUB_PAT in Keys.",
+  );
+}
 
 interface PublishResult {
   already?: boolean;
@@ -190,13 +250,14 @@ async function publishRunHandler(
   const userId = await getAuthUserId(ctx);
   if (userId === null) throw new Error("Sign in first.");
 
-  const account = await fetchAccountForUser(ctx, userId);
-  const token = account?.accessToken ?? envPat();
-  if (!token) {
-    throw new Error(
-      "Connect your GitHub account first (Console → GitHub), or set GITHUB_PAT in Keys.",
-    );
-  }
+  // Token priority: connected OAuth account, else the deployment PAT. The
+  // actor login is resolved against GitHub when using the PAT fallback so
+  // `owner:branch` head refs and commit authors stay correct.
+  const { token, actor: knownActor, account } = await resolvePublishToken(
+    ctx,
+    userId,
+  );
+  let actor = knownActor;
   // Settings tab: plan-only mode blocks manual publishing too.
   const settings = await ctx
     .runQuery(api.settings.getInternal, { userId })
@@ -209,7 +270,6 @@ async function publishRunHandler(
   // Identity used for branch head + commit author. With a connected OAuth
   // account it comes from the stored row; with the PAT fallback we resolve
   // the PAT's own login so `owner:branch` refs stay correct.
-  let actor = account?.username ?? null;
   if (!actor) {
     const me = await githubJson<{ login: string }>(`${GH_API}/user`, token);
     actor = me.login;

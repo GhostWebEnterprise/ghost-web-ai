@@ -125,3 +125,137 @@ jobs:
           name: android-apk-${{ github.ref_name }}
           path: apk-out/*.apk
           retention-days: 14
+
+  desktop-installers:
+    needs: build-and-release
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            targets: "dmg zip"
+          - os: ubuntu-latest
+            targets: "AppImage deb"
+          - os: windows-latest
+            targets: "nsis"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download verified web build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: dist/
+
+      - name: Scaffold the Electron desktop shell (Capacitor Electron)
+        run: |
+          bunx cap add @capawesome/capacitor-electron
+          bunx cap sync @capawesome/capacitor-electron
+
+      - name: Install Electron toolchain
+        working-directory: electron
+        shell: bash
+        run: |
+          if [ -f package-lock.json ]; then npm ci; else npm install; fi
+
+      - name: Apply themed matrix app icons
+        if: runner.os != 'Windows'
+        shell: bash
+        run: sh ./scripts/gen-desktop-icons.sh
+
+      - name: Verify electron scaffold exists
+        shell: bash
+        run: |
+          test -f electron/package.json || { echo "electron/package.json missing after cap add"; exit 1; }
+          test -f electron/electron-builder.config.js || { echo "electron-builder config missing after cap add"; exit 1; }
+
+      - name: Build the platform installers
+        working-directory: electron
+        shell: bash
+        env:
+          # electron-builder reads these; unsigned builds are fine for
+          # distribution via GitHub Releases.
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+          # GH_TOKEN is required by electron-builder for some publishing paths;
+          # packaging itself does not publish.
+          GH_TOKEN: ${{ github.token }}
+        run: npx electron-builder --publish never
+
+      - name: Stage installers with release names
+        shell: bash
+        run: |
+          mkdir -p desktop-out
+          find electron/dist -type f \
+            \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.exe" \) \
+            -exec cp {} desktop-out/ \;
+          ls -la desktop-out/
+
+      - name: Attach desktop installers to the GitHub release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: desktop-out/*
+
+      - name: Upload desktop workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: desktop-installers-${{ runner.os }}-${{ github.ref_name }}
+          path: desktop-out/*
+          retention-days: 14
+
+  ios-shell:
+    needs: build-and-release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Download verified web build
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-${{ github.ref_name }}
+          path: dist/
+
+      - name: Scaffold the iOS shell (Capacitor)
+        run: |
+          bunx cap add @capacitor/ios
+          bunx cap sync @capacitor/ios
+          test -d ios/App || { echo "iOS shell not scaffolded"; exit 1; }
+
+      - name: Verify the Xcode workspace resolves
+        run: |
+          test -f ios/App/App.xcworkspace/contents.xcworkspacedata \
+            || { echo "iOS workspace missing"; exit 1; }
+          xcodebuild -list -workspace ios/App/App.xcworkspace 2>/dev/null \
+            | head -20 || true
+
+      - name: Upload iOS shell artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-shell-${{ github.ref_name }}
+          path: ios/
+          retention-days: 14
+
+      - name: Note about signed iOS builds
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "iOS shell attached as a workflow artifact. Signed .ipa builds for" \
+               "TestFlight/App Store need APPLE_CERTIFICATES secrets and are not" \
+               "part of this pipeline yet." >> $GITHUB_STEP_SUMMARY
