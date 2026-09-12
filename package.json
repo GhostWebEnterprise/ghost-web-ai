@@ -9,6 +9,8 @@
     "test": "bun test",
     "e2e": "sh ./scripts/e2e-smoke.sh",
     "manifest": "sh ./scripts/gen-manifest.sh",
+    "cap:add:android": "cap add android",
+    "cap:sync": "cap sync android",
     "lint": "eslint .",
     "format": "prettier --write .",
     "preview": "vite preview"
@@ -74,6 +76,9 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@capacitor/android": "^7.4.4",
+    "@capacitor/cli": "^7.4.4",
+    "@capacitor/core": "^7.4.4",
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",

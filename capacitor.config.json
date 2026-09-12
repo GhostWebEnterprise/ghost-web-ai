@@ -1,0 +1,11 @@
+{
+  "appId": "cfd.ghostbin.ghostwebai",
+  "appName": "Ghost Web AI",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}
