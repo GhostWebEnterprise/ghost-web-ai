@@ -88,11 +88,15 @@ jobs:
         run: |
           bunx cap add android
           bunx cap sync android
+          echo "--- scaffold contents ---"
+          ls -la android/ | head -15
+          head -3 android/gradlew || echo "gradlew missing after scaffold"
 
       - name: Assemble debug APK
         run: |
+          test -f android/gradlew || { echo "android/gradlew not scaffolded"; exit 1; }
           chmod +x android/gradlew
-          ./gradlew assembleDebug --no-daemon
+          sh ./gradlew assembleDebug --no-daemon
 
       - name: Stage APK with release name
         run: |
