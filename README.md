@@ -44,6 +44,7 @@ The system coordinates specialized stages for planning, source/licence checks, r
 | 🔌 MCP / A2A | Agent-addressable: tool manifest, A2A card, tool execution |
 | 💳 Pricing model | Zero credit meter / no built-in token paywall |
 | ⚙️ Settings | Per-user engine, publishing, repo-default and appearance controls |
+| 🛡️ Ghost Securities © | Background protection engine: secrets, supply-chain, integrity, injection and release-hygiene scans with a 14-day automatic update cadence |
 | 🌐 Client | React + TypeScript + Vite web application |
 | 📱 Responsive | Auto-fits phones, tablets and desktops — safe-area aware, fluid type |
 
@@ -336,10 +337,13 @@ ghost-web-ai/
 │   ├── convex/
 │   │   ├── ghost/
 │   │   │   ├── plan.ts          # task classification + local engine
+│   │   │   ├── securities.ts    # Ghost Securities © — pure protection engine
 │   │   │   ├── team.ts          # 15-agent roster, task graph, waves, gates
 │   │   │   ├── teamActions.ts   # task-force execution engine
 │   │   │   ├── actions.ts       # single-run orchestrator
 │   │   │   └── mutations.ts     # conversations, runs, pipeline patches
+│   │   ├── securities.ts        # Ghost Securities © — queries, scans, 14-day cadence
+│   │   ├── crons.ts             # background protection tick (hourly)
 │   │   ├── mcp.ts               # MCP manifest / A2A card / tool execution
 │   │   ├── mcpTools.ts          # shared tool definitions
 │   │   ├── github/              # OAuth, sync, publish-to-PR
@@ -351,6 +355,7 @@ ghost-web-ai/
 │       ├── Chat.tsx             # agent console
 │       ├── BuildWizard.tsx      # guided build wizard
 │       ├── TeamBoard.tsx        # task-force board
+│       ├── Securities.tsx       # Ghost Securities © posture tab
 │       ├── Settings.tsx         # per-user settings tab
 │       └── Dashboard.tsx
 ├── scripts/
@@ -373,6 +378,7 @@ ghost-web-ai/
 | `/team` | Task-force board — 15 agents, waves, approval gates, event log |
 | `/dashboard` | Build HQ, run statistics and GitHub connection |
 | `/settings` | Per-user settings — engine mode, publishing, repo defaults, appearance |
+| `/securities` | Ghost Securities © — background protection posture, scans and 14-day update cadence |
 
 ## 💻 Supported Operating Systems
 

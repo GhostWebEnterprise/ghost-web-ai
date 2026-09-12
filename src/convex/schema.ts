@@ -66,6 +66,37 @@ export const runFileValidator = v.object({
 });
 export type RunFile = Infer<typeof runFileValidator>;
 
+// ---------------- Ghost Securities © (background protection engine) ----------------
+
+export const secFindingsValidator = v.union(
+  v.literal("pass"),
+  v.literal("warn"),
+  v.literal("critical"),
+);
+export type SecFindings = Infer<typeof secFindingsValidator>;
+
+export const securitiesScanValidator = v.object({
+  id: v.string(),
+  area: v.union(
+    v.literal("secrets"),
+    v.literal("dependencies"),
+    v.literal("code_integrity"),
+    v.literal("injection"),
+    v.literal("release_hygiene"),
+  ),
+  title: v.string(),
+  status: v.union(
+    v.literal("pending"),
+    v.literal("running"),
+    v.literal("pass"),
+    v.literal("warn"),
+    v.literal("critical"),
+  ),
+  findings: v.array(v.string()),
+  ranAt: v.number(),
+});
+export type SecScanRow = Infer<typeof securitiesScanValidator>;
+
 // ---------------- Multi-agent task force (15-agent team runs) ----------------
 
 export const teamNodeValidator = v.object({
@@ -223,6 +254,45 @@ const schema = defineSchema(
     })
       .index("by_owner_updated", ["ownerId", "updatedAt"])
       .index("by_conversation", ["conversationId"]),
+
+    // ---------- Ghost Securities © — background protection engine ----------
+
+    // Latest snapshot of the always-on protection engine: the scan set
+    // (secrets, dependency supply chain, code integrity, injection watch,
+    // release hygiene), the folded verdict and the posture headline.
+    // Singleton ("ghost") — one row per deployment, rewritten per scan.
+    ghostSecurities: defineTable({
+      singleton: v.string(), // always "ghost"
+      scans: v.array(securitiesScanValidator),
+      findings: secFindingsValidator,
+      criticalCount: v.number(),
+      warnCount: v.number(),
+      headline: v.string(),
+      updatedAt: v.number(),
+    }).index("by_singleton", ["singleton"]),
+
+    // The 14-day automatic update cadence: one row per deployment anchored on
+    // the last maintenance release. The background cron stamps a new anchor
+    // each cycle so the core/code/security surface never goes outdated.
+    ghostSecurityCadence: defineTable({
+      singleton: v.string(), // always "ghost"
+      lastReleaseAt: v.number(), // cadence anchor: last automatic update
+      lastReleaseNote: v.string(), // what the last automated pass shipped
+      updatedAt: v.number(),
+    }).index("by_singleton", ["singleton"]),
+
+    // Append-only log of what the background engine did (scans, cadence
+    // stamps, alerts) — surfaced on the Securities tab.
+    ghostSecurityEvents: defineTable({
+      at: v.number(),
+      kind: v.union(
+        v.literal("scan"),
+        v.literal("cadence"),
+        v.literal("alert"),
+      ),
+      text: v.string(),
+      findings: secFindingsValidator,
+    }),
   },
   {
     schemaValidation: false,

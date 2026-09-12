@@ -10,10 +10,12 @@
 
 import type * as auth from "../auth.js";
 import type * as auth_emailOtp from "../auth/emailOtp.js";
+import type * as crons from "../crons.js";
 import type * as ghost_actions from "../ghost/actions.js";
 import type * as ghost_mutations from "../ghost/mutations.js";
 import type * as ghost_plan from "../ghost/plan.js";
 import type * as ghost_queries from "../ghost/queries.js";
+import type * as ghost_securities from "../ghost/securities.js";
 import type * as ghost_team from "../ghost/team.js";
 import type * as ghost_teamActions from "../ghost/teamActions.js";
 import type * as ghost_teamMutations from "../ghost/teamMutations.js";
@@ -26,6 +28,7 @@ import type * as github_queries from "../github/queries.js";
 import type * as http from "../http.js";
 import type * as mcp from "../mcp.js";
 import type * as mcpTools from "../mcpTools.js";
+import type * as securities from "../securities.js";
 import type * as settings from "../settings.js";
 import type * as users from "../users.js";
 
@@ -38,10 +41,12 @@ import type {
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   "auth/emailOtp": typeof auth_emailOtp;
+  crons: typeof crons;
   "ghost/actions": typeof ghost_actions;
   "ghost/mutations": typeof ghost_mutations;
   "ghost/plan": typeof ghost_plan;
   "ghost/queries": typeof ghost_queries;
+  "ghost/securities": typeof ghost_securities;
   "ghost/team": typeof ghost_team;
   "ghost/teamActions": typeof ghost_teamActions;
   "ghost/teamMutations": typeof ghost_teamMutations;
@@ -54,6 +59,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   mcp: typeof mcp;
   mcpTools: typeof mcpTools;
+  securities: typeof securities;
   settings: typeof settings;
   users: typeof users;
 }>;

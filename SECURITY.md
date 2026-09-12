@@ -15,8 +15,9 @@ receives security updates; older releases are documented for reference only.
 The current release train is **v0.1.2**: typecheck, tests and build verified,
 APK assembled on GitHub runners and attached alongside its checksum manifest.
 This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
-live publishing, a fully responsive mobile/desktop UI, and a per-user Settings
-tab (engine mode, plan-only publishing, repo defaults).
+live publishing, a fully responsive mobile/desktop UI, a per-user Settings
+tab (engine mode, plan-only publishing, repo defaults), and **Ghost
+Securities ©** — the background protection engine described below.
 
 ## Reporting a Vulnerability
 
@@ -74,6 +75,39 @@ vulnerabilities, and never attach real credentials or API keys to a report.
   GitHub release (see `artifacts.sha256` on each release).
 - ❌ Secrets must never be committed. Provider and OAuth keys are configured
   through environment variables / project Keys settings only.
+- 👻 **Ghost Securities ©** runs the background protection engine below on
+  every deployment.
+
+## Ghost Securities © — background protection engine
+
+Ghost Securities © is the always-on protection layer that ships with the
+application and runs in the background on every deployment:
+
+- **Background scans** (hourly Convex cron, `src/convex/crons.ts` →
+  `internal.securities.backgroundTick`) cover five areas: secrets &
+  credentials, the dependency supply chain (lockfile + GHSA review), code
+  integrity (checksummed artifacts, CI gates, Guardian review),
+  malicious-content / prompt-injection watch, and release hygiene.
+- **Verdict model** — each scan folds into a single posture: `pass`, `warn`
+  or `critical`. Any critical finding blocks releases until resolved; the
+  posture is visible in-app on the `/securities` tab.
+- **14-day automatic update cadence** — the engine tracks the last
+  automatic-update anchor and re-stamps it every 14 days ("never
+  outdated"): GitHub security-advisory sweep for the locked dependency set,
+  lockfile refresh, a scan for open, useable upstream sources, README/
+  SECURITY.md sync, and a checksummed maintenance release tag.
+- **Protection stack** — the standing hardening guarantees are the same
+  controls listed above (server-side secrets, data-not-instructions repo
+  context, blocking gates, Guardian review, checksummed releases), plus the
+  cadence itself.
+- **Unit-tested core** — the engine is pure TypeScript with zero imports
+  (`src/convex/ghost/securities.ts`), so the whole defense surface is
+  covered by `bun test` in `tests/securities.test.ts`.
+
+The engine currently reports posture from deterministic checks that mirror
+this policy. Findings that require external reachability (live GHSA queries
+against the registry) are executed as release-chores each cadence window and
+must pass before the maintenance release tag moves.
 
 ## Hardening guidance for deployments
 

@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   Wand2,
   Users,
+  ShieldCheck,
   Settings as SettingsIcon,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router";
@@ -15,7 +16,13 @@ import { cn } from "@/lib/utils";
 export function AppNav({
   active,
 }: {
-  active?: "chat" | "dashboard" | "build" | "team" | "settings";
+  active?:
+    | "chat"
+    | "dashboard"
+    | "build"
+    | "team"
+    | "settings"
+    | "securities";
 }) {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
@@ -90,6 +97,20 @@ export function AppNav({
             >
               <LayoutGrid className="size-4" />
               <span className="hidden sm:inline">Dashboard</span>
+            </Button>
+          </Link>
+          <Link to="/securities">
+            <Button
+              variant="ghost"
+              className={cn(
+                "gap-2 border-2 border-foreground px-2 text-xs font-bold uppercase tracking-wide sm:px-3",
+                active === "securities"
+                  ? "bg-accent text-foreground shadow-[3px_3px_0_0_var(--ink)]"
+                  : "bg-card text-foreground hover:bg-accent",
+              )}
+            >
+              <ShieldCheck className="size-4" />
+              <span className="hidden sm:inline">Securities</span>
             </Button>
           </Link>
           <Link to="/settings">
