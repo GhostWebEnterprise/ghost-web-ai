@@ -318,7 +318,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
             <div className="flex items-center justify-center gap-2 border-t-2 border-foreground bg-muted px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
               <GhostMark className="size-3 text-foreground" />
-              Secured by freebuff
+              Secured by Ghost Securities ©
             </div>
           </div>
         </div>
