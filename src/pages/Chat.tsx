@@ -177,7 +177,7 @@ export default function Chat() {
   return (
     <div className="nb-grid-paper flex min-h-screen flex-col bg-background text-foreground">
       <AppNav active="chat" />
-      <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-4 p-4 lg:flex-row">
+      <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 px-3 py-3 lg:flex-row lg:gap-4 lg:p-4">
         {/* sessions */}
         <div className="lg:h-[calc(100vh-6.5rem)] lg:overflow-y-auto lg:pr-1">
           <ConversationsPanel
@@ -190,7 +190,7 @@ export default function Chat() {
         </div>
 
         {/* thread */}
-        <div className="flex min-w-0 flex-1 flex-col gap-3 lg:h-[calc(100vh-6.5rem)]">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 max-lg:min-h-0 lg:h-[calc(100vh-6.5rem)]">
           {/* conversation header */}
           <div className="flex flex-wrap items-center justify-between gap-2 border-2 border-foreground bg-card px-3 py-2">
             <div className="flex min-w-0 items-center gap-2">

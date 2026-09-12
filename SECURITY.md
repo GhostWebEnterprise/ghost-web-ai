@@ -8,12 +8,14 @@ receives security updates; older releases are documented for reference only.
 
 | Version  | Supported          | Notes                                              |
 | -------- | ------------------ | -------------------------------------------------- |
-| 0.1.x    | :white_check_mark: | Latest line — includes v0.1.1 (matrix icon release) |
-| 0.1.0    | :white_check_mark: | Superseded by v0.1.1; security fixes ride forward  |
+| 0.1.x    | :white_check_mark: | Latest line — includes v0.1.2 (responsive + PAT)    |
+| 0.1.0    | :white_check_mark: | Superseded by v0.1.2; security fixes ride forward  |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
-The current release train is **v0.1.1**: typecheck, tests and build verified,
+The current release train is **v0.1.2**: typecheck, tests and build verified,
 APK assembled on GitHub runners and attached alongside its checksum manifest.
+This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
+live publishing and a fully responsive mobile/desktop UI.
 
 ## Reporting a Vulnerability
 

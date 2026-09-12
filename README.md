@@ -44,6 +44,7 @@ The system coordinates specialized stages for planning, source/licence checks, r
 | 🔌 MCP / A2A | Agent-addressable: tool manifest, A2A card, tool execution |
 | 💳 Pricing model | Zero credit meter / no built-in token paywall |
 | 🌐 Client | React + TypeScript + Vite web application |
+| 📱 Responsive | Auto-fits phones, tablets and desktops — safe-area aware, fluid type |
 
 ## 🤖 The AI chain
 
@@ -370,6 +371,23 @@ ghost-web-ai/
 | `/team` | Task-force board — 15 agents, waves, approval gates, event log |
 | `/dashboard` | Build HQ, run statistics and GitHub connection |
 
+## 💻 Supported Operating Systems
+
+| Platform | Status |
+| --- | --- |
+| 🌐 **Web (PWA)** — any modern browser on desktop & mobile | ✅ Supported |
+| 🤖 **Android** — Capacitor shell, APK built by the release pipeline | ✅ Supported |
+| 🍎 **iOS** — Capacitor iOS shell | 🚧 In development |
+| 💻 **macOS** — desktop app (Capacitor Electron / Tauri shell) | 🚧 In development |
+| 🐧 **Linux** — desktop app (Capacitor Electron / Tauri shell) | 🚧 In development |
+| 🪟 **Windows** — desktop app | 🗓️ Planned |
+
+The web client is the primary target and adapts automatically from phone to
+desktop (fluid type, safe-area insets, single-column mobile layout). The
+Android APK ships from the release workflow today; iOS, macOS and Linux shells
+are in active development on the same Capacitor codebase — the Compatibility
+Agent (desktop + web environment validation) owns their environment gates.
+
 ## ⚠️ Important limitations
 
 - The local deterministic engine does not replace the quality of a strong hosted/open LLM for every task.
@@ -394,6 +412,8 @@ ghost-web-ai/
 - [x] Expanded Android/Desktop implementation workflows
 - [x] Hardened release automation
 - [x] Verified release artifacts
+- [x] Responsive mobile + desktop UI fit
+- [ ] iOS / macOS / Linux shells (in development)
 - [ ] App-store distribution for Android APKs
 - [ ] Desktop installer packaging
 

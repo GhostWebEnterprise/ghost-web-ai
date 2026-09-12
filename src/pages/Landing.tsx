@@ -267,12 +267,12 @@ export default function Landing() {
                 <GhostMark className="size-3.5" />
                 One dev team, in your browser
               </p>
-              <h1 className="text-5xl font-black uppercase leading-[0.95] tracking-tight sm:text-6xl xl:text-7xl">
+              <h1 className="text-[2rem] font-black uppercase leading-[0.95] tracking-tight sm:text-6xl xl:text-7xl">
                 Say what to
                 <br />
                 build.
                 <br />
-                <span className="mt-2 inline-block border-4 border-foreground bg-accent px-3 shadow-[6px_6px_0_0_var(--ink)]">
+                <span className="mt-2 inline-block border-4 border-foreground bg-accent px-2 shadow-[6px_6px_0_0_var(--ink)] sm:px-3">
                   Agents build it.
                 </span>
               </h1>

@@ -60,6 +60,11 @@ async function fetchAccountForUser(
   return row ?? null;
 }
 
+/** Deployment-wide PAT fallback (Keys settings) — GITHUB_PAT, then GITHUB_TOKEN. */
+function envPat(): string | undefined {
+  return process.env.GITHUB_PAT ?? process.env.GITHUB_TOKEN ?? undefined;
+}
+
 /** Fetch the connected account's profile + repos straight from GitHub. */
 async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
   const userId = await getAuthUserId(ctx);
@@ -67,8 +72,16 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     return { connected: false, repos: [] };
   }
   const account = await fetchAccountForUser(ctx, userId);
-  if (!account) {
-    return { connected: false, repos: [] };
+  // Token priority: the user's connected OAuth account, else the deployment
+  // GITHUB_PAT / GITHUB_TOKEN (acts as the PAT's own identity).
+  const token = account?.accessToken ?? envPat();
+  if (!token) {
+    return {
+      connected: false,
+      reason:
+        "No GitHub connection — connect an account or set GITHUB_PAT in Keys.",
+      repos: [],
+    };
   }
 
   const userRes = await gh<{
@@ -76,14 +89,17 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     name?: string | null;
     avatar_url?: string;
     html_url?: string;
-  }>(`${GH_API}/user`, account.accessToken);
+  }>(`${GH_API}/user`, token);
   if (!userRes.ok) {
     return {
       connected: false,
-      reason: "Token invalid or revoked.",
+      reason: account
+        ? "Token invalid or revoked."
+        : "GITHUB_PAT is set but invalid or expired.",
       repos: [],
     };
   }
+  const username = userRes.data?.login ?? account?.username ?? "pat";
 
   const repoRes = await gh<
     {
@@ -98,7 +114,7 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     }[]
   >(
     `${GH_API}/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member`,
-    account.accessToken,
+    token,
   );
 
   const repos: SyncedRepo[] = (repoRes.data ?? [])
@@ -114,20 +130,22 @@ async function syncReposHandler(ctx: ActionCtx): Promise<SyncResult> {
     }))
     .filter((r) => r.fullName);
 
-  try {
-    await ctx.runMutation(internal.github.mutations.touchSync, {
-      accountId: account._id,
-    });
-  } catch {
-    /* non-fatal */
+  if (account) {
+    try {
+      await ctx.runMutation(internal.github.mutations.touchSync, {
+        accountId: account._id,
+      });
+    } catch {
+      /* non-fatal */
+    }
   }
 
   return {
     connected: true,
     profile: {
-      username: userRes.data?.login ?? account.username,
-      name: userRes.data?.name ?? account.name,
-      avatarUrl: userRes.data?.avatar_url ?? account.avatarUrl,
+      username,
+      name: userRes.data?.name ?? account?.name,
+      avatarUrl: userRes.data?.avatar_url ?? account?.avatarUrl,
     },
     repos,
     syncedAt: Date.now(),
@@ -173,8 +191,19 @@ async function publishRunHandler(
   if (userId === null) throw new Error("Sign in first.");
 
   const account = await fetchAccountForUser(ctx, userId);
-  if (!account) {
-    throw new Error("Connect your GitHub account first (Console → GitHub).");
+  const token = account?.accessToken ?? envPat();
+  if (!token) {
+    throw new Error(
+      "Connect your GitHub account first (Console → GitHub), or set GITHUB_PAT in Keys.",
+    );
+  }
+  // Identity used for branch head + commit author. With a connected OAuth
+  // account it comes from the stored row; with the PAT fallback we resolve
+  // the PAT's own login so `owner:branch` refs stay correct.
+  let actor = account?.username ?? null;
+  if (!actor) {
+    const me = await githubJson<{ login: string }>(`${GH_API}/user`, token);
+    actor = me.login;
   }
 
   const conversation = await ctx.runQuery(
@@ -203,10 +232,7 @@ async function publishRunHandler(
     throw new Error("This run has no generated files to push.");
   }
 
-  const owner = repoMeta.fullName.split("/")[0];
-  const repoName = repoMeta.fullName.split("/")[1];
   const baseBranch = repoMeta.defaultBranch ?? "main";
-  const token = account.accessToken;
   const full = `${GH_API}/repos/${enc(repoMeta.fullName)}`;
 
   // Branch + messages come from the run's own plan receipt when present.
@@ -267,8 +293,8 @@ async function publishRunHandler(
 
   // 4. Commit the tree.
   const author = {
-    name: account.name ?? account.username,
-    email: `${account.username}@users.noreply.github.com`,
+    name: account?.name ?? actor,
+    email: `${actor}@users.noreply.github.com`,
   };
   const commit = await githubJson<{ sha: string }>(
     `${full}/git/commits`,
@@ -310,7 +336,7 @@ async function publishRunHandler(
   const existing = await githubJson<
     { number: number; html_url: string }[]
   >(
-    `${full}/pulls?state=open&head=${enc(`${account.username}:${branch}`)}`,
+    `${full}/pulls?state=open&head=${enc(`${actor}:${branch}`)}`,
     token,
   );
   let prUrl = existing?.[0]?.html_url;

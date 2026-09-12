@@ -137,10 +137,15 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* Fixed-width UI must never force horizontal panning on phones. */
+    overflow-x: clip;
   }
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "ss01" on, "cv01" on;
+    /* Respect iOS/Android/PWA safe areas (notches, home bar). */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
   }
   button:not([disabled]),
   [role="button"]:not([disabled]) {
