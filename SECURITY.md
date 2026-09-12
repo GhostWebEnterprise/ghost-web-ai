@@ -8,7 +8,7 @@ receives security updates; older releases are documented for reference only.
 
 | Version  | Supported          | Notes                                              |
 | -------- | ------------------ | -------------------------------------------------- |
-| 0.1.x    | :white_check_mark: | Latest line — includes v0.1.1 (matrix icon release) |
+| 0.1.x    | :white_check_mark: | Latest line — includes v0.1.1 (matrix icon release, security fixes) |
 | 0.1.0    | :x: | Superseded by v0.1.1; security fixes ride forward, not supported|
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
