@@ -195,10 +195,11 @@ jobs:
         env:
           # electron-builder reads these; unsigned builds are fine for
           # distribution via GitHub Releases.
+          # NOTE: do NOT set GH_TOKEN here — with a token present,
+          # electron-builder infers a GitHub publish provider and crashes on
+          # update-metadata tasks even with --publish never when it cannot
+          # resolve the repository. Packaging must stay publish-free.
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
-          # GH_TOKEN is required by electron-builder for some publishing paths;
-          # packaging itself does not publish.
-          GH_TOKEN: ${{ github.token }}
         run: |
           # Installers carry the release version (scaffold package.json is 0.0.0).
           # Non-tag runs (workflow_dispatch) get a neutral version.
