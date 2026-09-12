@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="public/icon.svg" alt="Ghost Web AI — matrix icon" width="140" />
+
 # 👻 Ghost Web AI
 
 **Say what to build. Agents build it. Plan. Code. Test. Heal. Ship.**
@@ -257,6 +259,7 @@ Additional engineering commands:
 bun run e2e       # 18-check browser + backend smoke suite
 bun run build     # production build (typecheck + vite build)
 bun run manifest  # sha256 manifest of dist/ artifacts
+bun run icons     # regenerate the matrix icon set (web + Android launcher)
 ```
 
 ## 🧪 Verification & CI
@@ -349,7 +352,8 @@ ghost-web-ai/
 │       └── Dashboard.tsx
 ├── scripts/
 │   ├── e2e-smoke.sh             # 18-check smoke suite
-│   └── gen-manifest.sh          # release artifact manifest
+│   ├── gen-manifest.sh          # release artifact manifest
+│   └── gen-icons.sh             # matrix icon set → web PNGs + Android launcher
 ├── .github/workflows/           # ci.yml + release.yml
 ├── package.json
 └── README.md
@@ -401,7 +405,7 @@ Issues, improvements and pull requests are welcome. Keep changes focused, preser
 
 Questions, feature ideas or partnership inquiries:
 
-## **ghostweb@ghostbin.cfd**
+**ghostweb@ghostbin.cfd**
 
 ---
 

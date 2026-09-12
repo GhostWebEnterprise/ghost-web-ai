@@ -68,7 +68,7 @@ writeFileSync(`${anydpiDir}/ic_launcher_round.xml`,
 const maskable = (size) => svg
   .replace(/<rect x="8" y="8" width="496" height="496" rx="112"\/>\n    <\/clipPath>/, "<rect x=\"0\" y=\"0\" width=\"512\" height=\"512\"/>\n    </clipPath>")
   .replace(/rx="109"/g, "rx=\"0\"").replace(/rx="100"/g, "rx=\"0\"")
-  .replace(/transform="translate(112 137) scale(4.5)"/, `transform="translate(140 160) scale(3.6)"`);
+  .replace(/transform="translate\(112 137\) scale\(4\.5\)"/, `transform="translate(140 160) scale(3.6)"`);
 for (const s of [192, 512]) {
   const png = new Resvg(maskable(s), { fitTo: { mode: "width", value: s } }).render().asPng();
   writeFileSync(`public/icons/maskable-${s}.png`, png);
