@@ -129,6 +129,9 @@ jobs:
   desktop-installers:
     needs: build-and-release
     strategy:
+      # Keep every OS running to its own conclusion so one failure does not
+      # cancel the other installer builds mid-flight.
+      fail-fast: false
       matrix:
         include:
           - os: macos-latest
@@ -181,7 +184,11 @@ jobs:
         working-directory: electron
         shell: bash
         run: |
-          npx capacitor-electron vendor
+          # Invoke the CLI via node: the scaffold package.json does not depend
+          # on @capawesome/capacitor-electron, so its bin only exists in the
+          # ROOT node_modules/.bin — which npx does not resolve reliably on
+          # every runner OS. The script path is identical on all platforms.
+          node ../node_modules/@capawesome/capacitor-electron/dist/cli/index.js vendor
           test -f vendor/node_modules/@capawesome/capacitor-electron/package.json \
             || { echo "vendor runtime missing after capacitor-electron vendor"; exit 1; }
 
