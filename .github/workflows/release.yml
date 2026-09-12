@@ -239,16 +239,19 @@ jobs:
         shell: bash
         run: |
           mkdir -p desktop-out
+          # *.exe is restricted to the NSIS installer name ("*Setup*.exe") —
+          # electron-builder also drops helper exes like elevate.exe in dist/.
           find electron/dist -type f \
-            \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.exe" \) \
+            \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*Setup*.exe" \) \
             -exec cp {} desktop-out/ \;
           # Normalize names: electron-builder emits spaces and the scaffold's
           # own package name — release assets use the project slug + tag.
           for f in desktop-out/*; do
-            mv "$f" "$(echo "$f" \
+            new="$(echo "$f" \
               | sed 's/ghost-web-ai-electron/ghost-web-ai/' \
               | sed 's/Ghost Web AI/ghost-web-ai/' \
               | sed 's/ Setup /-/')"
+            if [ "$f" != "$new" ]; then mv "$f" "$new"; fi
           done
           ls -la desktop-out/
           ls desktop-out | grep -qE "\.(dmg|zip|AppImage|deb|exe)$" \
