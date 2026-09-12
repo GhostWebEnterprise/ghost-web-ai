@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="bgGrad" cx="0.5" cy="0.3" r="0.9">
+      <stop offset="0" stop-color="#0c1c10"/>
+      <stop offset="0.6" stop-color="#081509"/>
+      <stop offset="1" stop-color="#040a06"/>
+    </radialGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#00ff41" stop-opacity="0.28"/>
+      <stop offset="1" stop-color="#00ff41" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="scan" width="4" height="6" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="#00ff41" opacity="0.05"/>
+    </pattern>
+    <clipPath id="tile">
+      <rect x="8" y="8" width="496" height="496" rx="112"/>
+    </clipPath>
+    <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="20"/>
+    </filter>
+  </defs>
+
+  <g clip-path="url(#tile)">
+    <!-- tile background -->
+    <rect x="8" y="8" width="496" height="496" fill="#040a06"/>
+    <rect x="8" y="8" width="496" height="496" fill="url(#bgGrad)"/>
+
+    <!-- digital rain backdrop -->
+    <g fill="#00ff41" opacity="0.16">
+      <rect x="24"  y="40"  width="16" height="16" rx="2"/>
+      <rect x="24"  y="136" width="16" height="16" rx="2"/>
+      <rect x="24"  y="280" width="16" height="16" rx="2"/>
+      <rect x="24"  y="424" width="16" height="16" rx="2"/>
+
+      <rect x="72"  y="88"  width="16" height="16" rx="2"/>
+      <rect x="72"  y="184" width="16" height="16" rx="2"/>
+      <rect x="72"  y="328" width="16" height="16" rx="2"/>
+
+      <rect x="120" y="40"  width="16" height="16" rx="2"/>
+      <rect x="120" y="184" width="16" height="16" rx="2"/>
+      <rect x="120" y="280" width="16" height="16" rx="2"/>
+      <rect x="120" y="376" width="16" height="16" rx="2"/>
+
+      <rect x="168" y="136" width="16" height="16" rx="2"/>
+      <rect x="168" y="232" width="16" height="16" rx="2"/>
+      <rect x="168" y="424" width="16" height="16" rx="2"/>
+
+      <rect x="216" y="88"  width="16" height="16" rx="2"/>
+      <rect x="216" y="280" width="16" height="16" rx="2"/>
+      <rect x="216" y="376" width="16" height="16" rx="2"/>
+
+      <rect x="264" y="40"  width="16" height="16" rx="2"/>
+      <rect x="264" y="136" width="16" height="16" rx="2"/>
+      <rect x="264" y="328" width="16" height="16" rx="2"/>
+      <rect x="264" y="424" width="16" height="16" rx="2"/>
+
+      <rect x="312" y="184" width="16" height="16" rx="2"/>
+      <rect x="312" y="280" width="16" height="16" rx="2"/>
+      <rect x="312" y="424" width="16" height="16" rx="2"/>
+
+      <rect x="360" y="88"  width="16" height="16" rx="2"/>
+      <rect x="360" y="232" width="16" height="16" rx="2"/>
+      <rect x="360" y="328" width="16" height="16" rx="2"/>
+
+      <rect x="408" y="40"  width="16" height="16" rx="2"/>
+      <rect x="408" y="184" width="16" height="16" rx="2"/>
+      <rect x="408" y="376" width="16" height="16" rx="2"/>
+
+      <rect x="456" y="136" width="16" height="16" rx="2"/>
+      <rect x="456" y="280" width="16" height="16" rx="2"/>
+      <rect x="456" y="424" width="16" height="16" rx="2"/>
+    </g>
+
+    <!-- phosphor glow behind the mark -->
+    <ellipse cx="256" cy="260" rx="175" ry="160" fill="url(#glow)" filter="url(#soft)"/>
+
+    <!-- ghost silhouette (brand mark, scaled 4.5x, vertically centered) -->
+    <path
+      d="M14 46V25C14 15.059 22.059 7 32 7C41.941 7 50 15.059 50 25V46H43L39.5 40.5L36 46H32L28.5 40.5L25 46H21L17.5 40.5L14 46Z"
+      transform="translate(112 137) scale(4.5)"
+      fill="#00ff41"
+    />
+    <!-- terminal-bar eyes -->
+    <rect x="206.5" y="227" width="31.5" height="45" fill="#040a06"/>
+    <rect x="274"   y="227" width="31.5" height="45" fill="#040a06"/>
+
+    <!-- CRT scanlines -->
+    <rect x="8" y="8" width="496" height="496" fill="url(#scan)"/>
+
+    <!-- tile border -->
+    <rect x="11" y="11" width="490" height="490" rx="109" fill="none" stroke="#00ff41" stroke-opacity="0.55" stroke-width="6"/>
+    <rect x="22" y="22" width="468" height="468" rx="100" fill="none" stroke="#00ff41" stroke-opacity="0.15" stroke-width="2"/>
+  </g>
+</svg>

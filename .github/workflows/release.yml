@@ -92,6 +92,14 @@ jobs:
           ls -la android/ | head -15
           head -3 android/gradlew || echo "gradlew missing after scaffold"
 
+      - name: Apply themed matrix launcher icons
+        run: |
+          sh ./scripts/gen-icons.sh
+          test -f android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png \
+            || { echo "launcher icons missing after generation"; exit 1; }
+          test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
+            || { echo "adaptive icon xml missing"; exit 1; }
+
       - name: Assemble debug APK
         working-directory: android
         run: |

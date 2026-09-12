@@ -31,6 +31,14 @@ jobs:
       - name: Artifact manifest (sha256)
         run: sh ./scripts/gen-manifest.sh
 
+      - name: Icon set sanity check
+        run: |
+          test -f public/icon.svg || { echo "icon.svg missing"; exit 1; }
+          for s in 32 180 192 512; do
+            test -f "public/icons/icon-${s}.png" || { echo "icon-${s}.png missing"; exit 1; }
+          done
+          test -f public/icons/maskable-512.png || { echo "maskable-512.png missing"; exit 1; }
+
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
