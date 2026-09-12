@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { action, type ActionCtx } from "../_generated/server";
-import { internal } from "../_generated/api";
+import { api, internal } from "../_generated/api";
 import { getAuthUserId } from "@convex-dev/auth/server";
 import type { Doc, Id } from "../_generated/dataModel";
 
@@ -195,6 +195,15 @@ async function publishRunHandler(
   if (!token) {
     throw new Error(
       "Connect your GitHub account first (Console → GitHub), or set GITHUB_PAT in Keys.",
+    );
+  }
+  // Settings tab: plan-only mode blocks manual publishing too.
+  const settings = await ctx
+    .runQuery(api.settings.getInternal, { userId })
+    .catch(() => null);
+  if (settings?.prMode === "plan_only") {
+    throw new Error(
+      "Publishing is disabled — turn off plan-only mode in Settings first.",
     );
   }
   // Identity used for branch head + commit author. With a connected OAuth

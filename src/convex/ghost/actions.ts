@@ -82,6 +82,13 @@ export const runTask = action({
           conversationId: args.conversationId,
         })
         .catch(() => null);
+      // Per-user settings (Settings tab) — govern engine mode, repo context
+      // reads and live publishing for this run.
+      const userSettings = conversationRow?.ownerId
+        ? await ctx
+            .runQuery(api.settings.getInternal, { userId: conversationRow.ownerId })
+            .catch(() => null)
+        : null;
       let connectedToken: string | null = null;
       if (conversationRow?.ownerId) {
         const account = await ctx
@@ -90,12 +97,16 @@ export const runTask = action({
           })
           .catch(() => null);
         if (account?.accessToken) connectedToken = account.accessToken;
+        // Plan-only mode: never publish — resolve no live publish token.
+        if (userSettings?.prMode === "plan_only") connectedToken = null;
       }
       const githubPat =
-        process.env.GITHUB_PAT ??
-        process.env.GITHUB_TOKEN ??
-        connectedToken ??
-        undefined;
+        userSettings?.prMode === "plan_only"
+          ? undefined
+          : (process.env.GITHUB_PAT ??
+            process.env.GITHUB_TOKEN ??
+            connectedToken ??
+            undefined);
 
       // ---------- 1. Resolve repo metadata (GitHub REST, best effort) ----------
       const parsed = parseRepoUrl(args.repoUrl);
@@ -116,12 +127,18 @@ export const runTask = action({
       }
 
       // ---------- 2. Engine selection: LLM provider chain (optional keys) or local engine ----------
-      const hasLlmKey = Boolean(
-        process.env.ANTHROPIC_API_KEY ||
-          process.env.SAMBANOVA_API_KEY ||
-          process.env.SAMBA_API_KEY ||
-          process.env.OPENAI_API_KEY,
-      );
+      // Settings tab: "local" always runs the zero-key engine; "force_llm"
+      // behaves like auto (the chain is tried when a key exists) but is
+      // recorded so the UI can surface the preference.
+      const enginePref = userSettings?.engineMode ?? "auto";
+      const hasLlmKey =
+        enginePref !== "local" &&
+        Boolean(
+          process.env.ANTHROPIC_API_KEY ||
+            process.env.SAMBANOVA_API_KEY ||
+            process.env.SAMBA_API_KEY ||
+            process.env.OPENAI_API_KEY,
+        );
       let engine: string = "local";
       let llm: LlmPlan | null = null;
       let repoCtx: RepoContext | null = null;
@@ -129,7 +146,8 @@ export const runTask = action({
         try {
           // Real repo context: pull the tree + key file contents so the LLM
           // plans and drafts code against the actual repository, not a guess.
-          if (repo && repo.source === "github") {
+          // Settings tab: repo-context reads can be disabled per user.
+          if (repo && repo.source === "github" && userSettings?.allowRepoContext !== false) {
             repoCtx = await fetchRepoContext(repo, githubPat || undefined);
           }
           const result = await callLlm(args.task, repo, repoCtx);
@@ -148,7 +166,7 @@ export const runTask = action({
           ? {
               pat: githubPat,
               repo: { ...repo, defaultBranch: repo.defaultBranch ?? "main" },
-              branch: `feat/${slugify(args.task)}`,
+              branch: `${userSettings?.branchPrefix || "feat/"}${slugify(args.task)}`,
               baseSha: null,
               baseTreeSha: null,
               branchReady: false,
@@ -269,8 +287,18 @@ export const runTask = action({
       const durationSec = Math.max(1, Math.round((Date.now() - startedAt) / 1000));
       const engineNote =
         engine === "local"
-          ? "Engine: local free engine — add ANTHROPIC_API_KEY, SAMBANOVA_API_KEY or OPENAI_API_KEY in Keys to upgrade to an LLM planner. No credits are ever required."
+          ? enginePref === "local"
+            ? "Engine: local free engine (pinned in Settings) — deterministic, zero keys."
+            : "Engine: local free engine — add ANTHROPIC_API_KEY, SAMBANOVA_API_KEY or OPENAI_API_KEY in Keys to upgrade to an LLM planner. No credits are ever required."
           : `Engine: ${engine} LLM — bring-your-own-key, no credits consumed by Ghost.`;
+
+      const planOnlyNote =
+        userSettings?.prMode === "plan_only"
+          ? [
+              "",
+              "Publishing: plan-only mode is on in Settings — nothing was pushed to GitHub.",
+            ]
+          : [];
 
       const content = [
         script.summary,
@@ -290,6 +318,7 @@ export const runTask = action({
               "",
             ]
           : []),
+        ...planOnlyNote,
         ...(llmFiles.length > 0
           ? [
               `${llmFiles.length} generated file${

@@ -15,7 +15,8 @@ receives security updates; older releases are documented for reference only.
 The current release train is **v0.1.2**: typecheck, tests and build verified,
 APK assembled on GitHub runners and attached alongside its checksum manifest.
 This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
-live publishing and a fully responsive mobile/desktop UI.
+live publishing, a fully responsive mobile/desktop UI, and a per-user Settings
+tab (engine mode, plan-only publishing, repo defaults).
 
 ## Reporting a Vulnerability
 

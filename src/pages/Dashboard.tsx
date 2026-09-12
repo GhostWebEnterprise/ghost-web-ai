@@ -359,13 +359,12 @@ export default function Dashboard() {
             The free engine runs every run. Add a SAMBANOVA key anytime for an
             open-LLM planner.
           </p>
-          <a
+          <Link
             className="border-2 border-foreground bg-card px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider hover:bg-accent"
-            href="#"
-            onClick={(e) => e.preventDefault()}
+            to="/settings"
           >
             Keys live in project settings
-          </a>
+          </Link>
         </div>
       </main>
     </div>

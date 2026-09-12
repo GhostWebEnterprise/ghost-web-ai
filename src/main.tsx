@@ -21,6 +21,7 @@ import Chat from "./pages/Chat.tsx";
 import Dashboard from "./pages/Dashboard.tsx";
 import BuildWizard from "./pages/BuildWizard.tsx";
 import TeamBoard from "./pages/TeamBoard.tsx";
+import Settings from "./pages/Settings.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 // The managed workspace can recycle without re-linking the Convex deployment,
@@ -97,6 +98,14 @@ const app = (
         element={
           <RequireAuth>
             <TeamBoard />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/settings"
+        element={
+          <RequireAuth>
+            <Settings />
           </RequireAuth>
         }
       />

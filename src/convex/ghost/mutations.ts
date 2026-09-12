@@ -109,8 +109,18 @@ export const startTask = mutation({
     const seq = (last?.seq ?? 0) + 1;
     const now = NOW();
 
+    // Settings tab: users who disabled custom pipelines always get the
+    // canonical chain, ignoring wizard toggles sent by the client.
+    const settingsRow = user
+      ? await ctx.db
+          .query("userSettings")
+          .withIndex("by_user", (q) => q.eq("userId", user._id))
+          .unique()
+      : null;
+    const allowCustom = settingsRow?.allowCustomPipeline ?? true;
+
     const pipeline: PlanStage[] =
-      args.pipeline && args.pipeline.length > 0
+      allowCustom && args.pipeline && args.pipeline.length > 0
         ? args.pipeline
         : buildPipeline(task);
 

@@ -134,6 +134,29 @@ const schema = defineSchema(
       .index("by_owner", ["ownerId"])
       .index("by_owner_updated", ["ownerId", "updatedAt"]),
 
+    // Per-user application settings (the Settings tab). All fields fall back
+    // to built-in defaults when no row exists for the user.
+    userSettings: defineTable({
+      userId: v.id("users"),
+      // "auto" — LLM chain when a key is set, else local engine.
+      // "local" — always the deterministic zero-key engine.
+      // "force_llm" — prefer the LLM chain (informational when no key is set).
+      engineMode: v.union(
+        v.literal("auto"),
+        v.literal("local"),
+        v.literal("force_llm"),
+      ),
+      allowCustomPipeline: v.boolean(), // /build wizard pipeline toggles are honored
+      allowRepoContext: v.boolean(), // engine may read the target repo's files
+      // "auto_pr" — live runs push a real branch + PR when possible.
+      // "plan_only" — never publish; runs stay workspace-local plans.
+      prMode: v.union(v.literal("auto_pr"), v.literal("plan_only")),
+      defaultRepoUrl: v.optional(v.string()), // prefilled repo target in the console
+      branchPrefix: v.string(), // e.g. "feat/" or "ghost/"
+      reduceMotion: v.boolean(), // appearance: tone down animations app-wide
+      updatedAt: v.number(),
+    }).index("by_user", ["userId"]),
+
     // GitHub OAuth — user-connected GitHub account (token used by the engine
     // to push branches + open PRs for real).
     githubAccounts: defineTable({

@@ -43,6 +43,7 @@ The system coordinates specialized stages for planning, source/licence checks, r
 | 🔑 Providers | Anthropic → SambaNova → OpenAI-compatible fallback chain, with a local deterministic engine |
 | 🔌 MCP / A2A | Agent-addressable: tool manifest, A2A card, tool execution |
 | 💳 Pricing model | Zero credit meter / no built-in token paywall |
+| ⚙️ Settings | Per-user engine, publishing, repo-default and appearance controls |
 | 🌐 Client | React + TypeScript + Vite web application |
 | 📱 Responsive | Auto-fits phones, tablets and desktops — safe-area aware, fluid type |
 
@@ -350,6 +351,7 @@ ghost-web-ai/
 │       ├── Chat.tsx             # agent console
 │       ├── BuildWizard.tsx      # guided build wizard
 │       ├── TeamBoard.tsx        # task-force board
+│       ├── Settings.tsx         # per-user settings tab
 │       └── Dashboard.tsx
 ├── scripts/
 │   ├── e2e-smoke.sh             # 18-check smoke suite
@@ -370,6 +372,7 @@ ghost-web-ai/
 | `/build` | Guided build wizard — presets, pipeline toggles, launch |
 | `/team` | Task-force board — 15 agents, waves, approval gates, event log |
 | `/dashboard` | Build HQ, run statistics and GitHub connection |
+| `/settings` | Per-user settings — engine mode, publishing, repo defaults, appearance |
 
 ## 💻 Supported Operating Systems
 
@@ -413,6 +416,7 @@ Agent (desktop + web environment validation) owns their environment gates.
 - [x] Hardened release automation
 - [x] Verified release artifacts
 - [x] Responsive mobile + desktop UI fit
+- [x] Per-user settings tab (engine mode, plan-only publishing, defaults)
 - [ ] iOS / macOS / Linux shells (in development)
 - [ ] App-store distribution for Android APKs
 - [ ] Desktop installer packaging

@@ -407,3 +407,14 @@
     display: none;
   }
 }
+
+/* Settings → Appearance: app-wide animation kill switch. Applied as a class
+   on a route's root container; complements the OS-level media query above. */
+.nb-reduce-motion *,
+.nb-reduce-motion *::before,
+.nb-reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}

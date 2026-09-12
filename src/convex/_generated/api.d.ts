@@ -26,6 +26,7 @@ import type * as github_queries from "../github/queries.js";
 import type * as http from "../http.js";
 import type * as mcp from "../mcp.js";
 import type * as mcpTools from "../mcpTools.js";
+import type * as settings from "../settings.js";
 import type * as users from "../users.js";
 
 import type {
@@ -53,6 +54,7 @@ declare const fullApi: ApiFromModules<{
   http: typeof http;
   mcp: typeof mcp;
   mcpTools: typeof mcpTools;
+  settings: typeof settings;
   users: typeof users;
 }>;
 

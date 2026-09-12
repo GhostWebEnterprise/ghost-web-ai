@@ -16,13 +16,16 @@ import { GhostMark } from "@/components/ghost/GhostMark";
 import { engineLabel, repoShort } from "@/lib/ghost-agents";
 import { Github, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useAppSettings } from "@/hooks/use-app-settings";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export default function Chat() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const paramId = searchParams.get("c");
+  const { settings } = useAppSettings();
 
   const conversationsQuery = useQuery(api.ghost.queries.listConversations);
   const conversations = conversationsQuery ?? [];
@@ -175,7 +178,12 @@ export default function Chat() {
   };
 
   return (
-    <div className="nb-grid-paper flex min-h-screen flex-col bg-background text-foreground">
+    <div
+      className={cn(
+        "nb-grid-paper flex min-h-screen flex-col bg-background text-foreground",
+        settings.reduceMotion && "nb-reduce-motion",
+      )}
+    >
       <AppNav active="chat" />
       <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 px-3 py-3 lg:flex-row lg:gap-4 lg:p-4">
         {/* sessions */}
@@ -321,7 +329,11 @@ export default function Chat() {
             }`}
             onSubmit={startRun}
             busy={chainRunning}
-            defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url}
+            defaultRepoUrl={
+              conversation?.repoUrl ??
+              pickedRepo?.url ??
+              settings.defaultRepoUrl
+            }
           />
         </div>
       </div>
