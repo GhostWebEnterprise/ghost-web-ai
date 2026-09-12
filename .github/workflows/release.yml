@@ -93,10 +93,11 @@ jobs:
           head -3 android/gradlew || echo "gradlew missing after scaffold"
 
       - name: Assemble debug APK
+        working-directory: android
         run: |
-          test -f android/gradlew || { echo "android/gradlew not scaffolded"; exit 1; }
-          chmod +x android/gradlew
-          sh ./gradlew assembleDebug --no-daemon
+          test -f gradlew || { echo "gradlew not scaffolded"; exit 1; }
+          chmod +x gradlew
+          sh gradlew assembleDebug --no-daemon
 
       - name: Stage APK with release name
         run: |
