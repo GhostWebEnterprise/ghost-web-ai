@@ -1,10 +1,12 @@
 #!/bin/sh
 # Ghost Web AI — desktop icon generation for the Electron shell.
-# Renders the matrix icon SVG into the PNG sizes electron-builder expects
-# under electron/build/ (macOS icon + Windows icon + Linux icons).
+# Renders the matrix icon SVG into electron/assets/icon.png (1024x1024).
+# electron-builder picks this up from its buildResources directory and
+# converts it automatically into the macOS .icns, Windows .ico and Linux
+# PNG sizes it needs at package time.
 #
-# Prereqs (CI): node + @resvg/resvg-js is available in the root project's
-# devDependencies, so this runs through a tiny node script.
+# Prereqs (CI): node + @resvg/resvg-js from the root project's
+# devDependencies (installed by `bun install` before this runs).
 
 set -eu
 cd "$(dirname "$0")/.."
@@ -14,21 +16,19 @@ if [ ! -f public/icon.svg ]; then
   exit 1
 fi
 
-mkdir -p electron/build
+mkdir -p electron/assets
 
 node -e '
 const { Resvg } = require("@resvg/resvg-js");
 const fs = require("fs");
 const svg = fs.readFileSync("public/icon.svg", "utf8");
-for (const size of [512, 256, 128]) {
-  const resvg = new Resvg(svg, {
-    fitTo: { mode: "width", value: size },
-    background: "rgba(0,0,0,0)",
-  });
-  const png = resvg.render().asPng();
-  fs.writeFileSync(`electron/build/icon-${size}.png`, png);
-  console.log(`icon-${size}.png written`);
-}
+const resvg = new Resvg(svg, {
+  fitTo: { mode: "width", value: 1024 },
+  background: "rgba(0,0,0,0)",
+});
+fs.writeFileSync("electron/assets/icon.png", resvg.render().asPng());
+console.log("electron/assets/icon.png written (1024x1024)");
 '
 
-echo "desktop icons written: electron/build/"
+test -s electron/assets/icon.png || { echo "icon.png was not written" >&2; exit 1; }
+echo "desktop icon written: electron/assets/icon.png"

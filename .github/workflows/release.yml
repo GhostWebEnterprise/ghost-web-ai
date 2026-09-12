@@ -162,6 +162,7 @@ jobs:
         run: |
           bunx cap add @capawesome/capacitor-electron
           bunx cap sync @capawesome/capacitor-electron
+          test -f electron/main.ts || { echo "electron scaffold missing after cap add"; exit 1; }
 
       - name: Install Electron toolchain
         working-directory: electron
@@ -169,16 +170,24 @@ jobs:
         run: |
           if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
-      - name: Apply themed matrix app icons
-        if: runner.os != 'Windows'
-        shell: bash
-        run: sh ./scripts/gen-desktop-icons.sh
-
-      - name: Verify electron scaffold exists
+      - name: Compile the Electron main process
+        working-directory: electron
         shell: bash
         run: |
-          test -f electron/package.json || { echo "electron/package.json missing after cap add"; exit 1; }
-          test -f electron/electron-builder.config.js || { echo "electron-builder config missing after cap add"; exit 1; }
+          npx tsc
+          test -f build/main.js || { echo "build/main.js missing after tsc — packager entry point would fail"; exit 1; }
+
+      - name: Vendor the Electron platform runtime
+        working-directory: electron
+        shell: bash
+        run: |
+          npx capacitor-electron vendor
+          test -f vendor/node_modules/@capawesome/capacitor-electron/package.json \
+            || { echo "vendor runtime missing after capacitor-electron vendor"; exit 1; }
+
+      - name: Apply themed matrix app icons
+        shell: bash
+        run: sh ./scripts/gen-desktop-icons.sh
 
       - name: Build the platform installers
         working-directory: electron
@@ -190,7 +199,33 @@ jobs:
           # GH_TOKEN is required by electron-builder for some publishing paths;
           # packaging itself does not publish.
           GH_TOKEN: ${{ github.token }}
-        run: npx electron-builder --publish never
+        run: |
+          # Installers carry the release version (scaffold package.json is 0.0.0).
+          # Non-tag runs (workflow_dispatch) get a neutral version.
+          VER="${GITHUB_REF_NAME#v}"
+          case "$VER" in
+            [0-9]*) ;;
+            *) VER="0.0.0" ;;
+          esac
+          case "${{ runner.os }}" in
+            macOS)
+              npx electron-builder --config electron-builder.config.js --mac dmg --mac zip \
+                -c.extraMetadata.version="$VER" --publish never
+              ;;
+            Linux)
+              # deb requires a maintainer and homepage; the scaffold metadata
+              # does not carry them, so supply via -c overrides.
+              npx electron-builder --config electron-builder.config.js --linux AppImage --linux deb \
+                -c.extraMetadata.version="$VER" \
+                -c.linux.maintainer="Ghost Web AI <ghostweb@ghostbin.cfd>" \
+                -c.extraMetadata.homepage="https://github.com/${GITHUB_REPOSITORY}" \
+                --publish never
+              ;;
+            Windows)
+              npx electron-builder --config electron-builder.config.js --win nsis \
+                -c.extraMetadata.version="$VER" --publish never
+              ;;
+          esac
 
       - name: Stage installers with release names
         shell: bash
@@ -199,7 +234,17 @@ jobs:
           find electron/dist -type f \
             \( -name "*.dmg" -o -name "*.zip" -o -name "*.AppImage" -o -name "*.deb" -o -name "*.exe" \) \
             -exec cp {} desktop-out/ \;
+          # Normalize names: electron-builder emits spaces and the scaffold's
+          # own package name — release assets use the project slug + tag.
+          for f in desktop-out/*; do
+            mv "$f" "$(echo "$f" \
+              | sed 's/ghost-web-ai-electron/ghost-web-ai/' \
+              | sed 's/Ghost Web AI/ghost-web-ai/' \
+              | sed 's/ Setup /-/')"
+          done
           ls -la desktop-out/
+          ls desktop-out | grep -qE "\.(dmg|zip|AppImage|deb|exe)$" \
+            || { echo "no installers staged"; exit 1; }
 
       - name: Attach desktop installers to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
@@ -235,8 +280,8 @@ jobs:
 
       - name: Scaffold the iOS shell (Capacitor)
         run: |
-          bunx cap add @capacitor/ios
-          bunx cap sync @capacitor/ios
+          bunx cap add ios
+          bunx cap sync ios
           test -d ios/App || { echo "iOS shell not scaffolded"; exit 1; }
 
       - name: Verify the Xcode workspace resolves

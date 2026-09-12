@@ -12,9 +12,9 @@ receives security updates; older releases are documented for reference only.
 | 0.1.0    | :white_check_mark: | Superseded; security fixes ride forward            |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
-The current release train is **v0.1.2**: typecheck, tests and build verified,
-APK assembled on GitHub runners and attached alongside its checksum manifest.
-This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
+The current release train is **v0.1.3**: typecheck, tests and build verified,
+checksummed web release, APK assembled on GitHub runners and attached alongside
+its checksum manifest. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
 live publishing (with truthful sync status and actionable 401/403/404 error
 hints in the UI), a fully responsive mobile/desktop UI, a per-user Settings
 tab (engine mode, plan-only publishing, repo defaults), **iOS/macOS/Linux
