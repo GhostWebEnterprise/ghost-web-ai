@@ -79,7 +79,7 @@ export function parseRepoUrl(raw: string | undefined | null): RepoInfo | null {
   }
   if (!match) return null;
   const owner = match[1];
-  let name = match[2].replace(/\.git$/i, "");
+  const name = match[2].replace(/\.git$/i, "");
   if (!name) return null;
   const fullName = `${owner}/${name}`;
   return {
@@ -285,7 +285,7 @@ export function buildLocalRunScript(
     `Result is on branch \`${branch}\` and pushed as a PR, ready for CI to verify.`,
   ].join(" ");
 
-  const files = buildFileList(profile, repo, branch);
+  const files = buildFileList(profile, repo);
   const perStage: Record<string, StageScript> = {
     scan: {
       detail: `Licence gate cleared. ${repo?.license ?? "MIT/Apache/MIT-style source"} is compatible with this workspace — nothing is copied in without a passing legal check.`,
@@ -439,7 +439,6 @@ function primaryAgent(profile: TaskProfile): string {
 function buildFileList(
   profile: TaskProfile,
   repo: RepoInfo | null,
-  branch: string,
 ): string[] {
   const lang = (repo?.language ?? "").toLowerCase();
   const tsLike = /typescript|javascript|tsx|jsx|react/.test(lang) || profile.wantsWeb;

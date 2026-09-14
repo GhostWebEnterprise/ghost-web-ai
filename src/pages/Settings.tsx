@@ -1,7 +1,6 @@
 import { AppNav } from "@/components/ghost/AppNav";
 import { Button } from "@/components/ui/button";
 import { useAppSettings } from "@/hooks/use-app-settings";
-import type { SyncedRepoPick } from "@/components/ghost/GitHubSync";
 import {
   GitBranch,
   Github,

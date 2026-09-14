@@ -11,7 +11,6 @@ import {
   Github,
   Scale,
   ShieldCheck,
-  Sparkles,
   Wand2,
   Zap,
 } from "lucide-react";

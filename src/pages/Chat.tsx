@@ -17,12 +17,11 @@ import { engineLabel, repoShort } from "@/lib/ghost-agents";
 import { Github, Loader2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useAppSettings } from "@/hooks/use-app-settings";
-import { useNavigate, useSearchParams } from "react-router";
+import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function Chat() {
-  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const paramId = searchParams.get("c");
   const { settings } = useAppSettings();

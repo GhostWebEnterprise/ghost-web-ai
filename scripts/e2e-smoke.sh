@@ -55,7 +55,7 @@ curl -s --max-time 10 "$BASE/src/pages/BuildWizard.tsx" -o /tmp/e2e_wizard
 contains "wizard compiles (matrix theme)" "mx-page" /tmp/e2e_wizard
 
 curl -s --max-time 10 "$BASE/src/main.tsx" -o /tmp/e2e_main
-contains "router registers /build" 'path: "/build"' /tmp/e2e_main
+contains "router registers /build" 'path="/build"' /tmp/e2e_main
 
 # ---------- global CSS serves both token systems ----------
 curl -s --max-time 10 "$BASE/src/index.css" -o /tmp/e2e_css

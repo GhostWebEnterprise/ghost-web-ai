@@ -6,7 +6,6 @@ import { AppNav } from "@/components/ghost/AppNav";
 import { runStatusCopy, timeAgo } from "@/lib/ghost-agents";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { teamAgent, TEAM_AGENTS } from "../convex/ghost/team";
 import type { TeamNodeRow, TeamSharedRow } from "../convex/schema";

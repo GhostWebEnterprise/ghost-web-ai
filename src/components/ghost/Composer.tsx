@@ -14,7 +14,7 @@ export const EXAMPLE_TASKS = [
 export function Composer({
   onSubmit,
   busy,
-  repoUrlPlaceholder,
+  repoUrlPlaceholder: _repoUrlPlaceholder,
   defaultRepoUrl,
 }: {
   onSubmit: (task: string, repoUrl?: string) => void;
