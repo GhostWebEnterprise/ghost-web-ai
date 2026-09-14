@@ -390,7 +390,7 @@ ghost-web-ai/
 | Platform | Status |
 | --- | --- |
 | 🌐 **Web (PWA)** — any modern browser on desktop & mobile | ✅ Supported |
-| 🤖 **Android** — Capacitor shell, APK built by the release pipeline | ✅ Supported |
+| 🤖 **Android** — Capacitor shell, **signed release APK** (versionCode/versionName stamped from the tag) built by the release pipeline | ✅ Supported |
 | 🍎 **iOS** — Capacitor iOS shell, Xcode workspace verified in the release pipeline | 🚧 In development |
 | 💻 **macOS** — desktop installer (.dmg/.zip) via Capacitor Electron + electron-builder | 🚧 In development |
 | 🐧 **Linux** — desktop installer (.AppImage/.deb) via Capacitor Electron + electron-builder | 🚧 In development |

@@ -100,18 +100,32 @@ jobs:
           test -f android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml \
             || { echo "adaptive icon xml missing"; exit 1; }
 
-      - name: Assemble debug APK
+      - name: Configure signed release build (version stamp + keystore)
+        run: |
+          node scripts/android-release-config.cjs "${GITHUB_REF_NAME}"
+          test -f android/release-env.txt || { echo "release env file missing"; exit 1; }
+          cat android/release-env.txt
+
+      - name: Assemble signed release APK
         working-directory: android
         run: |
           test -f gradlew || { echo "gradlew not scaffolded"; exit 1; }
           chmod +x gradlew
-          sh gradlew assembleDebug --no-daemon
+          set -a
+          . ./release-env.txt
+          set +a
+          sh gradlew assembleRelease --no-daemon
 
-      - name: Stage APK with release name
+      - name: Verify signature and stage APK with release name
         run: |
+          APK=$(ls android/app/build/outputs/apk/release/app-release*.apk 2>/dev/null | head -1)
+          test -n "$APK" || { echo "release APK missing"; ls android/app/build/outputs/apk/ 2>/dev/null; exit 1; }
+          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
+          if [ -n "$APKSIGNER" ]; then
+            "$APKSIGNER" verify --print-certs "$APK" | head -5
+          fi
           mkdir -p apk-out
-          cp android/app/build/outputs/apk/debug/app-debug.apk \
-             "apk-out/ghost-web-ai-${{ github.ref_name }}.apk"
+          cp "$APK" "apk-out/ghost-web-ai-${{ github.ref_name }}.apk"
 
       - name: Attach APK to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v')

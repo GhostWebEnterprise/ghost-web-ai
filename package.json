@@ -16,6 +16,7 @@
     "cap:sync:android": "cap sync android",
     "cap:sync:ios": "cap sync ios",
     "cap:sync:electron": "cap sync @capawesome/capacitor-electron",
+    "android:release": "vite build && cap sync android && node scripts/android-release-config.cjs && cd android && sh gradlew assembleRelease --no-daemon",
     "desktop:dev": "cd electron && npm run electron:start",
     "desktop:pack": "cd electron && npm run electron:pack",
     "desktop:make": "cd electron && npm run electron:make",
