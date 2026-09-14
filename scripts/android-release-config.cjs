@@ -100,7 +100,7 @@ const ENV_BLOCK =
   "def envVal = { String key -> System.getenv(key) ?: \"\" }\n" +
   "def keystoreFile = rootProject.file('release.keystore')\n" +
   "def keystorePass = envVal('ANDROID_KEYSTORE_PASSWORD')\n" +
-  "def keyAlias = envVal('ANDROID_KEY_ALIAS')\n" +
+  "def aliasVal = envVal('ANDROID_KEY_ALIAS')\n" +
   "def keyPass = envVal('ANDROID_KEY_PASSWORD')\n";
 
 const SIGNING_BLOCK =
@@ -109,7 +109,7 @@ const SIGNING_BLOCK =
   "            if (keystoreFile.exists()) {\n" +
   "                storeFile keystoreFile\n" +
   "                storePassword keystorePass\n" +
-  "                keyAlias keyAlias\n" +
+  "                keyAlias aliasVal\n" +
   "                keyPassword keyPass\n" +
   "            }\n" +
   "        }\n" +
