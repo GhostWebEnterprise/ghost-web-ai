@@ -47,7 +47,7 @@ jobs:
 
       - name: Create GitHub release with artifacts
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: RELEASE_NOTES.md
           files: |
@@ -129,7 +129,7 @@ jobs:
 
       - name: Attach APK to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: apk-out/ghost-web-ai-*.apk
 
@@ -273,7 +273,7 @@ jobs:
 
       - name: Attach desktop installers to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: desktop-out/*
 
