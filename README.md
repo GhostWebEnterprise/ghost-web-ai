@@ -1,58 +1,68 @@
 <div align="center">
 
-<img src="public/icon.svg" alt="Ghost Web AI — matrix icon" width="140" />
+<img src="public/icon.svg" width="128" alt="GhostWeb AI icon" />
 
-# 👻 Ghost Web AI
+# GhostWeb AI
 
-**Say what to build. Agents build it. Plan. Code. Test. Heal. Ship.**
+**Private by design. Secure by default. Open source.**
 
-A privacy-focused, zero-credit AI software delivery client that turns a plain-language request into real repository changes, automated verification, and a GitHub pull request.
+AI-assisted software delivery: plan, code, test, heal, verify, and ship through a coordinated agent workflow.
 
-[![Ghost Web AI](https://img.shields.io/badge/Ghost%20Web%20AI-Agent%20Delivery-39d353?logo=github&logoColor=white)](https://github.com/TempleEU/ghost-web-ai)
-[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Vite](https://img.shields.io/badge/Vite-7-646cff?logo=vite&logoColor=white)](https://vite.dev/)
-[![Backend](https://img.shields.io/badge/Backend-Convex-ff6b6b)](https://www.convex.dev/)
+[![GitHub](https://img.shields.io/badge/GitHub-GhostWebEnterprise-181717?style=plastic&logo=github&logoColor=white)](https://github.com/GhostWebEnterprise)
+[![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android%20%7C%20Desktop-3DDC84?style=plastic&logo=android&logoColor=white)](https://github.com/GhostWebEnterprise/ghost-web-ai)
+[![Release](https://img.shields.io/github/v/release/GhostWebEnterprise/ghost-web-ai?style=plastic&label=GhostWeb%20AI)](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
+[![License](https://img.shields.io/badge/License-Open%20Source-blue?style=plastic)](https://github.com/GhostWebEnterprise/ghost-web-ai)
+
+[![Test](https://img.shields.io/github/actions/workflow/status/GhostWebEnterprise/ghost-web-ai/ci.yml?branch=main&style=plastic&label=Test)](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/workflows/ci.yml)
+[![Dependabot](https://img.shields.io/github/issues/GhostWebEnterprise/ghost-web-ai/dependabot?style=plastic&label=Dependabot)](https://github.com/GhostWebEnterprise/ghost-web-ai/network/updates)
+[![Website](https://img.shields.io/badge/Website-GhostWeb-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostwebenterprise.github.io/ghostweb.signal/)
 
 </div>
 
 ---
 
-## 👻 Ghost Web AI
+## 👻 GhostWeb ecosystem
 
-Ghost Web AI follows one principle: **one request should be able to travel through the complete software-delivery path without forcing the user to jump between a chatbot, terminal, editor and GitHub.**
+**GhostWeb AI** is the AI and software-delivery project in the GhostWeb open-source ecosystem.
 
-The system coordinates specialized stages for planning, source/licence checks, repository-aware implementation, self-healing, CI verification, Git operations and pull-request delivery — wrapped in a phosphor-green **matrix terminal** interface, end to end.
+| Project | Purpose | Status |
+|---|---|---|
+| **GhostWeb Signal** | Privacy-focused Android messaging and calling | **Available** |
+| **GhostWeb VPN** | Browser and network protection | **Available** |
+| **GhostWeb AI** | AI client, agents, and software delivery | **Available** |
+
+**Project hub:** https://ghostwebenterprise.github.io/ghostweb.signal/
+
+---
+
+## 🧠 What GhostWeb AI does
+
+GhostWeb AI turns a plain-language request into a structured software-delivery workflow that can work against a real repository.
 
 > **Plan → branch → implement → inspect → build → first real error → fix → verify → commit → PR.**
 
-## ✨ What it does
+### Highlights
 
-| Area | Ghost Web AI |
-| --- | --- |
-| 🧠 Planning | Classifies the task and locks an execution plan |
-| 👥 Agent chain | Coordinated 10-stage delivery pipeline |
-| 🤖 Task force | 15-agent `/team` graph with approval gates and serialized writes |
-| 🔐 Source gate | Security and open-source licence checks before integration |
-| 📂 Repository context | Plans against the repository's real files and structure |
-| 🛠️ Implementation | Generates complete files rather than placeholder plans |
+| Area | GhostWeb AI |
+|---|---|
+| 🧠 Planning | Classifies the request and creates an implementation plan |
+| 👥 Agent chain | 10-stage delivery pipeline |
+| 🤖 Task force | 15-agent `/team` graph with approval gates |
+| 🔐 Source gate | Security and open-source licence checks |
+| 📂 Repository context | Plans against real repository files and structure |
+| 🛠️ Implementation | Generates complete reviewable file changes |
 | 🛡️ Guardian | Reviews generated changes before CI |
-| 🔄 Self-healing | Detect → diagnose → fix → re-run until gates pass |
-| 🧪 CI | Install → build → typecheck and first-error capture |
-| 🐙 GitHub | Branches, commits, repository sync and pull requests |
-| 🔑 Providers | Anthropic → SambaNova → OpenAI-compatible fallback chain, with a local deterministic engine |
-| 🔌 MCP / A2A | Agent-addressable: tool manifest, A2A card, tool execution |
-| 💳 Pricing model | Zero credit meter / no built-in token paywall |
-| ⚙️ Settings | Per-user engine, publishing, repo-default and appearance controls |
-| 🛡️ Ghost Securities © | Background protection engine: secrets, supply-chain, integrity, injection and release-hygiene scans with a 14-day automatic update cadence |
-| 🌐 Client | React + TypeScript + Vite web application |
-| 📱 Responsive | Auto-fits phones, tablets and desktops — safe-area aware, fluid type |
-| 🐙 GitHub sync | OAuth account **or** deployment PAT — sync repos and open real PRs either way |
-| 💻 Desktop installers | macOS (.dmg/.zip), Windows (.exe) and Linux (.AppImage/.deb) built by the release pipeline |
+| 🔄 Self-healing | Detect → diagnose → fix → re-run |
+| 🧪 CI | Install → build → typecheck → first-error capture |
+| 🐙 GitHub | Branches, commits, sync, releases, and pull requests |
+| 🔌 MCP / A2A | Agent-addressable tooling and execution |
+| 🔑 Providers | Multi-provider fallback plus local deterministic engine |
+| 💳 Pricing model | Zero built-in credit meter |
+| 🌐 Client | React + TypeScript + Vite |
+| 📱 Responsive | Phone, tablet, and desktop layouts |
+| 💻 Releases | Web, Android, and desktop release automation |
 
-## 🤖 The AI chain
-
-Every task moves through explicit delivery gates:
+## 🤖 Delivery chain
 
 ```text
 Request
@@ -80,69 +90,59 @@ Request
 Ready to merge
 ```
 
-### Agent responsibilities
+## 👥 15-agent task force
 
-1. **Security/Licence** — checks source, licence and integration risks.
-2. **AI Core** — classifies the request and produces the implementation plan.
-3. **Git** — creates an isolated feature branch from the repository default branch.
-4. **Web/Android/Desktop** — implements against the actual repository tree.
-5. **Guardian** — reviews the generated surface and patches obvious issues before CI.
-6. **CI** — installs, builds, typechecks and captures the first actionable failure.
-7. **AI Core** — runs the targeted repair loop until required gates pass.
-8. **Git** — commits and pushes the verified implementation.
-9. **GitHub** — opens a real pull request for review.
-10. **CI/GitHub** — confirms checks, preview and merge readiness.
+The `/team` board coordinates 15 specialized agents with shared state, approval gates, parallel execution waves, and serialized final writes.
 
-## 👥 The 15-agent task force
+| # | Agent | Role |
+|---|---|---|
+| 1 | **Orchestrator** | Task graph, shared state, assignments, approval gates |
+| 2 | **Architect** | Plan and acceptance criteria |
+| 3 | **Web Agent** | React/TypeScript UI and browser compatibility |
+| 4 | **App Agent** | Android-first implementation |
+| 5 | **Git Agent** | Branches and commits |
+| 6 | **GitHub Agent** | PRs, Actions, releases, artifacts |
+| 7 | **Build Agent** | Reproducible builds and checksums |
+| 8 | **Test/E2E Agent** | Unit, integration, browser regression |
+| 9 | **Repair Agent** | First-error diagnosis and targeted fixes |
+| 10 | **API/Provider Agent** | Providers, BYOK, routing and fallbacks |
+| 11 | **Security Agent** | Blocking security gate |
+| 12 | **License Agent** | Blocking licence gate |
+| 13 | **Release Agent** | CI, artifacts and release readiness |
+| 14 | **Documentation Agent** | README and operational documentation |
+| 15 | **Compatibility Agent** | Web, Android and desktop validation |
 
-Dispatch from the **`/team`** board and the orchestrator runs a real task graph:
-15 specialized agents, shared task state, approval gates, and serialized final
-writes. Independent nodes run in parallel waves; nothing downstream executes
-until its dependencies settle.
+## 🔐 Security & privacy
 
-| # | Agent | Role in the graph |
-| --- | --- | --- |
-| 1 | **Orchestrator** | Owns the task graph, shared state, assignments, and the two approval gates |
-| 2 | **Architect** | Implementation plan + pinned acceptance criteria |
-| 3 | **Web Agent** | React/TypeScript UI, routes, UX, browser compatibility |
-| 4 | **App Agent** | Android-first implementation (Kotlin/Compose) |
-| 5 | **Git Agent** | Branch + restore point, commits |
-| 6 | **GitHub Agent** | PR, Actions, releases, artifacts — and APK builds |
-| 7 | **Build Agent** | Reproducible isolated build (checksummed) |
-| 8 | **Test/E2E Agent** | Unit + integration + browser regression |
-| 9 | **Repair Agent** | Diagnoses the first actionable failure, applies a targeted fix |
-| 10 | **API/Provider Agent** | Provider registry, BYOK, routing, rate limits, fallbacks |
-| 11 | **Security Agent** | **Blocking gate** — secrets, dependency risks, permissions |
-| 12 | **License Agent** | **Blocking gate** — licenses, notices, attribution |
-| 13 | **Release Agent** | CI status, approval gates, artifacts, deploy readiness |
-| 14 | **Documentation Agent** | README, architecture, operational docs |
-| 15 | **Compatibility Agent** | Desktop + web environment validation |
+Security and licence verification are delivery gates rather than optional documentation.
 
-**Structural guarantees** (enforced by the engine, verified by tests):
+- GitHub credentials remain server-side during OAuth flows.
+- Repository content is treated as untrusted data.
+- Open-source sources are checked before integration.
+- Generated changes receive Guardian review.
+- Diffs and pipeline stages remain reviewable.
+- Required CI gates must pass before release/merge readiness.
+- Secrets must never be committed to source control.
 
-- **One shared task state** — a single `shared` object (branch, plan, files, commit, PR, APK) every agent reads and writes, live on the board
-- **Material changes stay reviewable** — the orchestrator's approval gate parks the run until you Approve/Reject; rejecting skips all transitive dependents
-- **Security & license checks are blocking gates** — nothing ships past them without explicit approval
-- **Final writes are serialized** — no two concurrent nodes ever write the same target
-- **Android tasks build real APK artifacts** through a dedicated release node
+## 🔑 Providers & zero-credit operation
 
-## 🔥 Real repository context
+Provider keys are optional. The engine can use a multi-provider fallback chain and a deterministic local engine.
 
-Ghost Web AI does not plan against an imaginary project. The planner reads the repository's actual tree and relevant configuration, entry points and source files before implementation.
+| Variable | Purpose | Required? |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | Primary LLM provider | No |
+| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Fallback provider | No |
+| `OPENAI_API_KEY` + `OPENAI_BASE_URL` | OpenAI-compatible endpoint | No |
+| `GITHUB_CLIENT_ID` | GitHub OAuth application ID | OAuth only |
+| `GITHUB_CLIENT_SECRET` | GitHub OAuth secret | OAuth only |
+| `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative GitHub access | Optional |
+| `SITE_URL` | Convex OAuth callback configuration | Managed |
 
-Repository content is treated as **data, not instructions**, with prompt-injection markers used to prevent repository text from silently becoming agent instructions.
-
-With GitHub connected, the same workflow can target repositories available to the authenticated account, including private repositories where the connection has access.
-
-## 🛠️ Real generated files
-
-When an LLM provider is configured, Ghost Web AI can generate complete file contents rather than returning a plan or stub. Generated changes are stored with the run and exposed as reviewable diffs while the pipeline continues.
-
-The implementation stage is therefore tied to the real repository tree rather than being a standalone code-generation chat.
+> Never place API keys, OAuth secrets, or personal access tokens directly in source code.
 
 ## 🐙 GitHub workflow
 
-Ghost Web AI is designed to perform the full GitHub delivery loop:
+GhostWeb AI is designed to work through the full repository delivery loop:
 
 ```text
 Connected repository
@@ -164,117 +164,35 @@ Pull request
 Green checks / review
 ```
 
-GitHub operations use REST APIs; the application does not require a local `git` binary for the live publish path.
-
-## 🔐 Security & licence gates
-
-Security and licence verification are part of the delivery pipeline rather than optional documentation.
-
-- 🔒 GitHub credentials remain server-side during OAuth flows.
-- 🛡️ Repository contents are treated as untrusted data.
-- 📜 Open-source sources are checked before integration.
-- 🔍 Generated changes receive Guardian review before CI.
-- 🧾 Diffs and pipeline stages remain reviewable.
-- 🚦 Required CI gates must pass before release/merge readiness.
-- ❌ Secrets must never be committed to the repository.
-
-## 🔑 Providers & zero-credit operation
-
-All provider keys are optional.
-
-The engine walks a **multi-provider fallback chain** — **Anthropic → SambaNova →
-any OpenAI-compatible endpoint** (`OPENAI_API_KEY` / `OPENAI_BASE_URL`) — logging
-per-attempt outcomes and degrading cleanly to the deterministic local engine,
-which runs the complete chain and task force with zero keys.
-
-### Project keys
-
-| Variable | Purpose | Required? |
-| --- | --- | --- |
-| `ANTHROPIC_API_KEY` | Primary LLM provider (planning + file generation) | No |
-| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Second provider in the fallback chain | No |
-| `OPENAI_API_KEY` + `OPENAI_BASE_URL` | Any OpenAI-compatible endpoint as final fallback | No |
-| `GITHUB_CLIENT_ID` | GitHub OAuth application ID | OAuth only |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth application secret | OAuth only |
-| `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative authenticated GitHub access | Alternative to OAuth |
-| `SITE_URL` | Convex site URL used for the OAuth callback | Managed |
-
-> Never place API keys, OAuth secrets or personal access tokens directly in source code.
-
-## 🔌 Connect & sync GitHub
-
-### Connect
-
-Connect a GitHub account through OAuth. The account, avatar and requested scopes are stored server-side; the access token is not sent to the browser.
-
-No OAuth app? A deployment-wide **`GITHUB_PAT` / `GITHUB_TOKEN`** works as a fallback: repo sync runs as the token's own identity (badged **pat sync** in the UI) and live publishing uses the same token. The UI tells you which path is active — a 401/403/404 from GitHub is surfaced with a hint about the exact scope or expiry problem.
-
-### Sync
-
-Sync repositories owned by the user, collaborators and organizations available to the authenticated account (OAuth connection) or the deployment PAT (fallback).
-
-### Ship
-
-Choose a synchronized repository, run a task, and Ghost Web AI can create the feature branch, push generated files, commit the change and open the pull request.
-
-### GitHub OAuth setup
-
-1. Create an OAuth App in GitHub Developer Settings.
-2. Set the callback URL to:
-
-```text
-https://<your-convex-site-url>.convex.site/github/callback
-```
-
-3. Configure `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in project Keys.
-4. Connect the account from Ghost Web AI.
-
-The application requests `repo`, `read:user` and `read:org` scopes for the GitHub connection.
+GitHub operations use repository APIs; the live publish path does not require a local `git` binary.
 
 ## 🚀 Quick Start
 
-Clone the repository and install dependencies:
-
 ```bash
-git clone https://github.com/TempleEU/ghost-web-ai.git
+git clone https://github.com/GhostWebEnterprise/ghost-web-ai.git
 cd ghost-web-ai
 bun install
-```
-
-Generate Convex types and push the development functions:
-
-```bash
 bun convex dev --once
-```
-
-Run type checking and the test suite:
-
-```bash
 bun tsc -b --noEmit
-bun test          # 56 unit + contract tests
-```
-
-Start the development server:
-
-```bash
+bun test
 bun run dev
 ```
 
-Additional engineering commands:
+Additional commands:
 
 ```bash
-bun run e2e       # 18-check browser + backend smoke suite
-bun run build     # production build (typecheck + vite build)
-bun run manifest  # sha256 manifest of dist/ artifacts
-bun run icons     # regenerate the matrix icon set (web + Android launcher)
+bun run e2e
+bun run build
+bun run manifest
+bun run icons
 ```
 
 ## 🧪 Verification & CI
 
-Ghost Web AI uses gate-based verification rather than treating a successful code generation step as completion.
+GhostWeb AI uses explicit delivery gates instead of treating code generation as completion.
 
 | Gate | Verification |
-| --- | --- |
+|---|---|
 | 01 | Source / licence gate |
 | 02 | Task classification and plan |
 | 03 | Feature branch creation |
@@ -288,37 +206,37 @@ Ghost Web AI uses gate-based verification rather than treating a successful code
 
 **Green CI is a delivery gate, not merely a status badge.**
 
-This repository applies the same discipline to itself: `.github/workflows/ci.yml` runs **typecheck → tests → build → sha256 artifact manifest** on every push and pull request, and tagging `v*` triggers `.github/workflows/release.yml` — a gated build whose artifacts are checksum-verified before being attached to a GitHub release, alongside the **Android APK**, **desktop installers (macOS/Windows/Linux)** and the **iOS Xcode workspace**.
+The repository CI workflow runs typecheck → tests → production build → SHA-256 artifact manifest and icon sanity checks on every push and pull request.
 
 ## 🧭 Architecture
 
 ```text
-┌──────────────────────────────────────────────┐
-│              Ghost Web AI Client             │
-│  Landing · Wizard · Team board · Dashboard   │
-└──────────────────────┬───────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────┐
-│             Ghost Agent Engine               │
-│  Plan · Context · Chain · Task force · MCP   │
-└──────────────┬───────────────┬───────────────┘
-               │               │
-               ▼               ▼
+┌─────────────────────────────────────┐
+│          GhostWeb AI Client         │
+│ Landing · Build · Team · Dashboard  │
+└──────────────────┬──────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────┐
+│          Ghost Agent Engine         │
+│ Plan · Context · Chain · Task force │
+└───────────────┬───────────────┬─────┘
+                │               │
+                ▼               ▼
         Repository Context   Guardian
-               │               │
-               └───────┬───────┘
-                       ▼
-┌──────────────────────────────────────────────┐
-│              CI / Verification               │
-│       install · build · typecheck · fix      │
-└──────────────────────┬───────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────────┐
-│             GitHub Integration               │
-│       branch · files · commit · pull request │
-└──────────────────────────────────────────────┘
+                │               │
+                └───────┬───────┘
+                        ▼
+┌─────────────────────────────────────┐
+│          CI / Verification          │
+│ install · build · typecheck · fix   │
+└──────────────────┬──────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────┐
+│          GitHub Integration         │
+│ branch · files · commit · pull req. │
+└─────────────────────────────────────┘
 ```
 
 ## 🧱 Tech stack
@@ -330,121 +248,55 @@ This repository applies the same discipline to itself: `.github/workflows/ci.yml
 - **Convex Auth** — authentication
 - **Tailwind CSS v4** — styling
 - **shadcn/ui** — interface components
-- **Framer Motion** — motion and interaction
-- **Bun** — runtime, test runner and package management
+- **Framer Motion** — interaction and motion
+- **Bun** — runtime, tests and package management
+
+## 🌐 Routes
+
+| Route | Purpose |
+|---|---|
+| `/` | Landing page |
+| `/auth` | Authentication |
+| `/chat` | Agent console |
+| `/build` | Guided build wizard |
+| `/team` | 15-agent task-force board |
+| `/dashboard` | Build and GitHub dashboard |
+| `/settings` | Engine and repository settings |
+| `/securities` | Ghost Securities posture and scans |
+
+## 💻 Supported platforms
+
+| Platform | Status |
+|---|---|
+| 🌐 Web / PWA | ✅ Supported |
+| 🤖 Android | ✅ Release pipeline |
+| 🍎 iOS | 🚧 In development |
+| 💻 macOS | 🚧 In development |
+| 🐧 Linux | 🚧 In development |
+| 🪟 Windows | 🚧 In development |
 
 ## 📁 Project structure
 
 ```text
 ghost-web-ai/
 ├── src/
-│   ├── convex/
-│   │   ├── ghost/
-│   │   │   ├── plan.ts          # task classification + local engine
-│   │   │   ├── securities.ts    # Ghost Securities © — pure protection engine
-│   │   │   ├── team.ts          # 15-agent roster, task graph, waves, gates
-│   │   │   ├── teamActions.ts   # task-force execution engine
-│   │   │   ├── actions.ts       # single-run orchestrator
-│   │   │   └── mutations.ts     # conversations, runs, pipeline patches
-│   │   ├── securities.ts        # Ghost Securities © — queries, scans, 14-day cadence
-│   │   ├── crons.ts             # background protection tick (hourly)
-│   │   ├── mcp.ts               # MCP manifest / A2A card / tool execution
-│   │   ├── mcpTools.ts          # shared tool definitions
-│   │   ├── github/              # OAuth, PAT-fallback sync, publish-to-PR
-│   │   └── schema.ts
-│   ├── components/ghost/
-│   └── pages/
-│       ├── Landing.tsx          # matrix hero → /build deep-link
-│       ├── Auth.tsx
-│       ├── Chat.tsx             # agent console
-│       ├── BuildWizard.tsx      # guided build wizard
-│       ├── TeamBoard.tsx        # task-force board
-│       ├── Securities.tsx       # Ghost Securities © posture tab
-│       ├── Settings.tsx         # per-user settings tab
-│       └── Dashboard.tsx
-├── scripts/
-│   ├── e2e-smoke.sh             # 18-check smoke suite
-│   ├── gen-manifest.sh          # release artifact manifest
-│   ├── gen-icons.sh             # matrix icon set → web PNGs + Android launcher
-│   └── gen-desktop-icons.sh     # matrix icon set → electron-builder sizes
-├── .github/workflows/           # ci.yml + release.yml (web + APK + desktop + iOS)
+│   ├── convex/                  # agent engine, security, GitHub, MCP
+│   ├── components/ghost/        # Ghost UI components
+│   └── pages/                   # application routes
+├── scripts/                     # E2E, manifests, icons
+├── public/                      # web assets and icons
+├── .github/workflows/           # CI and release automation
 ├── package.json
 └── README.md
 ```
 
-## 🌐 Routes
+## ⚠️ Limitations
 
-| Route | Purpose |
-| --- | --- |
-| `/` | Landing page — product, agents, matrix hero CTA |
-| `/auth` | Email OTP / guest authentication |
-| `/chat` | Agent console and live task runs |
-| `/build` | Guided build wizard — presets, pipeline toggles, launch |
-| `/team` | Task-force board — 15 agents, waves, approval gates, event log |
-| `/dashboard` | Build HQ, run statistics and GitHub connection |
-| `/settings` | Per-user settings — engine mode, publishing, repo defaults, appearance |
-| `/securities` | Ghost Securities © — background protection posture, scans and 14-day update cadence |
-
-## 💻 Supported Operating Systems
-
-| Platform | Status |
-| --- | --- |
-| 🌐 **Web (PWA)** — any modern browser on desktop & mobile | ✅ Supported |
-| 🤖 **Android** — Capacitor shell, **signed release APK** (versionCode/versionName stamped from the tag) built by the release pipeline | ✅ Supported |
-| 🍎 **iOS** — Capacitor iOS shell, Xcode workspace verified in the release pipeline | 🚧 In development |
-| 💻 **macOS** — desktop installer (.dmg/.zip) via Capacitor Electron + electron-builder | 🚧 In development |
-| 🐧 **Linux** — desktop installer (.AppImage/.deb) via Capacitor Electron + electron-builder | 🚧 In development |
-| 🪟 **Windows** — desktop installer (.exe) via Capacitor Electron + electron-builder | 🚧 In development |
-
-The web client is the primary target and adapts automatically from phone to
-desktop (fluid type, safe-area insets, single-column mobile layout). The same
-Capacitor codebase drives every shell; the Compatibility Agent (desktop + web
-environment validation) owns their environment gates.
-
-### iOS (in development)
-
-```bash
-bun run cap:add:ios      # one-time scaffold (needs macOS + Xcode)
-bun run cap:sync:ios     # copy web assets into the iOS shell
-```
-
-The release workflow (`ios-shell` job) scaffolds and verifies the Xcode
-workspace on every tag; signed `.ipa` builds for TestFlight/App Store require
-Apple certificates and are the next step.
-
-### macOS, Linux & Windows desktop installers (in development)
-
-The desktop shells use the Capacitor Electron platform with electron-builder
-packaging:
-
-```bash
-bun run cap:add:electron   # one-time scaffold (electron/ + npm toolchain)
-bun run desktop:dev        # run the desktop app against the built web assets
-bun run desktop:make       # package installers via electron-builder
-```
-
-The release workflow (`desktop-installers` job) builds **macOS .dmg/.zip**,
-**Windows .exe (NSIS)** and **Linux .AppImage/.deb** installers on their native
-runners for every tag and attaches them to the GitHub release. Unsigned builds
-distribute fine via GitHub Releases; code-signing keys can be added as secrets
-later.
-
-### Desktop shell notes
-
-- `electron/` is scaffolded at build time and gitignored, exactly like
-  `android/` and `ios/` — only `capacitor.config.json` is committed.
-- Desktop icons render from `public/icon.svg` through
-  `scripts/gen-desktop-icons.sh` into the sizes electron-builder expects.
-- A splash screen ships with the platform so the window never appears frozen
-  while plugins load.
-
-## ⚠️ Important limitations
-
-- The local deterministic engine does not replace the quality of a strong hosted/open LLM for every task.
-- GitHub operations require an authenticated account or PAT with sufficient repository permissions.
-- CI verification depends on the target repository's own build and test configuration.
-- A generated pull request still requires appropriate human review before merging production changes.
-- Provider availability, rate limits and free-tier terms are controlled by the provider.
+- Local deterministic execution does not replace a strong hosted/open LLM for every task.
+- GitHub operations require appropriate authentication and repository permissions.
+- CI verification depends on the target repository's build and test configuration.
+- Generated pull requests still require appropriate human review before merging production changes.
+- Provider availability, rate limits, and free-tier terms are controlled by each provider.
 
 ## 🗺️ Roadmap
 
@@ -454,36 +306,31 @@ later.
 - [x] First-real-error repair loop
 - [x] GitHub branch / commit / PR workflow
 - [x] Zero-credit local execution path
-- [x] Optional open-LLM integration
-- [x] Expanded automated test coverage
-- [x] Richer browser/E2E verification
-- [x] More provider integrations (fallback chain)
-- [x] MCP / A2A tool integrations
-- [x] Expanded Android/Desktop implementation workflows
-- [x] Hardened release automation
-- [x] Verified release artifacts
-- [x] Responsive mobile + desktop UI fit
-- [x] Per-user settings tab (engine mode, plan-only publishing, defaults)
-- [x] GitHub PAT-fallback sync with truthful UI status + actionable error hints
-- [x] Desktop installer packaging (macOS / Windows / Linux) in the release pipeline
-- [ ] iOS / macOS / Linux shells (in development — scaffolds + installers ship from CI)
-- [ ] App-store distribution for Android APKs
-- [ ] Code-signed desktop + iOS builds
+- [x] Multi-provider fallback chain
+- [x] MCP / A2A integrations
+- [x] Android/Desktop implementation workflows
+- [x] Release automation and artifact verification
+- [x] Responsive mobile + desktop UI
+- [ ] Expanded iOS/macOS/Linux shells
+- [ ] App-store distribution
+- [ ] Code-signed desktop and iOS builds
 
 ## 🤝 Contributing
 
-Issues, improvements and pull requests are welcome. Keep changes focused, preserve the security/licence gates, avoid hard-coded credentials, and keep CI green.
+Issues, improvements, security reports, documentation updates, and pull requests are welcome. Keep changes focused, preserve the security/licence gates, avoid hard-coded credentials, and keep CI green.
+
+- [Issues](https://github.com/GhostWebEnterprise/ghost-web-ai/issues)
+- [Pull requests](https://github.com/GhostWebEnterprise/ghost-web-ai/pulls)
+- [Releases](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
 
 ## 📬 Contact
 
-Questions, feature ideas or partnership inquiries:
-
-**ghostweb@ghostbin.cfd**
+Questions, feature ideas or support requests: **ghostweb@ghostbin.cfd**
 
 ---
 
 <div align="center">
 
-**Ghost Web AI** · plan → build → heal → verify → ship 👻
+**GhostWeb AI** · plan → build → heal → verify → ship 👻
 
 </div>
