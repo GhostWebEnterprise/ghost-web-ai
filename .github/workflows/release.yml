@@ -137,7 +137,7 @@ jobs:
           fi
           mkdir -p apk-out
           RELEASE_ASSET_VERSION="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${{ github.event.head_commit.message }}" == *"v0.2.0 APK"* ]]; then
+          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_ASSET_VERSION="v0.2.0"
           fi
           cp "$APK" "apk-out/ghost-web-ai-${RELEASE_ASSET_VERSION}.apk"
