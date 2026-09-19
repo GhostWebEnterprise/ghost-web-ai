@@ -56,7 +56,7 @@ GhostWeb AI turns a plain-language request into a structured software-delivery w
 | 🧪 CI | Install → build → typecheck → first-error capture |
 | 🐙 GitHub | Branches, commits, sync, releases, and pull requests |
 | 🔌 MCP / A2A | Agent-addressable tooling and execution |
-| 🔑 Providers | Multi-provider fallback plus local deterministic engine |
+| 🔑 Providers | OpenRouter, Ollama, direct providers, Puter.js, and local fallback |
 | 💳 Pricing model | Zero built-in credit meter |
 | 🌐 Client | React + TypeScript + Vite |
 | 📱 Responsive | Phone, tablet, and desktop layouts |
@@ -126,19 +126,25 @@ Security and licence verification are delivery gates rather than optional docume
 
 ## 🔑 Providers & zero-credit operation
 
-Provider keys are optional. The engine can use a multi-provider fallback chain and a deterministic local engine.
+Provider keys are optional. Ghost uses the first configured provider that responds successfully, then falls back to the deterministic local engine.
 
 | Variable | Purpose | Required? |
 |---|---|---|
-| `ANTHROPIC_API_KEY` | Primary LLM provider | No |
-| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Fallback provider | No |
-| `OPENAI_API_KEY` + `OPENAI_BASE_URL` | OpenAI-compatible endpoint | No |
+| `OPENROUTER_API_KEY` | Multi-model OpenAI-compatible gateway with free routing | No |
+| `OPENROUTER_MODEL` | Optional explicit OpenRouter model ID | No |
+| `OLLAMA_ENABLED` | Enables keyless self-hosted Ollama routing | No |
+| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Ollama endpoint and model configuration | No |
+| `ANTHROPIC_API_KEY` | Direct Anthropic fallback | No |
+| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Direct SambaNova fallback | No |
+| `OPENAI_API_KEY` + `OPENAI_BASE_URL` | OpenAI-compatible fallback endpoint | No |
 | `GITHUB_CLIENT_ID` | GitHub OAuth application ID | OAuth only |
 | `GITHUB_CLIENT_SECRET` | GitHub OAuth secret | OAuth only |
 | `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative GitHub access | Optional |
 | `SITE_URL` | Convex OAuth callback configuration | Managed |
 
-> Never place API keys, OAuth secrets, or personal access tokens directly in source code.
+The server-side routing order is Ollama → OpenRouter → Anthropic → SambaNova → OpenAI-compatible → local. Puter.js is a separate, explicitly selected browser mode for prompts without repository targets; it authenticates the user in Puter and does not receive private repository context.
+
+See [`integrations.md`](integrations.md) for setup, routing, and security details. Never place API keys, OAuth secrets, or personal access tokens directly in source code.
 
 ## 🐙 GitHub workflow
 
@@ -173,7 +179,7 @@ git clone https://github.com/GhostWebEnterprise/ghost-web-ai.git
 cd ghost-web-ai
 bun install
 bun convex dev --once
-bun tsc -b --noEmit
+bunx tsc -b --noEmit
 bun test
 bun run dev
 ```
@@ -306,7 +312,8 @@ ghost-web-ai/
 - [x] First-real-error repair loop
 - [x] GitHub branch / commit / PR workflow
 - [x] Zero-credit local execution path
-- [x] Multi-provider fallback chain
+- [x] Multi-provider fallback chain (OpenRouter, Ollama, direct providers)
+- [x] Optional user-authorized Puter.js browser AI
 - [x] MCP / A2A integrations
 - [x] Android/Desktop implementation workflows
 - [x] Release automation and artifact verification

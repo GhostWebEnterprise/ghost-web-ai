@@ -6,7 +6,7 @@ import {
   ConversationsPanel,
   type ConversationRow,
 } from "@/components/ghost/ConversationsPanel";
-import { Composer } from "@/components/ghost/Composer";
+import { Composer, type AssistantProvider } from "@/components/ghost/Composer";
 import {
   GitHubSync,
   type SyncedRepoPick,
@@ -14,30 +14,38 @@ import {
 import { RunMessage, UserMessage } from "@/components/ghost/RunMessage";
 import { GhostMark } from "@/components/ghost/GhostMark";
 import { engineLabel, repoShort } from "@/lib/ghost-agents";
-import { Github, Loader2 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import type { AssistantAgentId, AssistantCapability } from "@/lib/ai-models";
 import { useAppSettings } from "@/hooks/use-app-settings";
+import { cn } from "@/lib/utils";
+import {
+  ChevronDown,
+  Github,
+  Loader2,
+  Menu,
+  Plus,
+  Settings2,
+} from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { puterChat } from "@/lib/puter";
 
 export default function Chat() {
   const [searchParams, setSearchParams] = useSearchParams();
   const paramId = searchParams.get("c");
   const { settings } = useAppSettings();
+  const [mode, setMode] = useState<"thread" | "new">(
+    paramId ? "thread" : "new",
+  );
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
 
   const conversationsQuery = useQuery(api.ghost.queries.listConversations);
   const conversations = conversationsQuery ?? [];
   const listLoaded = conversationsQuery !== undefined;
-  const [mode, setMode] = useState<"thread" | "new">(
-    paramId ? "thread" : "new",
-  );
-
   const activeId: string | null = mode === "thread" ? paramId : null;
-  // While the session list is still loading, trust the URL param so a deep
-  // link can't accidentally create a duplicate conversation.
   const activeIdValid = listLoaded
-    ? conversations.some((c) => c._id === activeId)
+    ? conversations.some((conversation) => conversation._id === activeId)
     : true;
 
   const messages =
@@ -47,22 +55,68 @@ export default function Chat() {
         ? { conversationId: activeId as Id<"conversations"> }
         : "skip",
     ) ?? [];
-  const conversation = conversations.find((c) => c._id === activeId);
+  const conversation = conversations.find((item) => item._id === activeId);
 
   const createConversation = useMutation(api.ghost.mutations.createConversation);
   const startTask = useMutation(api.ghost.mutations.startTask);
-  const deleteConversation = useMutation(
-    api.ghost.mutations.deleteConversation,
-  );
+  const patchRun = useMutation(api.ghost.mutations.patchRun);
+  const deleteConversation = useMutation(api.ghost.mutations.deleteConversation);
   const runTask = useAction(api.ghost.actions.runTask);
+  const getGatewayStatus = useAction(api.ghost.actions.getGatewayStatus);
   const selectSyncedRepo = useMutation(api.github.mutations.selectSyncedRepo);
 
   const [sending, setSending] = useState(false);
-  // Repo picked from a synced GitHub account while no session exists yet.
-  const [pickedRepo, setPickedRepo] = useState<SyncedRepoPick | undefined>(
-    undefined,
-  );
+  const [gatewayConfigured, setGatewayConfigured] = useState<boolean | undefined>();
+  const [ollamaEnabled, setOllamaEnabled] = useState(false);
+
+  useEffect(() => {
+    void getGatewayStatus()
+      .then((status) => {
+        setGatewayConfigured(status.configured);
+        setOllamaEnabled(status.ollama.enabled);
+      })
+      .catch(() => {
+        setGatewayConfigured(false);
+        setOllamaEnabled(false);
+      });
+  }, [getGatewayStatus]);
+  const [pickedRepo, setPickedRepo] = useState<SyncedRepoPick | undefined>();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const chainRunning = sending || messages.some((message) => message.runStatus === "running");
+
+  useEffect(() => {
+    const node = scrollRef.current;
+    if (node) node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
+  }, [messages, sending]);
+
+  useEffect(() => {
+    if (listLoaded && activeId && !activeIdValid) {
+      setMode("new");
+      setSearchParams({}, { replace: true });
+    }
+  }, [activeId, activeIdValid, listLoaded, setSearchParams]);
+
+  const closeSidebar = () => setSidebarOpen(false);
+
+  const handleNew = () => {
+    setMode("new");
+    setPickedRepo(undefined);
+    setToolsOpen(false);
+    setSidebarOpen(false);
+    setSearchParams({}, { replace: true });
+  };
+
+  const handleSelect = (id: string) => {
+    setMode("thread");
+    setSidebarOpen(false);
+    setSearchParams({ c: id });
+  };
+
+  const handleDelete = async (id: string) => {
+    await deleteConversation({ conversationId: id as Id<"conversations"> });
+    if (activeId === id) handleNew();
+    toast.success("Conversation deleted");
+  };
 
   const handlePickRepo = async (repo: SyncedRepoPick) => {
     if (activeId && activeIdValid) {
@@ -76,38 +130,31 @@ export default function Chat() {
           description: repo.description,
           isPrivate: repo.private,
         });
+        toast.success(`Targeting ${repo.fullName}`);
+        setPickedRepo(undefined);
       } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : "Could not target the repo.",
-        );
-        return;
+        toast.error(err instanceof Error ? err.message : "Could not target the repo.");
       }
-      setPickedRepo(undefined);
     } else {
       setPickedRepo(repo);
+      toast.success(`Targeting ${repo.fullName}`);
     }
   };
 
-  const chainRunning =
-    sending || messages.some((m) => m.runStatus === "running");
-
-  // Follow the latest run activity.
-  useEffect(() => {
-    const node = scrollRef.current;
-    if (node) node.scrollTo({ top: node.scrollHeight, behavior: "smooth" });
-  }, [messages, sending]);
-
-  // If the URL points at a session that no longer exists, fall back to new.
-  useEffect(() => {
-    if (listLoaded && activeId && !activeIdValid) {
-      setMode("new");
-      setSearchParams({}, { replace: true });
-    }
-  }, [listLoaded, activeId, activeIdValid, setSearchParams]);
-
-  const startRun = async (task: string, repoUrl?: string) => {
+  const startRun = async (
+    task: string,
+    repoUrl?: string,
+    model?: string,
+    capability?: AssistantCapability,
+    agent?: AssistantAgentId,
+    provider: AssistantProvider = "server",
+  ) => {
     setSending(true);
     try {
+      if (provider === "puter" && (repoUrl || pickedRepo || conversation?.repoUrl)) {
+        toast.error("Puter.js browser mode is only available without a repository target.");
+        return;
+      }
       let id = activeId && activeIdValid ? activeId : null;
       if (!id) {
         id = await createConversation({ task, repoUrl });
@@ -129,212 +176,238 @@ export default function Chat() {
         conversationId: id as Id<"conversations">,
         task,
       });
-      // Fire the engine without blocking the UI; progress streams via queries.
-      void runTask({
-        conversationId: id as Id<"conversations">,
-        runId: runId as Id<"messages">,
-        task,
-        repoUrl,
-        pipeline: pipeline.map((s) => ({
-          id: s.id,
-          agent: s.agent,
-          title: s.title,
-          status: s.status,
-        })),
-      }).catch((err) => {
-        console.error("Run failed:", err);
-        toast.error("The agent chain stopped unexpectedly.");
-      });
-      toast.success(
-        "Agent chain started — plan → code → fix → commit → PR",
-        { duration: 3000 },
-      );
+      const seededPipeline = pipeline.map((stage) => ({
+        id: stage.id,
+        agent: stage.agent,
+        title: stage.title,
+        status: stage.status,
+      }));
+      if (provider === "puter") {
+        void puterChat(task, model)
+          .then((answer) =>
+            patchRun({
+              conversationId: id as Id<"conversations">,
+              runId: runId as Id<"messages">,
+              engine: "puter",
+              content: answer,
+              runStatus: "done",
+              pipeline: seededPipeline.map((stage) => ({
+                ...stage,
+                status: "done" as const,
+                detail: "Completed with user-authorized Puter.js browser AI.",
+                logs: ["puter.ai.chat completed"],
+              })),
+            }),
+          )
+          .catch((err) =>
+            patchRun({
+              conversationId: id as Id<"conversations">,
+              runId: runId as Id<"messages">,
+              engine: "puter",
+              runStatus: "error",
+              error: err instanceof Error ? err.message : "Puter.js request failed.",
+            }).catch(() => undefined),
+          );
+      } else {
+        void runTask({
+          conversationId: id as Id<"conversations">,
+          runId: runId as Id<"messages">,
+          task,
+          repoUrl,
+          selectedModel: model,
+          capability,
+          agent,
+          pipeline: seededPipeline,
+        }).catch(() => toast.error("The agent run stopped unexpectedly."));
+      }
+      toast.success("Ghost is on it", { duration: 2500 });
     } catch (err) {
-      console.error("Start task failed:", err);
       toast.error(err instanceof Error ? err.message : "Could not start the run.");
     } finally {
       setSending(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
-    await deleteConversation({ conversationId: id as Id<"conversations"> });
-    if (activeId === id) {
-      setMode("new");
-      setSearchParams({}, { replace: true });
-    }
-    toast.success("Build session deleted");
-  };
-
-  const handleNew = () => {
-    setMode("new");
-    setSearchParams({}, { replace: true });
-  };
-
-  const handleSelect = (id: string) => {
-    setMode("thread");
-    setSearchParams({ c: id });
-  };
-
   return (
     <div
       className={cn(
-        "nb-grid-paper flex min-h-screen flex-col bg-background text-foreground",
+        "min-h-screen bg-background text-foreground",
+        "bg-[radial-gradient(circle_at_top_right,rgba(0,255,65,0.08),transparent_32rem)]",
         settings.reduceMotion && "nb-reduce-motion",
       )}
     >
       <AppNav active="chat" />
-      <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col gap-3 px-3 py-3 lg:flex-row lg:gap-4 lg:p-4">
-        {/* sessions */}
-        <div className="lg:h-[calc(100vh-6.5rem)] lg:overflow-y-auto lg:pr-1">
+      <div className="mx-auto flex w-full max-w-[1540px] gap-0 px-0 lg:px-5 lg:py-5">
+        {sidebarOpen ? (
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            onClick={closeSidebar}
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+          />
+        ) : null}
+
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 flex w-[292px] flex-col border-r border-foreground/10 bg-background px-4 pb-4 pt-20 shadow-2xl shadow-black/20 transition-transform lg:static lg:z-auto lg:h-[calc(100vh-7rem)] lg:w-[272px] lg:translate-x-0 lg:border-r-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:shadow-none",
+            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+        >
           <ConversationsPanel
             conversations={conversations as ConversationRow[]}
             activeId={activeId}
             onSelect={handleSelect}
             onNew={handleNew}
             onDelete={handleDelete}
+            onClose={closeSidebar}
           />
-        </div>
+        </aside>
 
-        {/* thread */}
-        <div className="flex min-w-0 flex-1 flex-col gap-3 max-lg:min-h-0 lg:h-[calc(100vh-6.5rem)]">
-          {/* conversation header */}
-          <div className="flex flex-wrap items-center justify-between gap-2 border-2 border-foreground bg-card px-3 py-2">
+        <main className="flex min-h-[calc(100vh-4rem)] min-w-0 flex-1 flex-col overflow-hidden rounded-none border-foreground/10 bg-background/45 lg:min-h-0 lg:h-[calc(100vh-7rem)] lg:rounded-3xl lg:border lg:shadow-2xl lg:shadow-black/10 lg:pl-0">
+          <header className="flex h-16 shrink-0 items-center justify-between border-b border-foreground/10 px-4 lg:px-6">
             <div className="flex min-w-0 items-center gap-2">
-              <GhostMark className="size-4 text-foreground" />
+              <button
+                type="button"
+                aria-label="Open conversations"
+                onClick={() => setSidebarOpen(true)}
+                className="rounded-md p-1.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground lg:hidden"
+              >
+                <Menu className="size-5" />
+              </button>
+              <button
+                type="button"
+                onClick={handleNew}
+                className="hidden items-center gap-2 rounded-xl px-2 py-2 text-sm font-semibold transition-colors hover:bg-foreground/[0.06] sm:flex"
+              >
+                <GhostMark className="size-5 text-foreground" />
+                <span className="truncate">{conversation?.title ?? "New conversation"}</span>
+                <ChevronDown className="size-3.5 text-muted-foreground" />
+              </button>
+              <span className="flex items-center gap-2 text-sm font-semibold sm:hidden">
+                <GhostMark className="size-5 text-foreground" />
+                Ghost
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              {conversation?.repo?.fullName ? (
+                <span                  className="hidden max-w-[190px] items-center gap-1.5 truncate rounded-lg bg-foreground/[0.05] px-2.5 py-1.5 text-[10px] text-muted-foreground md:flex"
+>
+                  <Github className="size-3" />
+                  {repoShort(conversation.repo.fullName)}
+                </span>
+              ) : null}
               {conversation ? (
-                <>
-                  <span className="truncate text-[13px] font-black uppercase tracking-wide">
-                    {conversation.title}
-                  </span>
-                  {conversation.repo && (
-                    <span className="hidden shrink-0 items-center gap-1 border border-foreground bg-[#4dd8e6] px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-wider text-black md:inline-flex">
-                      <Github className="size-3" />
-                      {repoShort(conversation.repo.fullName)}
-                      {conversation.repo.license ? ` · ${conversation.repo.license}` : ""}
-                    </span>
-                  )}
-                </>
-              ) : (
-                <span className="text-[13px] font-black uppercase tracking-wide">
-                  New build
+                <span className="hidden rounded-lg bg-foreground/[0.05] px-2.5 py-1.5 text-[10px] text-muted-foreground sm:inline">
+                  {engineLabel(conversation.engine)}
                 </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-wider">
-              {conversation?.repo?.language && (
-                <span className="border border-foreground bg-[#ff9e64] px-1.5 py-0.5 text-black">
-                  {conversation.repo.language}
-                </span>
-              )}
-              <span className="border border-foreground bg-[#9aa5a0] px-1.5 py-0.5">
-                {engineLabel(conversation?.engine)}
-              </span>
-              {conversation?.liveGithub && (
-                <span
-                  title="A real branch + PR were pushed to this repo"
-                  className="inline-flex items-center gap-1 border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black"
-                >
-                  <Github className="size-3" /> PR live
-                </span>
-              )}
-              <span className="hidden border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black sm:inline">
-                {chainRunning ? "chain live" : "idle"}
-              </span>
-            </div>
-          </div>
-
-          {/* scroll area */}
-          <div
-            ref={scrollRef}
-            className="nb-scroll flex-1 space-y-4 overflow-y-auto border-2 border-foreground bg-card/60 p-4"
-          >
-            {activeId && !conversation && !listLoaded ? (
-              <div className="flex items-center justify-center gap-2 py-8 font-mono text-[11px] uppercase tracking-widest text-muted-foreground">
-                <Loader2 className="size-3.5 animate-spin" /> Loading session…
-              </div>
-            ) : activeId && conversation ? (
-              <>
-                {messages.map((message) =>
-                  message.role === "user" ? (
-                    <UserMessage key={message._id} content={message.content} />
-                  ) : (
-                    <RunMessage
-                      key={message._id}
-                      message={{
-                        role: "assistant",
-                        agent: message.agent,
-                        engine: message.engine,
-                        runStatus: message.runStatus,
-                        pipeline: message.pipeline,
-                        files: message.files,
-                        content: message.content,
-                        error: message.error,
-                        prUrl: message.prUrl,
-                        createdAt: message.createdAt,
-                      }}
-                    />
-                  ),
+              ) : null}
+              <button
+                type="button"
+                aria-label="New conversation"
+                onClick={handleNew}
+                className="rounded-md p-2 text-muted-foreground hover:bg-foreground/10 hover:text-foreground lg:hidden"
+              >
+                <Plus className="size-4" />
+              </button>
+              <button
+                type="button"
+                aria-label="Toggle workspace tools"
+                onClick={() => setToolsOpen((open) => !open)}
+                className={cn(
+                  "rounded-md p-2 text-muted-foreground hover:bg-foreground/10 hover:text-foreground",
+                  toolsOpen && "bg-foreground/10 text-foreground",
                 )}
-              </>
-            ) : (
-              /* empty state */
-              <div className="flex h-full flex-col items-center justify-center gap-5 p-6 text-center">
-                <div className="relative">
-                  <div className="absolute -inset-2 -rotate-3 border-2 border-foreground bg-accent" />
-                  <GhostMark className="relative size-14 text-foreground" />
-                </div>
-                <div className="max-w-md">
-                  <h2 className="text-2xl font-black uppercase tracking-tight">
-                    New build session
-                  </h2>
-                  <p className="mt-2 text-[13px] leading-6 text-foreground/75">
-                    Describe a feature — optionally paste a GitHub repo URL.
-                    Ghost Web AI runs the whole chain: license gate, plan,
-                    branch, code, guardian self-heal, CI, fix loop, commit,
-                    PR and verify. Add a GITHUB_PAT in Keys and the commit +
-                    PR stages push a real branch and pull request to that repo.
-                  </p>
-                </div>
-                <div className="flex flex-wrap items-center justify-center gap-1.5 font-mono text-[9px] font-bold uppercase tracking-widest text-muted-foreground">
-                  {["scan", "plan", "branch", "code", "guard", "ci", "fix", "commit", "pr", "verify"].map(
-                    (s) => (
-                      <span key={s} className="border border-foreground bg-card px-1.5 py-0.5">
-                        {s}
-                      </span>
-                    ),
-                  )}
-                </div>
+              >
+                <Settings2 className="size-4" />
+              </button>
+            </div>
+          </header>
+
+          <div className="relative flex min-h-0 flex-1 flex-col">
+            <div
+              ref={scrollRef}
+              className="nb-scroll flex-1 overflow-y-auto px-4 py-6 lg:px-10 lg:py-10"
+            >
+              <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+                {activeId && !conversation && !listLoaded ? (
+                  <div className="flex items-center justify-center gap-2 py-16 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <Loader2 className="size-3.5 animate-spin" /> Loading conversation…
+                  </div>
+                ) : activeId && conversation ? (
+                  messages.length > 0 ? (
+                    messages.map((message) =>
+                      message.role === "user" ? (
+                        <UserMessage key={message._id} content={message.content} />
+                      ) : (
+                        <RunMessage
+                          key={message._id}
+                          message={{
+                            role: "assistant",
+                            agent: message.agent,
+                            engine: message.engine,
+                            runStatus: message.runStatus,
+                            pipeline: message.pipeline,
+                            files: message.files,
+                            content: message.content,
+                            error: message.error,
+                            prUrl: message.prUrl,
+                            createdAt: message.createdAt,
+                          }}
+                        />
+                      ),
+                    )
+                  ) : (
+                    <EmptyConversation />
+                  )
+                ) : (
+                  <EmptyConversation />
+                )}
               </div>
-            )}
+            </div>
+
+            <div className="shrink-0 bg-gradient-to-t from-background via-background/95 to-transparent px-4 pb-5 pt-4 lg:px-10 lg:pb-5">
+              {toolsOpen ? (
+                <div className="mx-auto mb-3 w-full max-w-3xl">
+                  <GitHubSync
+                    targetFullName={conversation?.repo?.fullName ?? pickedRepo?.fullName ?? null}
+                    busy={chainRunning}
+                    onPick={handlePickRepo}
+                    onClear={activeId ? undefined : () => setPickedRepo(undefined)}
+                  />
+                </div>
+              ) : null}
+              <Composer
+                key={`${conversation?._id ?? "new"}:${conversation?.repoUrl ?? pickedRepo?.url ?? ""}`}
+                onSubmit={startRun}
+                busy={chainRunning}
+                defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url ?? settings.defaultRepoUrl}
+                gatewayConfigured={gatewayConfigured}
+                ollamaEnabled={ollamaEnabled}
+              />
+            </div>
           </div>
+        </main>
+      </div>
+    </div>
+  );
+}
 
-          {/* GitHub connect + repo targeting */}
-          <GitHubSync
-            targetFullName={
-              conversation?.repo?.fullName ?? pickedRepo?.fullName ?? null
-            }
-            busy={chainRunning}
-            onPick={handlePickRepo}
-            onClear={
-              activeId ? undefined : () => setPickedRepo(undefined)
-            }
-          />
-
-          {/* composer — keyed by session + target so repo state resets */}
-          <Composer
-            key={`${conversation?._id ?? "new"}:${
-              conversation?.repoUrl ?? pickedRepo?.url ?? ""
-            }`}
-            onSubmit={startRun}
-            busy={chainRunning}
-            defaultRepoUrl={
-              conversation?.repoUrl ??
-              pickedRepo?.url ??
-              settings.defaultRepoUrl
-            }
-          />
-        </div>
+function EmptyConversation() {
+  return (
+    <div className="flex min-h-[55vh] flex-col items-center justify-center px-4 pb-10 text-center">
+      <div className="mb-6 flex size-16 items-center justify-center rounded-3xl border border-foreground/15 bg-card shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
+        <GhostMark className="size-9 text-foreground" />
+      </div>
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Your AI workspace</p>
+      <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">What are we building?</h1>
+      <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
+        Describe a feature, ask for a fix, or point Ghost at a GitHub repository. The agent chain plans, codes, checks, and keeps you updated here.
+      </p>
+      <div className="mt-5 flex flex-wrap justify-center gap-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+        <span className="rounded-full border border-foreground/10 px-2 py-1">plan</span>
+        <span className="rounded-full border border-foreground/10 px-2 py-1">build</span>
+        <span className="rounded-full border border-foreground/10 px-2 py-1">self-heal</span>
+        <span className="rounded-full border border-foreground/10 px-2 py-1">ship</span>
       </div>
     </div>
   );

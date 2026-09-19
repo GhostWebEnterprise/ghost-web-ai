@@ -1,3 +1,5 @@
+"use node";
+
 import { v } from "convex/values";
 import { action } from "../_generated/server";
 import { api, internal } from "../_generated/api";
@@ -8,6 +10,17 @@ import {
   type PlanStage,
   type RepoInfo,
 } from "./plan";
+import {
+  getOpenRouterConfigStatus,
+  OPENROUTER_BASE_URL,
+  resolveOpenRouterModel,
+} from "../../lib/openrouter";
+import {
+  getOllamaBaseUrl,
+  getOllamaConfigStatus,
+  getOllamaModel,
+  isOllamaEnabled,
+} from "../../lib/ollama";
 
 const STAGE = v.union(
   v.literal("pending"),
@@ -32,6 +45,26 @@ export const runTask = action({
     runId: v.id("messages"),
     task: v.string(),
     repoUrl: v.optional(v.string()),
+    selectedModel: v.optional(v.string()),
+    capability: v.optional(
+      v.union(
+        v.literal("build"),
+        v.literal("slides"),
+        v.literal("video"),
+        v.literal("bot"),
+      ),
+    ),
+    agent: v.optional(
+      v.union(
+        v.literal("builder"),
+        v.literal("researcher"),
+        v.literal("rag"),
+        v.literal("review-panel"),
+        v.literal("workflow-architect"),
+        v.literal("memory"),
+        v.literal("reviewer"),
+      ),
+    ),
     pipeline: v.array(
       v.object({
         id: v.string(),
@@ -134,10 +167,12 @@ export const runTask = action({
       const hasLlmKey =
         enginePref !== "local" &&
         Boolean(
-          process.env.ANTHROPIC_API_KEY ||
+          isOllamaEnabled() ||
+            process.env.ANTHROPIC_API_KEY ||
             process.env.SAMBANOVA_API_KEY ||
             process.env.SAMBA_API_KEY ||
-            process.env.OPENAI_API_KEY,
+            process.env.OPENAI_API_KEY ||
+            process.env.OPENROUTER_API_KEY,
         );
       let engine: string = "local";
       let llm: LlmPlan | null = null;
@@ -150,7 +185,14 @@ export const runTask = action({
           if (repo && repo.source === "github" && userSettings?.allowRepoContext !== false) {
             repoCtx = await fetchRepoContext(repo, githubPat || undefined);
           }
-          const result = await callLlm(args.task, repo, repoCtx);
+          const result = await callLlm(
+            args.task,
+            repo,
+            repoCtx,
+            args.selectedModel,
+            args.capability,
+            args.agent,
+          );
           llm = result.plan;
           engine = result.provider;
         } catch (err) {
@@ -289,7 +331,7 @@ export const runTask = action({
         engine === "local"
           ? enginePref === "local"
             ? "Engine: local free engine (pinned in Settings) — deterministic, zero keys."
-            : "Engine: local free engine — add ANTHROPIC_API_KEY, SAMBANOVA_API_KEY or OPENAI_API_KEY in Keys to upgrade to an LLM planner. No credits are ever required."
+            : "Engine: local free engine — add OPENROUTER_API_KEY for free multi-model routing, or configure another provider key in Settings → Environment."
           : `Engine: ${engine} LLM — bring-your-own-key, no credits consumed by Ghost.`;
 
       const planOnlyNote =
@@ -412,6 +454,14 @@ const CONTEXT_FILE_BUDGET = 12000; // chars per file
 const CONTEXT_TOTAL_BUDGET = 36000; // chars of file contents total
 const MAX_CONTEXT_FILES = 7;
 const MAX_CONTEXT_TREE = 160;
+
+export const getGatewayStatus = action({
+  args: {},
+  handler: async () => ({
+    ...getOpenRouterConfigStatus(),
+    ollama: getOllamaConfigStatus(),
+  }),
+});
 
 const IGNORE_DIR_RE =
   /(^|\/)(node_modules|dist|build|coverage|vendor|\.git|\.next|\.cache|target|out|bin|obj|\.venv|__pycache__)(\/|$)/;
@@ -624,6 +674,9 @@ async function callLlm(
   task: string,
   repo: RepoInfo | null,
   repoCtx: RepoContext | null,
+  selectedModel?: string,
+  capability?: "build" | "slides" | "video" | "bot",
+  agent?: "builder" | "researcher" | "rag" | "review-panel" | "workflow-architect" | "memory" | "reviewer",
 ): Promise<{ plan: LlmPlan; provider: string }> {
   const repoLine = repo
     ? `Target repo: ${repo.fullName} (${repo.language ?? "unknown stack"}, license ${repo.license ?? "unknown"}).`
@@ -631,7 +684,34 @@ async function callLlm(
   const contextBlock = repoCtx
     ? buildRepoContextBlock(repoCtx)
     : "(No repository context was reachable — draft a sensible structure for the user's workspace and say so in the risks.)";
-  const prompt = `You are the code-writing core of Ghost Web AI, an agentic web/app builder. You plan a task AND write the actual files for it.
+  const agentBrief =
+    agent === "researcher"
+      ? "Act as the research agent: decompose the problem, identify evidence and unknowns, and include source-aware risks."
+      : agent === "rag"
+        ? "Act as an agentic RAG specialist: choose the most relevant repository context, grade evidence, retry weak context, and label uncertainty."
+        : agent === "review-panel"
+          ? "Act as a review panel: simulate independent specialist critiques of the same plan, reconcile disagreements, and only then recommend implementation."
+          : agent === "memory"
+            ? "Act as the memory keeper: preserve durable project decisions, preferences, constraints, and unresolved follow-ups without inventing facts."
+            : agent === "workflow-architect"
+          ? "Act as the workflow architect: define triggers, tools, memory, retries, handoffs, and operational ownership."
+          : agent === "reviewer"
+            ? "Act as the safety reviewer: challenge assumptions and check permissions, privacy, validation, and failure paths before proposing changes."
+            : "Act as the builder: prioritize complete, reviewable implementation files and verification steps.";
+  const capabilityBrief =
+    capability === "slides"
+      ? "The user wants a slide deck. Return a strong narrative, slide-by-slide copy, speaker notes, visual direction, and optional implementation files for a deck renderer."
+      : capability === "video"
+        ? "The user wants a video. Return a production-ready storyboard, shot list, voiceover, captions, timing, visual prompts, and optional implementation files for a video workflow."
+        : capability === "bot"
+          ? "The user wants an always-on bot. Return triggers, schedules, tools, memory, escalation rules, safety boundaries, observability, and implementation files for a durable bot workflow."
+          : "The user wants an application or feature. Return an implementation plan and complete files that can be reviewed and shipped through the agent chain.";
+  const prompt = `You are the super assistant core of Ghost Web AI. You route work across 100+ models and can build apps, create slides, direct videos, and design always-on bots.
+
+Capability: ${capability ?? "build"}
+Agent profile: ${agent ?? "builder"}
+${agentBrief}
+${capabilityBrief}
 
 ${repoLine}
 Task: "${task}"
@@ -681,6 +761,46 @@ Rules for "changes":
   const openaiBase = (process.env.OPENAI_BASE_URL ?? "https://api.openai.com/v1").replace(/\/$/, "");
 
   const providers: Provider[] = [];
+  if (isOllamaEnabled()) {
+    providers.push({
+      name: "ollama-local",
+      url: `${getOllamaBaseUrl()}/api/chat`,
+      headers: { "Content-Type": "application/json" },
+      body: {
+        model: getOllamaModel(),
+        stream: false,
+        messages: [{ role: "user", content: prompt }],
+        options: { temperature: 0.3, num_predict: 3800 },
+      },
+      extract: (data) => {
+        const d = data as { message?: { content?: string } };
+        return d.message?.content ?? "";
+      },
+    });
+  }
+  const openRouterKey = process.env.OPENROUTER_API_KEY;
+  if (openRouterKey) {
+    providers.push({
+      name: "openrouter-free",
+      url: `${OPENROUTER_BASE_URL}/chat/completions`,
+      headers: {
+        Authorization: `Bearer ${openRouterKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer": process.env.OPENROUTER_SITE_URL ?? "https://freebuff.app",
+        "X-Title": "Ghost Web AI",
+      },
+      body: {
+        model: resolveOpenRouterModel(selectedModel),
+        messages: [{ role: "user", content: prompt }],
+        temperature: 0.3,
+        max_tokens: 3800,
+      },
+      extract: (data) => {
+        const d = data as { choices?: { message?: { content?: string } }[] };
+        return d.choices?.[0]?.message?.content ?? "";
+      },
+    });
+  }
   if (anthropicKey) {
     providers.push({
       name: "anthropic",
@@ -691,6 +811,8 @@ Rules for "changes":
         "Content-Type": "application/json",
       },
       body: {
+        // VLY IDs (for example anthropic/...) are not valid provider-local
+        // IDs, so fallbacks must use their own configured/default model.
         model: process.env.ANTHROPIC_MODEL ?? "claude-sonnet-4-5",
         max_tokens: 3800,
         messages: [{ role: "user", content: prompt }],
@@ -713,7 +835,7 @@ Rules for "changes":
       headers: { Authorization: `Bearer ${sambaKey}`, "Content-Type": "application/json" },
       body: {
         // Current catalog id first; fall back to the legacy org-prefixed id.
-        model: "Meta-Llama-3.3-70B-Instruct",
+        model: process.env.SAMBANOVA_MODEL ?? "Meta-Llama-3.3-70B-Instruct",
         messages: [{ role: "user", content: prompt }],
         temperature: 0.3,
         max_tokens: 3800,
@@ -751,7 +873,7 @@ Rules for "changes":
         method: "POST",
         headers: provider.headers,
         body: JSON.stringify(provider.body),
-        signal: AbortSignal.timeout(45000),
+        signal: AbortSignal.timeout(provider.name === "ollama-local" ? 3500 : 45000),
       });
       if (!res.ok) {
         lastErr = new Error(`${provider.name} ${res.status}: ${(await res.text()).slice(0, 200)}`);
@@ -769,6 +891,10 @@ Rules for "changes":
     }
   }
   if (!raw) throw (lastErr ?? new Error("all providers failed"));
+  return { plan: parseLlmPlan(raw, task), provider: chosen || "llm" };
+}
+
+function parseLlmPlan(raw: string, task: string): LlmPlan {
   const jsonText = raw
     .replace(/```json/gi, "")
     .replace(/```/g, "")
@@ -790,7 +916,7 @@ Rules for "changes":
     prBody: parsed.prBody ?? "Automated by Ghost Web AI.",
     risks: parsed.risks ?? [],
   };
-  return { plan, provider: chosen || "llm" };
+  return plan;
 }
 
 function lineCount(file: GeneratedFile): number {
