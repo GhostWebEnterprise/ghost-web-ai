@@ -111,27 +111,27 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="nb-grid-paper min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground bg-[radial-gradient(circle_at_top_right,rgba(0,255,65,0.08),transparent_34rem)]">
       <AppNav active="dashboard" />
 
-      <main className="mx-auto max-w-[1100px] px-4 py-8">
+      <main className="mx-auto max-w-[1240px] px-4 py-8 lg:px-6 lg:py-10">
         {/* greeting */}
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="nb-overline text-muted-foreground">
-              Build HQ · {user?.name?.split(" ")[0] ?? "builder"}
+            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
+              Workspace overview · {user?.name?.split(" ")[0] ?? "builder"}
             </p>
-            <h1 className="mt-2 text-4xl font-black uppercase tracking-tight sm:text-5xl">
-              Pick up where the<br className="hidden sm:block" />
-              <span className="border-4 border-foreground bg-accent px-2">
-                chain left off.
-              </span>
+            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
+              Pick up where the <span className="text-foreground/55">chain left off.</span>
             </h1>
+            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
+              Your agent activity, connected repositories, and recent delivery runs — all in one calm workspace.
+            </p>
           </div>
           <Link to="/chat">
             <Button
               size="lg"
-              className="gap-2 border-2 border-foreground bg-foreground text-sm font-black uppercase tracking-wide text-background shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#04140a]"
+              className="gap-2 rounded-xl border border-foreground/15 bg-foreground text-sm font-semibold text-background shadow-lg shadow-black/15 hover:bg-foreground/85"
             >
               <Play className="size-4" /> New run
             </Button>
@@ -143,10 +143,10 @@ export default function Dashboard() {
           {statCards.map((card) => (
             <div
               key={card.label}
-              className="border-2 border-foreground bg-card p-3.5 shadow-[3px_3px_0_0_var(--ink)]"
+              className="rounded-2xl border border-foreground/10 bg-card/80 p-4 shadow-lg shadow-black/10"
             >
               <span
-                className={`mb-3 inline-block size-2.5 border border-black ${card.color}`}
+                className={`mb-4 inline-block size-2.5 rounded-full shadow-[0_0_12px_rgba(0,255,65,0.35)] ${card.color}`}
               />
               <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
                 {card.label}
@@ -162,7 +162,7 @@ export default function Dashboard() {
           {/* recent runs */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight">
+              <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
                 <Terminal className="size-5" /> Recent runs
               </h2>
               <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
@@ -188,7 +188,7 @@ export default function Dashboard() {
                 </Link>
               </div>
             ) : (
-              <div className="flex flex-col gap-2.5">
+              <div className="flex flex-col gap-2.5 rounded-2xl border border-foreground/10 bg-card/35 p-2">
                 {conversations.slice(0, 6).map((conversation) => {
                   const status = runStatusCopy(
                     conversation.status,
@@ -199,7 +199,7 @@ export default function Dashboard() {
                       key={conversation._id}
                       type="button"
                       onClick={() => navigate(`/chat?c=${conversation._id}`)}
-                      className="group flex items-center gap-3 border-2 border-foreground bg-card px-3 py-2.5 text-left transition-colors hover:bg-[#0f2417]"
+                      className="group flex items-center gap-3 rounded-xl border border-foreground/10 bg-card/80 px-3 py-3 text-left transition-all hover:bg-foreground/[0.07] hover:shadow-md"
                     >
                       <span
                         className={`inline-block size-2.5 shrink-0 border border-black ${status.cls}`}
@@ -237,7 +237,7 @@ export default function Dashboard() {
           {/* agents standing by */}
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-black uppercase tracking-tight">
+              <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
                 <Layers className="size-5" /> Agents standing by
               </h2>
             </div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
               {AGENTS.map((agent, i) => (
                 <div
                   key={agent.key}
-                  className="flex items-center gap-3 border-2 border-foreground bg-card px-3 py-2"
+                  className="flex items-center gap-3 rounded-xl border border-foreground/10 bg-card/70 px-3 py-2.5"
                 >
                   <span className="w-6 font-mono text-[10px] font-black text-muted-foreground">
                     {String(i + 1).padStart(2, "0")}
@@ -266,7 +266,7 @@ export default function Dashboard() {
             </div>
 
             {/* connect GitHub card */}
-            <div className="mt-4 border-2 border-foreground bg-foreground p-4 text-background">
+            <div className="mt-4 rounded-2xl border border-foreground/10 bg-foreground p-5 text-background shadow-xl shadow-black/20">
               <div className="flex items-center gap-2">
                 <Github className="size-4" />
                 <h3 className="text-[13px] font-black uppercase tracking-wide">
@@ -368,7 +368,7 @@ export default function Dashboard() {
         </div>
 
         {/* free band */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-2 border-foreground bg-[#0f2417] px-4 py-3">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-foreground/10 bg-card/70 px-4 py-3.5">
           <p className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-wider">
             <span className="border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black">
               No credits

@@ -221,30 +221,30 @@ function GhostSticker({ label }: { label: string }) {
 
 export default function Landing() {
   return (
-    <div className="nb-grid-paper min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground bg-[radial-gradient(circle_at_top_right,rgba(0,255,65,0.1),transparent_38rem)]">
       {/* header */}
-      <header className="sticky top-0 z-40 border-b-2 border-foreground bg-background/95 backdrop-blur">
-        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+      <header className="sticky top-0 z-40 border-b border-foreground/10 bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 lg:px-6">
           <Link to="/" aria-label="Ghost Web AI home">
             <Wordmark markSize="h-8 w-8" />
           </Link>
-          <nav className="hidden items-center gap-5 font-mono text-[11px] font-bold uppercase tracking-widest md:flex">
-            <a className="hover:underline" href="#chain">Chain</a>
-            <a className="hover:underline" href="#agents">Agents</a>
-            <a className="hover:underline" href="#features">Git &amp; GitHub</a>
-            <a className="hover:underline" href="#faq">FAQ</a>
+          <nav className="hidden items-center gap-1 rounded-xl border border-foreground/10 bg-card/50 p-1 md:flex">
+            <a className="rounded-lg px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground" href="#chain">Chain</a>
+            <a className="rounded-lg px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground" href="#agents">Agents</a>
+            <a className="rounded-lg px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground" href="#features">Git &amp; GitHub</a>
+            <a className="rounded-lg px-3 py-1.5 text-[10px] font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground" href="#faq">FAQ</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link to="/auth">
               <Button
                 variant="ghost"
-                className="border-2 border-foreground bg-card text-xs font-black uppercase tracking-wide text-foreground hover:bg-accent"
+                className="rounded-lg border border-foreground/10 bg-transparent text-xs font-medium text-muted-foreground hover:bg-foreground/[0.07] hover:text-foreground"
               >
                 Log in
               </Button>
             </Link>
             <Link to={SECTION_LINK}>
-              <Button className="gap-2 border-2 border-foreground bg-accent text-xs font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166]">
+              <Button className="gap-2 rounded-lg border border-foreground/15 bg-foreground text-xs font-semibold text-background shadow-lg shadow-black/10 hover:bg-foreground/85">
                 Console <ArrowRight className="size-3.5" />
               </Button>
             </Link>
@@ -254,7 +254,7 @@ export default function Landing() {
 
       <main>
         {/* ------------------------------ hero ------------------------------ */}
-        <section className="relative mx-auto max-w-6xl px-4 pb-20 pt-14 lg:pt-20">
+        <section className="relative mx-auto max-w-7xl px-4 pb-24 pt-16 lg:px-6 lg:pt-24">
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -262,20 +262,20 @@ export default function Landing() {
             className="grid items-start gap-10 lg:grid-cols-[1.05fr_0.95fr]"
           >
             <div>
-              <p className="nb-overline mb-4 inline-flex items-center gap-2 border-2 border-foreground bg-card px-2 py-1">
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-foreground/10 bg-card/70 px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 <GhostMark className="size-3.5" />
                 One dev team, in your browser
               </p>
-              <h1 className="text-[2rem] font-black uppercase leading-[0.95] tracking-tight sm:text-6xl xl:text-7xl">
+              <h1 className="max-w-3xl text-[2.4rem] font-semibold leading-[0.98] tracking-[-0.06em] sm:text-6xl xl:text-7xl">
                 Say what to
                 <br />
                 build.
                 <br />
-                <span className="mt-2 inline-block border-4 border-foreground bg-accent px-2 shadow-[6px_6px_0_0_var(--ink)] sm:px-3">
+                <span className="mt-2 inline-block text-foreground/45">
                   Agents build it.
                 </span>
               </h1>
-              <p className="mt-6 max-w-xl text-[15px] leading-7 text-foreground/80">
+              <p className="mt-6 max-w-xl text-[15px] leading-7 text-muted-foreground">
                 Ghost Web AI is a fused chain of agents — Git, GitHub, web,
                 Android, desktop, API and CI — that plans, codes, tests,
                 self-heals, commits and opens the pull request for you. It
@@ -286,7 +286,7 @@ export default function Landing() {
                 <Link to={BUILD_LINK}>
                   <Button
                     size="lg"
-                    className="gap-2 border-2 border-foreground bg-accent text-[15px] font-black uppercase tracking-wide text-foreground shadow-[5px_5px_0_0_var(--ink)] hover:bg-[#ffd166] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                    className="gap-2 rounded-xl border border-foreground/15 bg-foreground text-[15px] font-semibold text-background shadow-lg shadow-black/20 hover:bg-foreground/85"
                   >
                     <Wand2 className="size-4" />
                     Start the guided build — free
@@ -294,7 +294,7 @@ export default function Landing() {
                 </Link>
                 <Link
                   to={SECTION_LINK}
-                  className="border-2 border-foreground bg-card px-4 py-2.5 text-sm font-black uppercase tracking-wide hover:bg-accent"
+                  className="rounded-xl border border-foreground/15 bg-card/70 px-4 py-2.5 text-sm font-medium hover:bg-foreground/[0.07]"
                 >
                   Open the console
                 </Link>
@@ -329,8 +329,8 @@ export default function Landing() {
             {/* sample run console */}
             <div className="relative lg:sticky lg:top-24">
               <GhostSticker label="Live preview · not a mockup of a mockup" />
-              <div className="mb-3 flex items-center gap-2">
-                <span className="border-2 border-foreground bg-[#ff9e64] px-2 py-1 font-mono text-[10px] font-black uppercase">
+              <div className="mb-3 flex items-center gap-2 px-1">
+                <span className="rounded-full border border-foreground/10 bg-card px-3 py-1 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                   Example run
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
