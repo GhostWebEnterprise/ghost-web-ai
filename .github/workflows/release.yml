@@ -139,7 +139,7 @@ jobs:
           cp "$APK" "apk-out/ghost-web-ai-${RELEASE_ASSET_VERSION}.apk"
 
       - name: Attach APK to the GitHub release
-        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && github.sha == '9e727a4dba2c0f5cd9666245351735375c06e734')
+        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
