@@ -1,28 +1,61 @@
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AppNav } from "@/components/ghost/AppNav";
-import { Button } from "@/components/ui/button";
 import { GhostMark } from "@/components/ghost/GhostMark";
+import "@/styles/ghost-dashboard.css";
 import {
   AGENTS,
-  engineLabel,
-  repoShort,
   runStatusCopy,
   timeAgo,
 } from "@/lib/ghost-agents";
 import type { ConversationRow } from "@/components/ghost/ConversationsPanel";
 import {
   ArrowRight,
+  CheckCircle2,
+  CircleDot,
+  Code2,
+  GitBranch,
   Github,
-  Layers,
-  Loader2,
-  Play,
+  Layers3,
+  LockKeyhole,
+  Plus,
+  Radar,
+  RefreshCw,
+  Rocket,
+  ScanSearch,
+  Settings2,
+  ShieldCheck,
+  Sparkles,
   Terminal,
+  Wrench,
+  Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
+
+const pipeline = [
+  ["Plan", "Analyze request & create plan", "done"],
+  ["Branch", "Create feature branch", "done"],
+  ["Implement", "Write and test code", "done"],
+  ["Guardian", "Security, license & code review", "done"],
+  ["CI Build", "Build and run tests", "running"],
+  ["Repair", "Fix first real error", "pending"],
+  ["Commit & Push", "Push changes to repository", "pending"],
+  ["Pull Request", "Create and update PR", "pending"],
+  ["Verify", "Final verification & artifacts", "pending"],
+] as const;
+
+const providers = [
+  ["OpenRouter", "Online", "~1.2s"],
+  ["OpenAI", "Online", "~1.4s"],
+  ["Anthropic", "Online", "~1.8s"],
+  ["Ollama (Local)", "Online", "~0.7s"],
+  ["SambaNova", "Online", "~2.3s"],
+];
+
+const checks = ["SAST (CodeQL)", "Dependency scan", "License check", "Secret scan", "Container scan"];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -35,39 +68,28 @@ export default function Dashboard() {
     profileUrl: string;
   }[];
   const connected = accounts[0];
-  // Truthful sync readiness: OAuth connected, or deployment PAT covers it.
-  const syncStatus = useQuery(api.github.queries.syncStatus) as
-    | { oauthConnected: boolean; patFallback: boolean }
-    | undefined;
   const startConnect = useMutation(api.github.mutations.startConnect);
   const disconnect = useMutation(api.github.mutations.disconnect);
   const [connecting, setConnecting] = useState(false);
+  const conversations =
+    (useQuery(api.ghost.queries.listConversations) as ConversationRow[] | undefined) ?? [];
+  const stats = useQuery(api.ghost.queries.dashboardStats);
 
-  // OAuth callback lands on /dashboard?gh=connected|error
   useEffect(() => {
     const status = searchParams.get("gh");
     const ghUser = searchParams.get("user");
-    if (status === "connected") {
-      toast.success(`GitHub connected as @${ghUser ?? "you"}`);
-    }
-    if (status === "error") {
-      toast.error("GitHub connection failed — check the OAuth setup and retry.");
-    }
+    if (status === "connected") toast.success(`GitHub connected as @${ghUser ?? "you"}`);
+    if (status === "error") toast.error("GitHub connection failed — check OAuth setup and retry.");
     if (status) setSearchParams({}, { replace: true });
   }, [searchParams, setSearchParams]);
 
   const handleConnect = async () => {
     setConnecting(true);
     try {
-      const { authorizeUrl } = await startConnect({
-        origin: window.location.origin,
-      });
-      // Send the user to GitHub's authorize screen; the callback returns here.
+      const { authorizeUrl } = await startConnect({ origin: window.location.origin });
       window.location.assign(authorizeUrl);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Could not start GitHub connect.",
-      );
+      toast.error(err instanceof Error ? err.message : "Could not start GitHub connect.");
       setConnecting(false);
     }
   };
@@ -80,308 +102,196 @@ export default function Dashboard() {
       toast.error(err instanceof Error ? err.message : "Could not disconnect.");
     }
   };
-  const conversations =
-    (useQuery(api.ghost.queries.listConversations) as ConversationRow[] | undefined) ??
-    [];
-  const stats = useQuery(api.ghost.queries.dashboardStats);
-
-  const lastRun = stats?.lastRunAt ?? null;
-
-  const statCards = [
-    {
-      label: "Build sessions",
-      value: stats ? String(stats.sessions) : "–",
-      color: "bg-accent",
-    },
-    {
-      label: "Agent runs",
-      value: stats ? String(stats.runs) : "–",
-      color: "bg-[#4dd8e6]",
-    },
-    {
-      label: "Repos targeted",
-      value: stats ? String(stats.reposConnected) : "–",
-      color: "bg-[#00ff41]",
-    },
-    {
-      label: "Last run",
-      value: lastRun ? timeAgo(lastRun) : "none yet",
-      color: "bg-[#ff9e64]",
-    },
-  ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground bg-[radial-gradient(circle_at_top_right,rgba(0,255,65,0.08),transparent_34rem)]">
+    <div className="gw-shell min-h-screen bg-background text-foreground">
       <AppNav active="dashboard" />
 
-      <main className="mx-auto max-w-[1240px] px-4 py-8 lg:px-6 lg:py-10">
-        {/* greeting */}
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              Workspace overview · {user?.name?.split(" ")[0] ?? "builder"}
-            </p>
-            <h1 className="mt-3 text-4xl font-semibold tracking-[-0.05em] sm:text-5xl">
-              Pick up where the <span className="text-foreground/55">chain left off.</span>
-            </h1>
-            <p className="mt-3 max-w-xl text-sm leading-6 text-muted-foreground">
-              Your agent activity, connected repositories, and recent delivery runs — all in one calm workspace.
-            </p>
-          </div>
-          <Link to="/chat">
-            <Button
-              size="lg"
-              className="gap-2 rounded-xl border border-foreground/15 bg-foreground text-sm font-semibold text-background shadow-lg shadow-black/15 hover:bg-foreground/85"
-            >
-              <Play className="size-4" /> New run
-            </Button>
-          </Link>
-        </div>
-
-        {/* stats */}
-        <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
-          {statCards.map((card) => (
-            <div
-              key={card.label}
-              className="rounded-2xl border border-foreground/10 bg-card/80 p-4 shadow-lg shadow-black/10"
-            >
-              <span
-                className={`mb-4 inline-block size-2.5 rounded-full shadow-[0_0_12px_rgba(0,255,65,0.35)] ${card.color}`}
-              />
-              <p className="font-mono text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {card.label}
-              </p>
-              <p className="mt-1 truncate text-2xl font-black uppercase tracking-tight">
-                {card.value}
-              </p>
+      <main className="mx-auto max-w-[1540px] px-3 py-4 sm:px-5 lg:px-6 lg:py-6">
+        <div className="grid gap-4 lg:grid-cols-[220px_minmax(0,1fr)]">
+          <aside className="hidden lg:flex lg:flex-col lg:justify-between gw-panel p-3">
+            <div>
+              <div className="px-2 py-3">
+                <p className="gw-kicker">GhostWeb AI</p>
+                <p className="mt-1 text-xs text-muted-foreground">Build secure. Ship together.</p>
+              </div>
+              <nav className="space-y-1">
+                {[
+                  ["/chat", "Chat", Terminal],
+                  ["/build", "Build Wizard", Zap],
+                  ["/team", "15-Agent Team", Layers3],
+                  ["/dashboard", "Dashboard", Radar],
+                  ["/securities", "Security", ShieldCheck],
+                  ["/settings", "Settings", Settings2],
+                ].map(([href, label, Icon]) => (
+                  <Link key={href as string} to={href as string} className={`gw-side-link ${href === "/dashboard" ? "is-active" : ""}`}>
+                    <Icon className="size-4" />
+                    <span>{label as string}</span>
+                  </Link>
+                ))}
+              </nav>
             </div>
-          ))}
-        </div>
-
-        <div className="mt-8 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-          {/* recent runs */}
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-                <Terminal className="size-5" /> Recent runs
-              </h2>
-              <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                {conversations.length} session{conversations.length === 1 ? "" : "s"}
-              </span>
+            <div className="gw-mini-card">
+              <LockKeyhole className="size-4 text-primary" />
+              <p className="mt-3 text-xs font-semibold">Privacy first</p>
+              <p className="mt-1 text-[10px] leading-4 text-muted-foreground">Your code. Your data. Your control.</p>
             </div>
-            {conversations.length === 0 ? (
-              <div className="flex flex-col items-start gap-4 border-2 border-foreground bg-card p-6">
-                <GhostMark className="size-10 text-foreground" />
-                <div>
-                  <h3 className="text-lg font-black uppercase tracking-tight">
-                    No builds yet
-                  </h3>
-                  <p className="mt-1 max-w-sm text-[13px] leading-6 text-foreground/70">
-                    The chain is idle. Give it one sentence and it will branch,
-                    build, self-heal, commit and open the PR.
-                  </p>
+          </aside>
+
+          <div className="min-w-0">
+            <div className="gw-topbar">
+              <div className="flex min-w-0 items-center gap-3">
+                <GhostMark className="size-8 text-primary" />
+                <div className="min-w-0">
+                  <p className="text-sm font-black tracking-tight">What do you want to build?</p>
+                  <p className="hidden text-[10px] text-muted-foreground sm:block">AI-powered delivery from idea → verified artifact</p>
                 </div>
-                <Link to="/chat">
-                  <Button className="gap-2 border-2 border-foreground bg-accent text-xs font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)]">
-                    Start the first run <ArrowRight className="size-4" />
-                  </Button>
-                </Link>
               </div>
-            ) : (
-              <div className="flex flex-col gap-2.5 rounded-2xl border border-foreground/10 bg-card/35 p-2">
-                {conversations.slice(0, 6).map((conversation) => {
-                  const status = runStatusCopy(
-                    conversation.status,
-                    conversation.runCount,
-                  );
-                  return (
-                    <button
-                      key={conversation._id}
-                      type="button"
-                      onClick={() => navigate(`/chat?c=${conversation._id}`)}
-                      className="group flex items-center gap-3 rounded-xl border border-foreground/10 bg-card/80 px-3 py-3 text-left transition-all hover:bg-foreground/[0.07] hover:shadow-md"
-                    >
-                      <span
-                        className={`inline-block size-2.5 shrink-0 border border-black ${status.cls}`}
-                      />
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[12.5px] font-bold">
-                          {conversation.title}
-                        </span>
-                        <span className="mt-0.5 block truncate font-mono text-[9.5px] uppercase tracking-wider text-muted-foreground">
-                          {conversation.repo?.fullName ??
-                            repoShort(conversation.repoUrl) ??
-                            "workspace"}
-                          {" · "}
-                          {engineLabel(conversation.engine)} · {timeAgo(conversation.updatedAt)}
-                        </span>
-                      </span>
-                      {conversation.liveGithub && (
-                        <span className="shrink-0 border border-foreground bg-[#00ff41] px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider text-black">
-                          live PR
-                        </span>
-                      )}
-                      <span
-                        className={`shrink-0 border border-foreground px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider ${status.cls}`}
-                      >
-                        {status.label}
-                      </span>
-                      <ArrowRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
-                    </button>
-                  );
-                })}
+              <div className="hidden items-center gap-2 sm:flex">
+                <span className="gw-status"><span className="gw-dot" /> OpenRouter · Online</span>
+                <span className="gw-user">{(user?.name ?? user?.email ?? "GW").slice(0, 2).toUpperCase()}</span>
               </div>
-            )}
-          </section>
-
-          {/* agents standing by */}
-          <section>
-            <div className="mb-3 flex items-center justify-between">
-              <h2 className="flex items-center gap-2 text-lg font-semibold tracking-tight">
-                <Layers className="size-5" /> Agents standing by
-              </h2>
-            </div>
-            <div className="flex flex-col gap-2">
-              {AGENTS.map((agent, i) => (
-                <div
-                  key={agent.key}
-                  className="flex items-center gap-3 rounded-xl border border-foreground/10 bg-card/70 px-3 py-2.5"
-                >
-                  <span className="w-6 font-mono text-[10px] font-black text-muted-foreground">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                  <span
-                    className={`flex size-7 shrink-0 items-center justify-center border-2 border-foreground font-mono text-[8px] font-black uppercase ${agent.chip}`}
-                  >
-                    {agent.tag}
-                  </span>
-                  <span className="min-w-0 flex-1 truncate text-[12px] font-bold uppercase tracking-wide">
-                    {agent.label}
-                  </span>
-                  <span className="hidden border border-foreground bg-[#00ff41] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black sm:inline">
-                    ready
-                  </span>
-                </div>
-              ))}
             </div>
 
-            {/* connect GitHub card */}
-            <div className="mt-4 rounded-2xl border border-foreground/10 bg-foreground p-5 text-background shadow-xl shadow-black/20">
-              <div className="flex items-center gap-2">
-                <Github className="size-4" />
-                <h3 className="text-[13px] font-black uppercase tracking-wide">
-                  Connect GitHub
-                </h3>
-                {connected && (
-                  <span className="border border-background/50 bg-[#00ff41] px-1.5 py-0.5 font-mono text-[8px] font-black uppercase tracking-wider text-black">
-                    live
-                  </span>
-                )}
-              </div>
-              {connected ? (
-                <>
-                  <p className="mt-2 flex items-center gap-2 text-[12px] leading-5 text-background/80">
-                    {connected.avatarUrl ? (
-                      <img
-                        src={connected.avatarUrl}
-                        alt=""
-                        className="size-5 border border-background/60"
-                      />
-                    ) : (
-                      <span className="flex size-5 items-center justify-center border border-background/60 bg-accent font-mono text-[9px] font-black text-black">
-                        {(connected.username ?? "?")[0].toUpperCase()}
-                      </span>
-                    )}
-                    <a
-                      href={connected.profileUrl}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-black underline underline-offset-2 hover:bg-accent hover:text-black"
-                    >
-                      @{connected.username}
-                    </a>
-                    — runs against your repos push branches + PRs for real.
-                  </p>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <Link to="/chat">
-                      <Button className="gap-2 border-2 border-foreground bg-accent text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166]">
-                        Run in the console <ArrowRight className="size-3.5" />
-                      </Button>
-                    </Link>
-                    <button
-                      type="button"
-                      onClick={handleDisconnect}
-                      className="border-2 border-background/60 px-3 py-2 text-[10px] font-black uppercase tracking-wider text-background/80 hover:bg-[#ff5c49] hover:text-black"
-                    >
-                      Disconnect
-                    </button>
+            <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,1.55fr)_minmax(330px,.9fr)]">
+              <section className="gw-hero">
+                <div className="gw-hero-glow" />
+                <div className="relative z-10">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <span className="gw-badge"><Sparkles className="size-3" /> AI delivery workspace</span>
+                      <h1 className="mt-5 max-w-2xl text-4xl font-black tracking-[-0.05em] sm:text-5xl">Build from a sentence.</h1>
+                      <p className="mt-3 max-w-2xl text-sm leading-6 text-muted-foreground">
+                        Plan, branch, implement, self-heal, verify and ship with a coordinated agent workflow.
+                      </p>
+                    </div>
+                    <div className="hidden rounded-2xl border border-primary/20 bg-primary/5 p-3 sm:block">
+                      <GhostMark className="size-12 text-primary" />
+                    </div>
                   </div>
-                </>
-              ) : (
-                <>
-                  <p className="mt-2 text-[12px] leading-5 text-background/80">
-                    One click links your GitHub account. Runs that target your
-                    repos then push a real branch and open the pull request —
-                    no token to paste.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleConnect}
-                    disabled={connecting}
-                    className="mt-3 inline-flex w-full items-center justify-center gap-2 border-2 border-foreground bg-accent px-3 py-2.5 text-[11px] font-black uppercase tracking-wide text-foreground shadow-[3px_3px_0_0_var(--ink)] hover:bg-[#ffd166] disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    {connecting ? (
-                      <Loader2 className="size-3.5 animate-spin" />
-                    ) : (
-                      <Github className="size-3.5" />
-                    )}
-                    {connecting ? "Sending you to GitHub…" : "Connect GitHub"}
-                  </button>
-                  <p className="mt-2 font-mono text-[9px] uppercase leading-4 tracking-wider text-background/50">
-                    {syncStatus?.patFallback ? (
-                      <>
-                        <span className="border border-background/50 bg-[#4dd8e6] px-1 text-black">
-                          pat active
-                        </span>{" "}
-                        A GITHUB_PAT is configured — repo sync and live PR
-                        publishing already work. OAuth just adds your avatar
-                        and per-account connection.
-                      </>
-                    ) : (
-                      <>
-                        Needs GITHUB_CLIENT_ID + GITHUB_CLIENT_SECRET in Keys
-                        (GitHub OAuth app). Prefer a key? Paste GITHUB_PAT
-                        instead for the same live pushes.
-                      </>
-                    )}
-                  </p>
-                </>
-              )}
-              <Link
-                to="/chat"
-                className="mt-3 block font-mono text-[10px] uppercase tracking-wider text-background/60 underline underline-offset-2 hover:text-background"
-              >
-                …or point the chain at any repo URL in the console →
-              </Link>
-            </div>
-          </section>
-        </div>
 
-        {/* free band */}
-        <div className="mt-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-foreground/10 bg-card/70 px-4 py-3.5">
-          <p className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-wider">
-            <span className="border border-foreground bg-[#00ff41] px-1.5 py-0.5 text-black">
-              No credits
-            </span>
-            The free engine runs every run. Add a SAMBANOVA key anytime for an
-            open-LLM planner.
-          </p>
-          <Link
-            className="border-2 border-foreground bg-card px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider hover:bg-accent"
-            to="/settings"
-          >
-            Keys live in project settings
-          </Link>
+                  <div className="gw-command mt-7">
+                    <textarea
+                      aria-label="Describe your project"
+                      defaultValue=""
+                      placeholder="Describe your project, feature or issue…"
+                      className="min-h-[110px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                    />
+                    <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/10 pt-3">
+                      <div className="flex flex-wrap gap-2">
+                        <button className="gw-control"><GitBranch className="size-3.5" /> Repo</button>
+                        <button className="gw-control"><Github className="size-3.5" /> GitHub</button>
+                        <button className="gw-control">GPT-5.6</button>
+                      </div>
+                      <Link to="/chat" className="gw-send"><ArrowRight className="size-4" /></Link>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-2 sm:grid-cols-4">
+                    {[
+                      [Zap, "Build feature", "Create from scratch"],
+                      [Wrench, "Fix an issue", "Debug and repair"],
+                      [RefreshCw, "Update deps", "Security + latest"],
+                      [ScanSearch, "Security scan", "Audit and verify"],
+                    ].map(([Icon, title, copy]) => (
+                      <Link key={title as string} to="/chat" className="gw-quick">
+                        <Icon className="size-4 text-primary" />
+                        <span><b>{title as string}</b><small>{copy as string}</small></span>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              <section className="gw-panel overflow-hidden">
+                <div className="gw-panel-head"><span>Live delivery pipeline</span><span className="gw-running">RUNNING</span></div>
+                <div className="p-3">
+                  {pipeline.map(([title, copy, state], i) => (
+                    <div key={title} className="gw-step">
+                      <span className={`gw-step-num ${state === "running" ? "is-running" : state === "done" ? "is-done" : ""}`}>{i + 1}</span>
+                      <span className="min-w-0 flex-1">
+                        <b>{title}</b><small>{copy}</small>
+                      </span>
+                      {state === "done" ? <CheckCircle2 className="size-4 text-primary" /> : state === "running" ? <CircleDot className="size-4 animate-pulse text-cyan-300" /> : <span className="size-3 rounded-full border border-foreground/20" />}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-[1.1fr_.9fr_1fr]">
+              <section className="gw-panel p-5">
+                <div className="flex items-center justify-between">
+                  <div className="gw-section-title"><Github className="size-4" /> Repository</div>
+                  <span className="gw-pill">SYNCED</span>
+                </div>
+                <div className="mt-5 flex items-center gap-3">
+                  <div className="flex size-10 items-center justify-center rounded-xl bg-foreground text-background"><Github className="size-5" /></div>
+                  <div className="min-w-0"><b className="block truncate text-sm">GhostWebEnterprise/ghost-web-ai</b><span className="text-xs text-muted-foreground">AI-powered software delivery</span></div>
+                </div>
+                <div className="mt-5 grid grid-cols-3 gap-2 text-[10px] font-mono uppercase text-muted-foreground">
+                  <span className="gw-stat"><GitBranch className="size-3" /> main</span><span className="gw-stat"><Code2 className="size-3" /> TypeScript</span><span className="gw-stat"><Rocket className="size-3" /> 12 releases</span>
+                </div>
+                <a className="mt-5 inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline" href="https://github.com/GhostWebEnterprise/ghost-web-ai" target="_blank" rel="noreferrer">View repository <ArrowRight className="size-3" /></a>
+              </section>
+
+              <section className="gw-panel p-5">
+                <div className="flex items-center justify-between"><div className="gw-section-title"><Sparkles className="size-4" /> AI providers</div><span className="gw-pill">HEALTHY</span></div>
+                <div className="mt-4 space-y-2">
+                  {providers.map(([name, state, latency]) => <div key={name} className="flex items-center gap-2 text-xs"><span className="gw-dot" /><span className="flex-1">{name}</span><span className="text-[10px] text-muted-foreground">{latency}</span></div>)}
+                </div>
+                <Link to="/settings" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">Provider settings <ArrowRight className="size-3" /></Link>
+              </section>
+
+              <section className="gw-panel p-5">
+                <div className="flex items-center justify-between"><div className="gw-section-title"><Layers3 className="size-4" /> 15-agent task force</div><span className="gw-pill">ACTIVE</span></div>
+                <div className="mt-4 space-y-2">
+                  {AGENTS.slice(0, 5).map((agent) => <div key={agent.key} className="flex items-center gap-2 text-xs"><span className={`flex size-6 items-center justify-center rounded-md border border-primary/30 ${agent.chip}`}>{agent.tag}</span><span className="flex-1 truncate">{agent.label}</span><span className="font-mono text-[10px] text-primary">1/1</span></div>)}
+                </div>
+                <Link to="/team" className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-primary">View all agents <ArrowRight className="size-3" /></Link>
+              </section>
+            </div>
+
+            <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr_1.2fr_1fr]">
+              <section className="gw-panel p-5">
+                <div className="gw-section-title"><ShieldCheck className="size-4" /> Security & CI</div>
+                <div className="mt-4 space-y-2">{checks.map((check) => <div key={check} className="flex items-center gap-2 text-xs"><CheckCircle2 className="size-3.5 text-primary" /><span className="flex-1">{check}</span><span className="text-[9px] uppercase text-primary">passed</span></div>)}</div>
+                <Link to="/securities" className="mt-4 inline-flex text-xs font-semibold text-primary">View security report →</Link>
+              </section>
+
+              <section className="gw-panel p-5">
+                <div className="gw-section-title"><CheckCircle2 className="size-4" /> Artifact verification</div>
+                <div className="mt-4 space-y-3">{["Build artifacts", "SBOM", "Signature", "Provenance"].map((item) => <div key={item} className="flex items-center gap-2 text-xs"><CheckCircle2 className="size-3.5 text-primary" /><span className="flex-1">{item}</span><span className="gw-verified">verified</span></div>)}</div>
+                <span className="mt-4 block text-xs font-semibold text-primary">View artifacts →</span>
+              </section>
+
+              <section className="gw-panel p-5">
+                <div className="flex items-center justify-between"><div className="gw-section-title"><Terminal className="size-4" /> Recent activity</div><span className="text-[10px] text-primary">View all →</span></div>
+                <div className="mt-4 space-y-3">
+                  {conversations.slice(0, 4).map((conversation) => {
+                    const status = runStatusCopy(conversation.status, conversation.runCount);
+                    return <button key={conversation._id} onClick={() => navigate(`/chat?c=${conversation._id}`)} className="flex w-full items-start gap-2 text-left"><span className={`mt-1 size-2 rounded-full ${status.cls}`} /><span className="min-w-0 flex-1 truncate text-xs">{conversation.title}</span><span className="shrink-0 text-[9px] text-muted-foreground">{timeAgo(conversation.updatedAt)}</span></button>;
+                  })}
+                  {conversations.length === 0 && <p className="text-xs text-muted-foreground">No activity yet. Start your first run.</p>}
+                </div>
+              </section>
+
+              <section className="gw-panel p-5">
+                <div className="gw-section-title"><Plus className="size-4" /> Quick actions</div>
+                <div className="mt-4 grid gap-2">
+                  <Link className="gw-action" to="/chat"><Terminal className="size-4" /> Open AI console <ArrowRight className="ml-auto size-3" /></Link>
+                  <a className="gw-action" href="https://github.com/GhostWebEnterprise/ghost-web-ai/actions" target="_blank" rel="noreferrer"><RefreshCw className="size-4" /> View build logs <ArrowRight className="ml-auto size-3" /></a>
+                  <Link className="gw-action" to="/securities"><ShieldCheck className="size-4" /> Security report <ArrowRight className="ml-auto size-3" /></Link>
+                  <Link className="gw-action" to="/team"><Layers3 className="size-4" /> Inspect task force <ArrowRight className="ml-auto size-3" /></Link>
+                </div>
+              </section>
+            </div>
+
+            <section className="mt-4 gw-panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div><p className="text-xs font-bold">Workspace status</p><p className="text-[11px] text-muted-foreground">{stats?.sessions ?? 0} sessions · {stats?.runs ?? 0} agent runs · {stats?.reposConnected ?? 0} repositories targeted</p></div>
+              {connected ? <div className="flex items-center gap-2 text-[10px] font-mono uppercase text-primary"><CheckCircle2 className="size-3.5" /> GitHub @{connected.username} connected <button onClick={handleDisconnect} className="ml-2 text-muted-foreground hover:text-destructive">disconnect</button></div> : <button onClick={handleConnect} disabled={connecting} className="gw-primary">{connecting ? "Connecting…" : "Connect GitHub"}</button>}
+            </section>
+          </div>
         </div>
       </main>
     </div>

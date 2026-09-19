@@ -1,41 +1,10 @@
 {
-  "name": "Ghost Web AI",
-  "short_name": "Ghost AI",
-  "description": "Agent task force: plain-language task → plan → branch → code → self-heal → CI → PR.",
+  "name": "GhostWeb AI",
+  "short_name": "GhostWeb",
+  "description": "Private, secure AI-powered software delivery with a 15-agent task force.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#060a07",
-  "theme_color": "#060a07",
-  "icons": [
-    {
-      "src": "/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/maskable-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/icons/maskable-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    }
-  ]
+  "theme_color": "#07120c",
+  "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
 }

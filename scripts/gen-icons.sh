@@ -9,13 +9,11 @@ set -eu
 cd "$(dirname "$0")/.."
 
 OUT_DIR="public/icons"
-APK_DIR="android/app/src/main/res"   # only touched when the platform exists
-SIZES_WEB="16 32 48 64 96 128 180 192 256 384 512"
-
 command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
 
 mkdir -p "$OUT_DIR"
 
+# shellcheck disable=SC2016
 bun -e '
 import { Resvg } from "@resvg/resvg-js";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
