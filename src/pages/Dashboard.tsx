@@ -71,6 +71,7 @@ export default function Dashboard() {
   const startConnect = useMutation(api.github.mutations.startConnect);
   const disconnect = useMutation(api.github.mutations.disconnect);
   const [connecting, setConnecting] = useState(false);
+  const [prompt, setPrompt] = useState("");
   const conversations =
     (useQuery(api.ghost.queries.listConversations) as ConversationRow[] | undefined) ?? [];
   const stats = useQuery(api.ghost.queries.dashboardStats);
@@ -101,6 +102,11 @@ export default function Dashboard() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not disconnect.");
     }
+  };
+
+  const openChat = () => {
+    const task = prompt.trim();
+    navigate(task ? `/chat?task=${encodeURIComponent(task)}` : "/chat");
   };
 
   return (
@@ -173,17 +179,24 @@ export default function Dashboard() {
                   <div className="gw-command mt-7">
                     <textarea
                       aria-label="Describe your project"
-                      defaultValue=""
+                      value={prompt}
+                      onChange={(event) => setPrompt(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          openChat();
+                        }
+                      }}
                       placeholder="Describe your project, feature or issue…"
                       className="min-h-[110px] w-full resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
                     />
                     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-foreground/10 pt-3">
                       <div className="flex flex-wrap gap-2">
-                        <button className="gw-control"><GitBranch className="size-3.5" /> Repo</button>
-                        <button className="gw-control"><Github className="size-3.5" /> GitHub</button>
-                        <button className="gw-control">GPT-5.6</button>
+                        <button type="button" className="gw-control"><GitBranch className="size-3.5" /> Repo</button>
+                        <button type="button" className="gw-control"><Github className="size-3.5" /> GitHub</button>
+                        <button type="button" className="gw-control">GPT-5.6</button>
                       </div>
-                      <Link to="/chat" className="gw-send"><ArrowRight className="size-4" /></Link>
+                      <button type="button" onClick={openChat} aria-label="Open AI console" className="gw-send"><ArrowRight className="size-4" /></button>
                     </div>
                   </div>
 

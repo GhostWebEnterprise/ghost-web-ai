@@ -27,6 +27,7 @@ export function Composer({
   busy,
   repoUrlPlaceholder: _repoUrlPlaceholder,
   defaultRepoUrl,
+  initialTask,
   gatewayConfigured,
   ollamaEnabled,
 }: {
@@ -41,10 +42,11 @@ export function Composer({
   busy?: boolean;
   repoUrlPlaceholder?: string;
   defaultRepoUrl?: string;
+  initialTask?: string;
   gatewayConfigured?: boolean;
   ollamaEnabled?: boolean;
 }) {
-  const [task, setTask] = useState("");
+  const [task, setTask] = useState(initialTask ?? "");
   const [repoUrl, setRepoUrl] = useState(defaultRepoUrl ?? "");
   const [showRepo, setShowRepo] = useState(!!defaultRepoUrl);
   const [capability, setCapability] = useState<AssistantCapability>("build");

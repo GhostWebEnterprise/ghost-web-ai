@@ -33,6 +33,7 @@ import { puterChat } from "@/lib/puter";
 export default function Chat() {
   const [searchParams, setSearchParams] = useSearchParams();
   const paramId = searchParams.get("c");
+  const initialTask = searchParams.get("task") ?? "";
   const { settings } = useAppSettings();
   const [mode, setMode] = useState<"thread" | "new">(
     paramId ? "thread" : "new",
@@ -381,6 +382,7 @@ export default function Chat() {
                 onSubmit={startRun}
                 busy={chainRunning}
                 defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url ?? settings.defaultRepoUrl}
+                initialTask={initialTask}
                 gatewayConfigured={gatewayConfigured}
                 ollamaEnabled={ollamaEnabled}
               />
