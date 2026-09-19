@@ -347,3 +347,5 @@ jobs:
             echo "TestFlight/App Store need APPLE_CERTIFICATES secrets and are not"
             echo "part of this pipeline yet."
           } >> "$GITHUB_STEP_SUMMARY"
+
+# Release trigger marker: v0.2.0 APK attach
