@@ -1,10 +1,11 @@
 {
-  "name": "GhostWeb AI",
-  "short_name": "GhostWeb",
-  "description": "Private, secure AI-powered software delivery with a 15-agent task force.",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#060a07",
-  "theme_color": "#07120c",
-  "icons": [{"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}]
+  "name":"GhostWeb AI",
+  "short_name":"GhostWeb AI",
+  "description":"Private, secure AI-powered software delivery with a 15-agent task force.",
+  "start_url":"/",
+  "scope":"/",
+  "display":"standalone",
+  "background_color":"#020812",
+  "theme_color":"#020812",
+  "icons":[{"src":"/icon.svg","sizes":"512x512","type":"image/svg+xml","purpose":"any maskable"}]
 }

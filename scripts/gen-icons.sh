@@ -39,10 +39,10 @@ for (const [dpi, s] of android) {
   writeFileSync(`${dir}/ic_launcher_round.png`, png);
 }
 
-// Adaptive icon layers (Android 8+): solid dark background + full-bleed ghost
-// foreground. Safe-zone padding is baked into the foreground SVG.
-const bg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><rect width="108" height="108" fill="#040a06"/></svg>`;
-const fg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><g transform="translate(21 21) scale(0.615)"><path d="M14 46V25C14 15.059 22.059 7 32 7C41.941 7 50 15.059 50 25V46H43L39.5 40.5L36 46H32L28.5 40.5L25 46H21L17.5 40.5L14 46Z" fill="#00ff41"/><rect x="20.75" y="20" width="7.9" height="11.25" fill="#040a06"/><rect x="39.35" y="20" width="7.9" height="11.25" fill="#040a06"/></g></svg>`;
+// Adaptive icon layers (Android 8+): use the exact GhostWeb AI artwork
+// from public/icon.svg so Android never falls back to the old matrix mark.
+const bg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><rect width="108" height="108" fill="#020812"/></svg>`;
+const fg = svg;
 for (const [dpi, s] of android) {
   const dir = `android/app/src/main/res/mipmap-${dpi}`;
   try { mkdirSync(dir, { recursive: true }); } catch {}
