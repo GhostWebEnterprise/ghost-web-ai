@@ -349,3 +349,4 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
 # Release trigger marker: v0.2.0 APK attach
+# The main-branch v0.2.0 path intentionally uses the repository release upload command above.
