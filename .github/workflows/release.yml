@@ -377,4 +377,5 @@ jobs:
 # Release trigger marker: v0.2.0 APK attach
 # The main-branch v0.2.0 path intentionally uses the repository release upload command above.
 # One-time trigger: v0.2.0 APK
+# CI verification trigger: 2026-09-20
 
