@@ -39,7 +39,7 @@ jobs:
           grep -q '<div id="root">' dist/index.html || { echo "root div missing"; exit 1; }
 
       - name: Extract release notes from the tag
-        if: github.ref == 'refs/heads/main' && github.event.head_commit.message == 'release: v0.1.9'
+        if: github.ref == 'refs/heads/main'
         run: |
           {
             echo "## Ghost Web AI ${GITHUB_REF_NAME}"
@@ -49,7 +49,7 @@ jobs:
           } > RELEASE_NOTES.md
 
       - name: Create GitHub release with artifacts
-        if: github.ref == 'refs/heads/main' && github.event.head_commit.message == 'release: v0.1.9'
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v0.1.9
@@ -132,7 +132,7 @@ jobs:
           cp "$APK" "apk-out/ghost-web-ai-v0.1.9.apk"
 
       - name: Attach APK to the GitHub release
-        if: github.ref == 'refs/heads/main' && github.event.head_commit.message == 'release: v0.1.9'
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           files: apk-out/ghost-web-ai-*.apk
@@ -276,7 +276,7 @@ jobs:
             || { echo "no installers staged"; exit 1; }
 
       - name: Attach desktop installers to the GitHub release
-        if: github.ref == 'refs/heads/main' && github.event.head_commit.message == 'release: v0.1.9'
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           files: desktop-out/*
@@ -328,7 +328,7 @@ jobs:
           retention-days: 14
 
       - name: Note about signed iOS builds
-        if: github.ref == 'refs/heads/main' && github.event.head_commit.message == 'release: v0.1.9'
+        if: github.ref == 'refs/heads/main'
         run: |
           {
             echo "iOS shell attached as a workflow artifact. Signed .ipa builds for"
