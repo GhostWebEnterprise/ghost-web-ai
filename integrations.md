@@ -1,4 +1,4 @@
-# VLY Integrations
+# AI Gateway + VLY Integrations
 
 First-order integrations for AI, email, and payments with automatic usage billing through VLY integration keys.
 
@@ -6,8 +6,24 @@ First-order integrations for AI, email, and payments with automatic usage billin
 
 The following environment variables are automatically set during project creation:
 
-- `VLY_INTEGRATION_KEY`: Your unique integration key (format: `sk_*`)
-- `VLY_INTEGRATION_BASE_URL`: The base URL for the integration gateway (default: `https://integrations.freebuff.com/`)
+- `AI_GATEWAY_API_KEY`: Server-side key for the OpenAI-compatible AI gateway
+- `AI_GATEWAY_BASE_URL`: Gateway base URL (default: `https://ai-gateway.vercel.sh/v1`)
+- `VLY_INTEGRATION_KEY`: Legacy/other VLY integration key, only where the VLY integration package is still used
+- `VLY_INTEGRATION_BASE_URL`: Legacy VLY integration gateway URL
+
+## Verified AI Gateway
+
+GhostWeb AI now uses the Vercel AI Gateway as its model-routing endpoint. The live catalogue is discovered from `GET /v1/models`; the application does not treat the curated model list as authoritative. A model is shown as verified only when its exact ID is present in the live catalogue.
+
+```text
+https://ai-gateway.vercel.sh/v1/models
+https://ai-gateway.vercel.sh/v1/chat/completions
+https://ai-gateway.vercel.sh/v1/responses
+```
+
+The curated IDs in `src/lib/ai-gateway.ts` include verified OpenAI, Anthropic, Google, Alibaba/Qwen, DeepSeek and Meta/Llama entries. The runtime filters this list against the live catalogue before exposing it.
+
+**Security:** `AI_GATEWAY_API_KEY` is server-side only and must never be placed in a `VITE_*` variable or committed to source control.
 
 ## Installation
 
@@ -125,7 +141,7 @@ if (result.success) {
 
 ## Important Notes
 
-1. The integration key (`VLY_INTEGRATION_KEY`) is automatically injected during project creation
+1. The AI gateway key (`AI_GATEWAY_API_KEY`) must be configured server-side
 2. All API calls are automatically billed to your deployment based on usage
 3. Must be used in Convex actions with `"use node"` directive
 4. The integration key should never be exposed to the client
