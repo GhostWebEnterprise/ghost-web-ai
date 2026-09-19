@@ -135,6 +135,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v0.1.9
           files: apk-out/ghost-web-ai-*.apk
 
       - name: Upload APK workflow artifact
@@ -279,6 +280,7 @@ jobs:
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v0.1.9
           files: desktop-out/*
 
       - name: Upload desktop workflow artifact
