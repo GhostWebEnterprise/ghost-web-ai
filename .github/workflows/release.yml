@@ -118,9 +118,9 @@ jobs:
 
       - name: Verify signature and stage APK with release name
         run: |
-          APK=$(ls android/app/build/outputs/apk/release/app-release*.apk 2>/dev/null | head -1)
-          test -n "$APK" || { echo "release APK missing"; ls android/app/build/outputs/apk/ 2>/dev/null; exit 1; }
-          APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
+          APK=$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name "app-release*.apk" -print -quit 2>/dev/null)
+          test -n "$APK" || { echo "release APK missing"; find android/app/build/outputs/apk/ -maxdepth 2 -type f 2>/dev/null; exit 1; }
+          APKSIGNER=$(find "$ANDROID_HOME"/build-tools -type f -name apksigner -print 2>/dev/null | sort -V | tail -1 || true)
           if [ -n "$APKSIGNER" ]; then
             "$APKSIGNER" verify --print-certs "$APK" | head -5
           fi
