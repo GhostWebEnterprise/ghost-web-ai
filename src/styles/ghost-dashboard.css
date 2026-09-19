@@ -32,3 +32,17 @@
   .gw-verified { color:var(--mx-green); padding:.12rem .3rem; }
   @media (max-width:640px) { .gw-hero { padding:1rem; min-height:auto; } .gw-topbar { min-height:52px; } }
 }
+
+/* GhostWeb concept motion + responsive shell */
+@keyframes gw-pulse { 0%,100%{opacity:.55;transform:scale(.96)} 50%{opacity:1;transform:scale(1)} }
+@keyframes gw-rise { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+.gw-shell,.gw-chat-screen,.gw-appnav,.gw-mobile-nav,.mx-page{animation:gw-rise .45s ease both}
+.gw-dot{animation:gw-pulse 1.8s ease-in-out infinite}
+.gw-panel,.gw-hero,.gw-command,.gw-quick,.gw-action{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background-color .18s ease}
+.gw-panel:hover{border-color:rgba(0,255,65,.28)}
+.gw-hero::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.18;background-image:linear-gradient(rgba(0,255,65,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,65,.06) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,black,transparent 78%)}
+.gw-chat-screen main{border-color:rgba(0,255,65,.18)}
+main.mx-auto.max-w-\[1400px\] .border-2.border-foreground{border-color:rgba(0,255,65,.18);background:rgba(11,19,13,.82);box-shadow:0 18px 50px rgba(0,0,0,.18)}
+main.mx-auto.max-w-\[1400px\] .border-2.border-foreground:hover{border-color:rgba(0,255,65,.34)}
+@media(max-width:639px){body{padding-bottom:4.8rem}.gw-shell>main{padding-bottom:5rem}.gw-topbar{position:sticky;top:3.5rem;z-index:20}.gw-hero h1{font-size:2.2rem}.gw-panel{box-shadow:0 12px 32px rgba(0,0,0,.2)}}
+@media(prefers-reduced-motion:reduce){.gw-shell,.gw-chat-screen,.gw-appnav,.gw-mobile-nav,.mx-page,.gw-dot{animation:none!important}}
