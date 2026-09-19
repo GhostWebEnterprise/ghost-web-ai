@@ -89,7 +89,7 @@ jobs:
           bunx cap add android
           bunx cap sync android
           echo "--- scaffold contents ---"
-          ls -la android/ | head -15
+          find android -maxdepth 1 -mindepth 1 -print | head -15
           head -3 android/gradlew || echo "gradlew missing after scaffold"
 
       - name: Apply themed matrix launcher icons
