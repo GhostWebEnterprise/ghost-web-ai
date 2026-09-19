@@ -143,11 +143,32 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           RELEASE_TAG="${GITHUB_REF_NAME}"
           if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${{ github.event.head_commit.message }}" == *"v0.2.0 APK"* ]]; then
             RELEASE_TAG="v0.2.0"
           fi
-          gh release upload "${RELEASE_TAG}" apk-out/ghost-web-ai-*.apk --clobber --repo "${GITHUB_REPOSITORY}"
+
+          APK_PATH="apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
+          test -f "${APK_PATH}" || {
+            echo "Expected APK missing: ${APK_PATH}"
+            ls -la apk-out/
+            exit 1
+          }
+
+          # The release must exist before the asset upload. If it was deleted,
+          # recreate it automatically; otherwise keep the existing release.
+          if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release create "${RELEASE_TAG}"               --title "Ghost Web AI ${RELEASE_TAG}"               --generate-notes               --repo "${GITHUB_REPOSITORY}"
+          fi
+
+          # Idempotent asset replacement: the same release asset is safely
+          # replaced on retries/re-runs.
+          gh release upload "${RELEASE_TAG}" "${APK_PATH}"             --clobber             --repo "${GITHUB_REPOSITORY}"
+
+          # Verify the exact release asset through GitHub before declaring
+          # the attach gate green.
+          gh release view "${RELEASE_TAG}"             --repo "${GITHUB_REPOSITORY}"             --json assets             --jq '.assets[].name' | grep -Fx "ghost-web-ai-${RELEASE_TAG}.apk"
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
