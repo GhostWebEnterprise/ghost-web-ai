@@ -150,7 +150,7 @@ jobs:
         run: |
           set -euo pipefail
           RELEASE_TAG="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${{ github.event.head_commit.message }}" == *"v0.2.0 APK"* ]]; then
+          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_TAG="v0.2.0"
           fi
 
