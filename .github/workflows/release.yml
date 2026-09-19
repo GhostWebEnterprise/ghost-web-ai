@@ -104,9 +104,11 @@ jobs:
             || { echo "adaptive icon xml missing"; exit 1; }
 
       - name: Configure signed release build (version stamp + keystore)
+        env:
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           RELEASE_REF="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${{ github.event.head_commit.message }}" == *"v0.2.0 APK"* ]]; then
+          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_REF="v0.2.0"
           fi
           node scripts/android-release-config.cjs "${RELEASE_REF}"
@@ -124,6 +126,8 @@ jobs:
           sh gradlew assembleRelease --no-daemon
 
       - name: Verify signature and stage APK with release name
+        env:
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           APK=$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name "app-release*.apk" -print -quit 2>/dev/null)
           test -n "$APK" || { echo "release APK missing"; find android/app/build/outputs/apk/ -maxdepth 2 -type f 2>/dev/null; exit 1; }
@@ -142,6 +146,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
         env:
           GH_TOKEN: ${{ github.token }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
           RELEASE_TAG="${GITHUB_REF_NAME}"
