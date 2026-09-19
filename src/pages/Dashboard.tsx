@@ -2,10 +2,9 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { AppNav } from "@/components/ghost/AppNav";
 import { GhostMark } from "@/components/ghost/GhostMark";
+import "@/styles/ghost-dashboard.css";
 import {
   AGENTS,
-  engineLabel,
-  repoShort,
   runStatusCopy,
   timeAgo,
 } from "@/lib/ghost-agents";
@@ -19,7 +18,6 @@ import {
   Github,
   Layers3,
   LockKeyhole,
-  Play,
   Plus,
   Radar,
   RefreshCw,
@@ -30,7 +28,6 @@ import {
   Sparkles,
   Terminal,
   Wrench,
-  XCircle,
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -71,9 +68,6 @@ export default function Dashboard() {
     profileUrl: string;
   }[];
   const connected = accounts[0];
-  const syncStatus = useQuery(api.github.queries.syncStatus) as
-    | { oauthConnected: boolean; patFallback: boolean }
-    | undefined;
   const startConnect = useMutation(api.github.mutations.startConnect);
   const disconnect = useMutation(api.github.mutations.disconnect);
   const [connecting, setConnecting] = useState(false);
