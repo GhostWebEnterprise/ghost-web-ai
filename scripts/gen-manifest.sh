@@ -12,5 +12,7 @@ if [ ! -f dist/index.html ]; then
 fi
 
 cd dist
-find . -type f ! -name artifacts.sha256 -print0 | sort -z | xargs -0 sha256sum > artifacts.sha256
+tmp_manifest="$(mktemp)"
+find . -type f ! -name artifacts.sha256 -print0 | sort -z | xargs -0 sha256sum > "$tmp_manifest"
+mv "$tmp_manifest" artifacts.sha256
 echo "manifest written: dist/artifacts.sha256 ($(wc -l < artifacts.sha256) files)"
