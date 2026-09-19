@@ -1,0 +1,27 @@
+name: Publish GhostWeb AI v0.2.0
+
+on:
+  push:
+    branches: ["main"]
+
+permissions:
+  contents: write
+
+jobs:
+  tag-release:
+    if: github.sha == 'b29000134d77581c06a8a0a342dc18572b4ae7d0'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create v0.2.0 tag once
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -eu
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/v0.2.0" >/dev/null 2>&1; then
+            echo "v0.2.0 already exists"
+            exit 0
+          fi
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/tags/v0.2.0" \
+            -f sha="${GITHUB_SHA}"
+          echo "Created v0.2.0 at ${GITHUB_SHA}"
