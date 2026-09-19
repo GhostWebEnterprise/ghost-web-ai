@@ -9,7 +9,6 @@ permissions:
 
 jobs:
   tag-release:
-    if: github.sha == 'b29000134d77581c06a8a0a342dc18572b4ae7d0'
     runs-on: ubuntu-latest
     steps:
       - name: Create v0.2.0 tag once
