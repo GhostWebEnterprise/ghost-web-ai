@@ -13,6 +13,7 @@ command -v bun >/dev/null 2>&1 || { echo "bun is required" >&2; exit 1; }
 
 mkdir -p "$OUT_DIR"
 
+# shellcheck disable=SC2016
 bun -e '
 import { Resvg } from "@resvg/resvg-js";
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
