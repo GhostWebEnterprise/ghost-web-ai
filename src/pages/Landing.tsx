@@ -30,9 +30,10 @@ const agents: Array<[string, string]> = [
 const security = ["SAST (CodeQL)", "Dependency Scan", "License Check", "Secret Scan", "Container Scan"];
 const artifacts = ["Build Artifacts", "SBOM", "Signature", "Provenance"];
 
-const navItems: Array<[typeof Grid3X3, string]> = [
-  [Grid3X3, "Dashboard"], [Terminal, "Chat"], [Zap, "Build"], [Activity, "Pipeline"],
-  [Users, "Team"], [Layers3, "Repos"], [ShieldCheck, "Security"], [Settings, "Settings"],
+const navItems: Array<[typeof Grid3X3, string, string]> = [
+  [Grid3X3, "Dashboard", "/dashboard"], [Terminal, "Chat", "/chat"], [Zap, "Build", "/build"],
+  [Activity, "Pipeline", "/dashboard"], [Users, "Team", "/team"], [Layers3, "Repos", "/dashboard"],
+  [ShieldCheck, "Security", "/securities"], [Settings, "Settings", "/settings"],
 ];
 
 function Cross() {
@@ -130,8 +131,8 @@ export default function Landing() {
       <div className={`px-shell ${open ? "open" : ""}`}>
         <aside className="px-side">
           <nav className="px-nav">
-            {navItems.map(([Icon, label], i) => (
-              <Link key={label} to={i === 0 ? "/" : "/auth"} className={i === 0 ? "active" : ""}>
+            {navItems.map(([Icon, label, href]) => (
+              <Link key={label} to={href}>
                 <Icon className="size-4" /><span>{label}</span>
               </Link>
             ))}
@@ -187,19 +188,19 @@ export default function Landing() {
                     <button type="button"><Github className="size-3" /> Web <ChevronDown className="size-3" /></button>
                     <button type="button"><Wrench className="size-3" /> Tools <ChevronDown className="size-3" /></button>
                   </div>
-                  <Link className="px-send" to="/auth" aria-label="Send"><ArrowRight className="size-5" /></Link>
+                  <Link className="px-send" to={prompt.trim() ? `/chat?task=${encodeURIComponent(prompt.trim())}` : "/chat"} aria-label="Send"><ArrowRight className="size-5" /></Link>
                 </div>
               </section>
 
               {/* QUICK ACTIONS */}
               <div className="px-quick">
                 {([
-                  [Sparkles, "Plan & Analyze", "Create a plan"],
-                  [Code2, "Build & Code", "Generate code"],
-                  [Wrench, "Fix & Improve", "Debug and repair"],
-                  [Rocket, "Deploy & Release", "Ship to production"],
-                ] as const).map(([Icon, title, copy], i) => (
-                  <Link to="/auth" className="px-frame" key={title}>
+                  [Sparkles, "Plan & Analyze", "Create a plan", "/build"],
+                  [Code2, "Build & Code", "Generate code", "/chat"],
+                  [Wrench, "Fix & Improve", "Debug and repair", "/chat"],
+                  [Rocket, "Deploy & Release", "Ship to production", "/build"],
+                ] as const).map(([Icon, title, copy, href], i) => (
+                  <Link to={href} className="px-frame" key={title}>
                     <span className="idx">0{i + 1}</span>
                     <Icon className="size-4" />
                     <b>{title}</b>
@@ -228,7 +229,7 @@ export default function Landing() {
                         <div key={name}><StatusDot /><span>{name}</span><small>{latency}</small></div>
                       ))}
                     </div>
-                    <Link className="px-link" to="/auth">Provider settings <ArrowRight className="size-3" /></Link>
+                    <Link className="px-link" to="/settings">Provider settings <ArrowRight className="size-3" /></Link>
                   </div>
                 </section>
 
@@ -240,7 +241,7 @@ export default function Landing() {
                         <div key={name}><span className="px-agent">{tag}</span><span>{name}</span><small>1/1</small></div>
                       ))}
                     </div>
-                    <Link className="px-link" to="/auth">View all agents <ArrowRight className="size-3" /></Link>
+                    <Link className="px-link" to="/team">View all agents <ArrowRight className="size-3" /></Link>
                   </div>
                 </section>
 
@@ -252,7 +253,7 @@ export default function Landing() {
                         <div key={item}><CheckCircle2 className="size-3.5" /><span>{item}</span><small>Passed</small></div>
                       ))}
                     </div>
-                    <Link className="px-link" to="/auth">View security report <ArrowRight className="size-3" /></Link>
+                    <Link className="px-link" to="/securities">View security report <ArrowRight className="size-3" /></Link>
                   </div>
                 </section>
 
@@ -264,7 +265,7 @@ export default function Landing() {
                         <div key={item}><CheckCircle2 className="size-3.5" /><span>{item}</span><small>Verified</small></div>
                       ))}
                     </div>
-                    <Link className="px-link" to="/auth">View artifacts <ArrowRight className="size-3" /></Link>
+                    <Link className="px-link" to="/securities">View artifacts <ArrowRight className="size-3" /></Link>
                   </div>
                 </section>
 
@@ -301,11 +302,11 @@ export default function Landing() {
       </div>
 
       <nav className="px-mnav">
-        <Link to="/"><Terminal /><span>Chat</span></Link>
-        <Link to="/auth"><Zap /><span>Build</span></Link>
-        <Link to="/auth"><Users /><span>Team</span></Link>
-        <Link to="/"><Grid3X3 /><span>Dash</span></Link>
-        <Link to="/auth"><MoreHorizontal /><span>More</span></Link>
+        <Link to="/chat"><Terminal /><span>Chat</span></Link>
+        <Link to="/build"><Zap /><span>Build</span></Link>
+        <Link to="/team"><Users /><span>Team</span></Link>
+        <Link to="/dashboard"><Grid3X3 /><span>Dash</span></Link>
+        <Link to="/settings"><MoreHorizontal /><span>More</span></Link>
       </nav>
     </div>
   );
