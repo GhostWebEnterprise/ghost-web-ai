@@ -1,13 +1,9 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-
 import { useAuth } from "@/hooks/use-auth";
-import { GhostMark, Wordmark } from "@/components/ghost/GhostMark";
 import {
   ArrowRight,
   ArrowLeft,
@@ -17,6 +13,7 @@ import {
 } from "lucide-react";
 import { Suspense, useEffect, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
+import "@/styles/ghost-ai-home.css";
 
 interface AuthProps {
   redirectAfterAuth?: string;
@@ -32,14 +29,14 @@ function resolveRedirectAfterAuth(
   return fallback;
 }
 
-const PITCH = [
-  ["plan → kod", "plan → code"],
-  ["Git branch", "git"],
+const PITCH: Array<[string, string]> = [
+  ["plan → code", "plan"],
+  ["git branch", "git"],
   ["build → test", "ci"],
-  ["fel → fix", "self-heal"],
+  ["error → fix", "self-heal"],
   ["commit", "git"],
-  ["GitHub Actions → verifiering", "github"],
-  ["PR / release", "github"],
+  ["actions → verify", "github"],
+  ["PR / release", "ship"],
 ];
 
 function Auth({ redirectAfterAuth }: AuthProps = {}) {
@@ -114,52 +111,45 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
     }
   };
 
-  const field =
-    "border-2 border-foreground bg-background text-foreground placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-0";
-
   return (
-    <div className="nb-grid-paper flex min-h-screen flex-col bg-background text-foreground">
-      {/* top bar */}
-      <div className="border-b-2 border-foreground bg-background/95">
-        <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-          <Link to="/" aria-label="Ghost Web AI home">
-            <Wordmark markSize="h-7 w-7" />
-          </Link>
-          <Link
-            to="/"
-            className="flex items-center gap-1.5 border-2 border-foreground bg-card px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-wider hover:bg-accent"
-          >
-            <ArrowLeft className="size-3.5" /> Back
+    <div className="px-app flex min-h-screen flex-col">
+      <header className="px-top">
+        <Link to="/" className="px-brand" aria-label="Ghost Web AI home">
+          <span className="px-brand-mark">GW</span>
+          <span>
+            GHOST<b>//</b>WEB<b>.AI</b>
+          </span>
+        </Link>
+        <div className="px-top-actions" style={{ display: "flex" }}>
+          <Link to="/" className="px-chip-btn">
+            <ArrowLeft className="size-4" /> Back
           </Link>
         </div>
-      </div>
+      </header>
 
-      <div className="mx-auto flex w-full max-w-5xl flex-1 items-center gap-10 px-4 py-10 lg:py-16">
+      <div className="mx-auto flex w-full max-w-5xl flex-1 items-center gap-12 px-4 py-10 lg:py-16">
         {/* pitch panel */}
         <div className="hidden flex-1 flex-col lg:flex">
-          <p className="nb-overline inline-flex w-fit items-center gap-2 border-2 border-foreground bg-accent px-2 py-1">
-            <GhostMark className="size-3.5" /> Free forever
-          </p>
-          <h1 className="mt-4 text-4xl font-black uppercase leading-[1.02] tracking-tight xl:text-5xl">
-            The agent chain<br />
-            waits for<br />
-            <span className="border-4 border-foreground bg-[#4dd8e6] px-2">your repo.</span>
+          <div className="px-eyebrow">[ FREE FOREVER · RX0 ]</div>
+          <h1 className="px-glitch mt-4" data-text="AGENT CHAIN" style={{ fontSize: "clamp(34px,5vw,58px)" }}>
+            AGENT CHAIN
           </h1>
-          <p className="mt-5 max-w-md text-sm leading-6 text-foreground/75">
-            One prompt runs the whole delivery path. No credits, no paywall,
-            no jumping between GitHub, terminal and CI. Sign in and point the
-            chain at your first build.
+          <div className="px-sub" style={{ marginTop: 4 }}>WAITS FOR YOUR REPO</div>
+          <p className="px-lead" style={{ maxWidth: 440, fontSize: 12 }}>
+            One prompt runs the whole delivery path. No credits, no paywall, no
+            jumping between GitHub, terminal and CI. Sign in and point the chain
+            at your first build.
           </p>
           <ul className="mt-7 flex max-w-md flex-col gap-2">
             {PITCH.map(([label, tag]) => (
               <li
                 key={label}
-                className="flex items-center justify-between border-2 border-foreground bg-card px-3 py-2"
+                className="px-frame flex items-center justify-between px-3 py-2"
               >
-                <span className="font-mono text-[12px] font-bold">{label}</span>
-                <span className="border border-foreground bg-muted px-1.5 py-0.5 font-mono text-[9px] font-black uppercase tracking-wider">
-                  {tag}
+                <span className="font-mono text-[12px] font-bold uppercase tracking-wider">
+                  {label}
                 </span>
+                <span className="px-badge">{tag}</span>
               </li>
             ))}
           </ul>
@@ -167,49 +157,47 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
 
         {/* auth card */}
         <div className="mx-auto w-full max-w-[400px] lg:mx-0">
-          <div className="nb-card nb-shadow-lg border-2 border-foreground bg-card">
-            {/* card header */}
-            <div className="flex items-center justify-between border-b-2 border-foreground bg-foreground px-4 py-3 text-background">
-              <span className="font-mono text-[11px] font-black uppercase tracking-[0.2em]">
+          <div className="px-frame">
+            <div className="px-panel-head">
+              <span className="t">
                 {step === "signIn" ? "Sign in / up" : "Verify code"}
               </span>
-              <span className="border border-background/40 px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider">
-                Ghost console
-              </span>
+              <span className="s">Ghost Console</span>
             </div>
 
             <div className="p-5">
               {step === "signIn" ? (
                 <>
-                  <div className="mb-4">
-                    <h2 className="text-xl font-black uppercase tracking-tight">
-                      Get started
-                    </h2>
-                    <p className="mt-1 text-[12.5px] text-foreground/70">
+                  <div className="mb-5">
+                    <h2 className="px-title-sm">Get started</h2>
+                    <p className="px-lead" style={{ marginTop: 6 }}>
                       Email login, or skip straight to the console as a guest.
                     </p>
                   </div>
-                  <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2">
+                  <form onSubmit={handleEmailSubmit} className="flex flex-col gap-2.5">
+                    <label className="px-label" htmlFor="email">Email</label>
                     <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                      <Input
+                      <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--px-faint)]" />
+                      <input
+                        id="email"
                         name="email"
                         placeholder="name@example.com"
                         type="email"
                         required
                         disabled={isLoading}
-                        className={`${field} pl-9`}
+                        className="px-input"
+                        style={{ paddingLeft: 34 }}
                       />
                     </div>
                     {error && (
-                      <p className="border-2 border-foreground bg-[#ff5c49]/30 px-2 py-1.5 text-[12px] font-semibold">
+                      <p className="px-frame px-2.5 py-2 text-[12px] font-semibold text-[var(--px-white)]">
                         {error}
                       </p>
                     )}
-                    <Button
+                    <button
                       type="submit"
                       disabled={isLoading}
-                      className="mt-1 gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd166]"
+                      className="px-btn px-btn-primary mt-1"
                     >
                       {isLoading ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -218,40 +206,38 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                           Email me a code <ArrowRight className="size-4" />
                         </>
                       )}
-                    </Button>
+                    </button>
                   </form>
 
                   <div className="my-4 flex items-center gap-3">
-                    <span className="h-0.5 flex-1 bg-foreground/15" />
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <span className="h-px flex-1 bg-[var(--px-line)]" />
+                    <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--px-faint)]">
                       or
                     </span>
-                    <span className="h-0.5 flex-1 bg-foreground/15" />
+                    <span className="h-px flex-1 bg-[var(--px-line)]" />
                   </div>
 
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
                     onClick={handleGuestLogin}
                     disabled={isLoading}
-                    className="w-full gap-2 border-2 border-foreground bg-background py-2.5 text-xs font-black uppercase tracking-wide text-foreground hover:bg-[#0f2417]"
+                    className="px-btn w-full"
                   >
                     <UserX className="size-4" />
                     Continue as guest
-                  </Button>
-                  <p className="mt-3 font-mono text-[9.5px] uppercase leading-4 tracking-wider text-muted-foreground">
+                  </button>
+                  <p className="mt-3 font-mono text-[9px] uppercase leading-4 tracking-wider text-[var(--px-faint)]">
                     No credits · no paywall — the agent chain runs free either
                     way.
                   </p>
                 </>
               ) : (
                 <>
-                  <div className="mb-4">
-                    <h2 className="text-xl font-black uppercase tracking-tight">
-                      Check your email
-                    </h2>
-                    <p className="mt-1 text-[12.5px] leading-5 text-foreground/70">
-                      We sent a code to <strong>{step.email}</strong>
+                  <div className="mb-5">
+                    <h2 className="px-title-sm">Check your email</h2>
+                    <p className="px-lead" style={{ marginTop: 6 }}>
+                      We sent a code to{" "}
+                      <strong className="text-[var(--px-white)]">{step.email}</strong>
                     </p>
                   </div>
                   <form onSubmit={handleOtpSubmit} className="flex flex-col gap-3">
@@ -274,21 +260,21 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                             <InputOTPSlot
                               key={index}
                               index={index}
-                              className="border-2 border-foreground"
+                              className="border-[var(--px-line-strong)] bg-black text-[var(--px-white)]"
                             />
                           ))}
                         </InputOTPGroup>
                       </InputOTP>
                     </div>
                     {error && (
-                      <p className="border-2 border-foreground bg-[#ff5c49]/30 px-2 py-1.5 text-center text-[12px] font-semibold">
+                      <p className="px-frame px-2.5 py-2 text-center text-[12px] font-semibold text-[var(--px-white)]">
                         {error}
                       </p>
                     )}
-                    <Button
+                    <button
                       type="submit"
                       disabled={isLoading || otp.length !== 6}
-                      className="gap-2 border-2 border-foreground bg-accent py-2.5 text-xs font-black uppercase tracking-wide text-foreground shadow-[4px_4px_0_0_var(--ink)] hover:bg-[#ffd166]"
+                      className="px-btn px-btn-primary"
                     >
                       {isLoading ? (
                         <Loader2 className="size-4 animate-spin" />
@@ -297,17 +283,18 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
                           Verify &amp; enter <ArrowRight className="size-4" />
                         </>
                       )}
-                    </Button>
+                    </button>
                   </form>
-                  <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider">
-                    <span className="text-muted-foreground">Wrong email?</span>
+                  <div className="mt-4 flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-[var(--px-dim)]">
+                    <span>Wrong email?</span>
                     <button
                       type="button"
                       onClick={() => {
                         setStep("signIn");
                         setError(null);
                       }}
-                      className="border border-foreground bg-background px-2 py-1 font-bold hover:bg-accent"
+                      className="px-btn px-btn-ghost"
+                      style={{ height: 28, padding: "0 10px" }}
                     >
                       Use different email
                     </button>
@@ -316,8 +303,7 @@ function Auth({ redirectAfterAuth }: AuthProps = {}) {
               )}
             </div>
 
-            <div className="flex items-center justify-center gap-2 border-t-2 border-foreground bg-muted px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-muted-foreground">
-              <GhostMark className="size-3 text-foreground" />
+            <div className="flex items-center justify-center gap-2 border-t border-[var(--px-line)] px-4 py-3 font-mono text-[9px] uppercase tracking-widest text-[var(--px-faint)]">
               Secured by Ghost Securities ©
             </div>
           </div>

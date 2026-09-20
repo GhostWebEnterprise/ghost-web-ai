@@ -1,7 +1,7 @@
 import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { AppNav } from "@/components/ghost/AppNav";
+import { PhotonShell } from "@/components/ghost/PhotonShell";
 import {
   ConversationsPanel,
   type ConversationRow,
@@ -12,7 +12,6 @@ import {
   type SyncedRepoPick,
 } from "@/components/ghost/GitHubSync";
 import { RunMessage, UserMessage } from "@/components/ghost/RunMessage";
-import { GhostMark } from "@/components/ghost/GhostMark";
 import { engineLabel, repoShort } from "@/lib/ghost-agents";
 import type { AssistantAgentId, AssistantCapability } from "@/lib/ai-models";
 import { useAppSettings } from "@/hooks/use-app-settings";
@@ -230,75 +229,60 @@ export default function Chat() {
   };
 
   return (
-    <div
-      className={cn(
-        "min-h-screen bg-background text-foreground",
-        "bg-[radial-gradient(circle_at_top_right,rgba(0,255,65,0.08),transparent_32rem)]",
-        settings.reduceMotion && "nb-reduce-motion",
-      )}
-    >
-      <AppNav active="chat" />
-      <div className="mx-auto flex w-full max-w-[1540px] gap-0 px-0 lg:px-5 lg:py-5">
+    <PhotonShell active="chat" contentClassName="px-chat-shell">
+      <div className={cn("px-chat", settings.reduceMotion && "nb-reduce-motion")}>
         {sidebarOpen ? (
           <button
             type="button"
             aria-label="Close sidebar"
             onClick={closeSidebar}
-            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/70 lg:hidden"
           />
         ) : null}
 
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 flex w-[292px] flex-col border-r border-foreground/10 bg-background px-4 pb-4 pt-20 shadow-2xl shadow-black/20 transition-transform lg:static lg:z-auto lg:h-[calc(100vh-7rem)] lg:w-[272px] lg:translate-x-0 lg:border-r-0 lg:bg-transparent lg:px-0 lg:pt-0 lg:shadow-none",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-        >
-          <ConversationsPanel
-            conversations={conversations as ConversationRow[]}
-            activeId={activeId}
-            onSelect={handleSelect}
-            onNew={handleNew}
-            onDelete={handleDelete}
-            onClose={closeSidebar}
-          />
+        <aside className={cn("px-chat-side px-scroll", sidebarOpen && "open")}>
+          <div className="p-3">
+            <ConversationsPanel
+              conversations={conversations as ConversationRow[]}
+              activeId={activeId}
+              onSelect={handleSelect}
+              onNew={handleNew}
+              onDelete={handleDelete}
+              onClose={closeSidebar}
+            />
+          </div>
         </aside>
 
-        <main className="flex min-h-[calc(100vh-4rem)] min-w-0 flex-1 flex-col overflow-hidden rounded-none border-foreground/10 bg-background/45 lg:min-h-0 lg:h-[calc(100vh-7rem)] lg:rounded-3xl lg:border lg:shadow-2xl lg:shadow-black/10 lg:pl-0">
-          <header className="flex h-16 shrink-0 items-center justify-between border-b border-foreground/10 px-4 lg:px-6">
+        <main className="px-chat-body">
+          <header className="px-chat-head">
             <div className="flex min-w-0 items-center gap-2">
               <button
                 type="button"
                 aria-label="Open conversations"
                 onClick={() => setSidebarOpen(true)}
-                className="rounded-md p-1.5 text-muted-foreground hover:bg-foreground/10 hover:text-foreground lg:hidden"
+                className="px-icon-btn lg:hidden"
+                style={{ width: 32, height: 32 }}
               >
-                <Menu className="size-5" />
+                <Menu className="size-4" />
               </button>
               <button
                 type="button"
                 onClick={handleNew}
-                className="hidden items-center gap-2 rounded-xl px-2 py-2 text-sm font-semibold transition-colors hover:bg-foreground/[0.06] sm:flex"
+                className="flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-wider text-[var(--px-white)]"
               >
-                <GhostMark className="size-5 text-foreground" />
                 <span className="truncate">{conversation?.title ?? "New conversation"}</span>
-                <ChevronDown className="size-3.5 text-muted-foreground" />
+                <ChevronDown className="size-3.5 text-[var(--px-dim)]" />
               </button>
-              <span className="flex items-center gap-2 text-sm font-semibold sm:hidden">
-                <GhostMark className="size-5 text-foreground" />
-                Ghost
-              </span>
             </div>
             <div className="flex items-center gap-1.5">
               {conversation?.repo?.fullName ? (
-                <span                  className="hidden max-w-[190px] items-center gap-1.5 truncate rounded-lg bg-foreground/[0.05] px-2.5 py-1.5 text-[10px] text-muted-foreground md:flex"
->
+                <span className="hidden max-w-[190px] items-center gap-1.5 truncate border border-[var(--px-line)] bg-black px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-[var(--px-dim)] md:flex">
                   <Github className="size-3" />
                   {repoShort(conversation.repo.fullName)}
                 </span>
               ) : null}
               {conversation ? (
-                <span className="hidden rounded-lg bg-foreground/[0.05] px-2.5 py-1.5 text-[10px] text-muted-foreground sm:inline">
+                <span className="hidden border border-[var(--px-line)] bg-black px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-[var(--px-dim)] sm:inline">
                   {engineLabel(conversation.engine)}
                 </span>
               ) : null}
@@ -306,7 +290,8 @@ export default function Chat() {
                 type="button"
                 aria-label="New conversation"
                 onClick={handleNew}
-                className="rounded-md p-2 text-muted-foreground hover:bg-foreground/10 hover:text-foreground lg:hidden"
+                className="px-icon-btn"
+                style={{ width: 32, height: 32 }}
               >
                 <Plus className="size-4" />
               </button>
@@ -314,102 +299,94 @@ export default function Chat() {
                 type="button"
                 aria-label="Toggle workspace tools"
                 onClick={() => setToolsOpen((open) => !open)}
-                className={cn(
-                  "rounded-md p-2 text-muted-foreground hover:bg-foreground/10 hover:text-foreground",
-                  toolsOpen && "bg-foreground/10 text-foreground",
-                )}
+                className={cn("px-icon-btn", toolsOpen && "bg-[var(--px-bg-2)]")}
+                style={{ width: 32, height: 32 }}
               >
                 <Settings2 className="size-4" />
               </button>
             </div>
           </header>
 
-          <div className="relative flex min-h-0 flex-1 flex-col">
-            <div
-              ref={scrollRef}
-              className="nb-scroll flex-1 overflow-y-auto px-4 py-6 lg:px-10 lg:py-10"
-            >
-              <div className="mx-auto flex w-full max-w-3xl flex-col gap-8">
-                {activeId && !conversation && !listLoaded ? (
-                  <div className="flex items-center justify-center gap-2 py-16 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                    <Loader2 className="size-3.5 animate-spin" /> Loading conversation…
-                  </div>
-                ) : activeId && conversation ? (
-                  messages.length > 0 ? (
-                    messages.map((message) =>
-                      message.role === "user" ? (
-                        <UserMessage key={message._id} content={message.content} />
-                      ) : (
-                        <RunMessage
-                          key={message._id}
-                          message={{
-                            role: "assistant",
-                            agent: message.agent,
-                            engine: message.engine,
-                            runStatus: message.runStatus,
-                            pipeline: message.pipeline,
-                            files: message.files,
-                            content: message.content,
-                            error: message.error,
-                            prUrl: message.prUrl,
-                            createdAt: message.createdAt,
-                          }}
-                        />
-                      ),
-                    )
-                  ) : (
-                    <EmptyConversation />
+          <div className="px-chat-scroll px-scroll" ref={scrollRef}>
+            <div className="mx-auto flex w-full max-w-3xl flex-col gap-6">
+              {activeId && !conversation && !listLoaded ? (
+                <div className="flex items-center justify-center gap-2 py-16 font-mono text-[10px] uppercase tracking-widest text-[var(--px-dim)]">
+                  <Loader2 className="size-3.5 animate-spin" /> Loading conversation…
+                </div>
+              ) : activeId && conversation ? (
+                messages.length > 0 ? (
+                  messages.map((message) =>
+                    message.role === "user" ? (
+                      <UserMessage key={message._id} content={message.content} />
+                    ) : (
+                      <RunMessage
+                        key={message._id}
+                        message={{
+                          role: "assistant",
+                          agent: message.agent,
+                          engine: message.engine,
+                          runStatus: message.runStatus,
+                          pipeline: message.pipeline,
+                          files: message.files,
+                          content: message.content,
+                          error: message.error,
+                          prUrl: message.prUrl,
+                          createdAt: message.createdAt,
+                        }}
+                      />
+                    ),
                   )
                 ) : (
                   <EmptyConversation />
-                )}
-              </div>
+                )
+              ) : (
+                <EmptyConversation />
+              )}
             </div>
+          </div>
 
-            <div className="shrink-0 bg-gradient-to-t from-background via-background/95 to-transparent px-4 pb-5 pt-4 lg:px-10 lg:pb-5">
-              {toolsOpen ? (
-                <div className="mx-auto mb-3 w-full max-w-3xl">
-                  <GitHubSync
-                    targetFullName={conversation?.repo?.fullName ?? pickedRepo?.fullName ?? null}
-                    busy={chainRunning}
-                    onPick={handlePickRepo}
-                    onClear={activeId ? undefined : () => setPickedRepo(undefined)}
-                  />
-                </div>
-              ) : null}
-              <Composer
-                key={`${conversation?._id ?? "new"}:${conversation?.repoUrl ?? pickedRepo?.url ?? ""}`}
-                onSubmit={startRun}
-                busy={chainRunning}
-                defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url ?? settings.defaultRepoUrl}
-                initialTask={initialTask}
-                gatewayConfigured={gatewayConfigured}
-                ollamaEnabled={ollamaEnabled}
-              />
-            </div>
+          <div className="px-chat-foot">
+            {toolsOpen ? (
+              <div className="mx-auto mb-3 w-full max-w-3xl">
+                <GitHubSync
+                  targetFullName={conversation?.repo?.fullName ?? pickedRepo?.fullName ?? null}
+                  busy={chainRunning}
+                  onPick={handlePickRepo}
+                  onClear={activeId ? undefined : () => setPickedRepo(undefined)}
+                />
+              </div>
+            ) : null}
+            <Composer
+              key={`${conversation?._id ?? "new"}:${conversation?.repoUrl ?? pickedRepo?.url ?? ""}`}
+              onSubmit={startRun}
+              busy={chainRunning}
+              defaultRepoUrl={conversation?.repoUrl ?? pickedRepo?.url ?? settings.defaultRepoUrl}
+              initialTask={initialTask}
+              gatewayConfigured={gatewayConfigured}
+              ollamaEnabled={ollamaEnabled}
+            />
           </div>
         </main>
       </div>
-    </div>
+    </PhotonShell>
   );
 }
 
 function EmptyConversation() {
   return (
     <div className="flex min-h-[55vh] flex-col items-center justify-center px-4 pb-10 text-center">
-      <div className="mb-6 flex size-16 items-center justify-center rounded-3xl border border-foreground/15 bg-card shadow-[0_18px_45px_rgba(0,0,0,0.22)]">
-        <GhostMark className="size-9 text-foreground" />
-      </div>
-      <p className="mb-2 text-[11px] font-medium uppercase tracking-[0.2em] text-muted-foreground">Your AI workspace</p>
-      <h1 className="text-3xl font-semibold tracking-[-0.04em] sm:text-4xl">What are we building?</h1>
-      <p className="mt-3 max-w-lg text-sm leading-6 text-muted-foreground">
-        Describe a feature, ask for a fix, or point Ghost at a GitHub repository. The agent chain plans, codes, checks, and keeps you updated here.
+      <div className="px-eyebrow">[ YOUR AI WORKSPACE ]</div>
+      <h1 className="px-glitch mt-4" data-text="WHAT ARE WE BUILDING" style={{ fontSize: "clamp(26px,5vw,46px)" }}>
+        WHAT ARE WE BUILDING
+      </h1>
+      <p className="px-lead mt-3 max-w-lg">
+        Describe a feature, ask for a fix, or point Ghost at a GitHub repository.
+        The agent chain plans, codes, checks, and keeps you updated here.
       </p>
-      <div className="mt-5 flex flex-wrap justify-center gap-2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
-        <span className="rounded-full border border-foreground/10 px-2 py-1">plan</span>
-        <span className="rounded-full border border-foreground/10 px-2 py-1">build</span>
-        <span className="rounded-full border border-foreground/10 px-2 py-1">self-heal</span>
-        <span className="rounded-full border border-foreground/10 px-2 py-1">ship</span>
+      <div className="mt-5 flex flex-wrap justify-center gap-2">
+        {["plan", "build", "self-heal", "ship"].map((tag) => (
+          <span key={tag} className="px-badge">{tag}</span>
+        ))}
       </div>
     </div>
   );
