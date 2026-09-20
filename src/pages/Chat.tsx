@@ -151,13 +151,18 @@ export default function Chat() {
   ) => {
     setSending(true);
     try {
-      if (provider === "puter" && (repoUrl || pickedRepo || conversation?.repoUrl)) {
+      // The composer is remounted while a new conversation is being created.
+      // Resolve the target once so follow-up prompts cannot lose the persisted
+      // repository while React/Convex are still refreshing the conversation.
+      const effectiveRepoUrl =
+        repoUrl?.trim() || pickedRepo?.url || conversation?.repoUrl || undefined;
+      if (provider === "puter" && effectiveRepoUrl) {
         toast.error("Puter.js browser mode is only available without a repository target.");
         return;
       }
       let id = activeId && activeIdValid ? activeId : null;
       if (!id) {
-        id = await createConversation({ task, repoUrl });
+        id = await createConversation({ task, repoUrl: effectiveRepoUrl });
         setMode("thread");
         setSearchParams({ c: id }, { replace: true });
       }
@@ -213,7 +218,7 @@ export default function Chat() {
           conversationId: id as Id<"conversations">,
           runId: runId as Id<"messages">,
           task,
-          repoUrl,
+          repoUrl: effectiveRepoUrl,
           selectedModel: model,
           capability,
           agent,

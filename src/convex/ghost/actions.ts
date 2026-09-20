@@ -142,7 +142,9 @@ export const runTask = action({
             undefined);
 
       // ---------- 1. Resolve repo metadata (GitHub REST, best effort) ----------
-      const parsed = parseRepoUrl(args.repoUrl);
+      // Follow-up messages do not have to resend a repository URL. The
+      // conversation is authoritative once a repo has been selected.
+      const parsed = parseRepoUrl(args.repoUrl ?? conversationRow?.repoUrl);
       let repo: RepoInfo | null = parsed;
       if (parsed?.source === "github") {
         const meta = await fetchGitHubMeta(parsed, githubPat || undefined);
