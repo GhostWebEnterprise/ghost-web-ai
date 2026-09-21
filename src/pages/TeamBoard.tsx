@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "../convex/_generated/api";
 import type { Id } from "../convex/_generated/dataModel";
-import { AppNav } from "@/components/ghost/AppNav";
+import { PhotonShell } from "@/components/ghost/PhotonShell";
 import { runStatusCopy, timeAgo } from "@/lib/ghost-agents";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -106,8 +106,7 @@ export default function TeamBoard() {
   const running = run?.status === "running" || run?.status === "awaiting";
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <AppNav active="team" />
+    <PhotonShell active="team">
       <main className="mx-auto max-w-[1400px] px-4 py-8">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -336,7 +335,7 @@ export default function TeamBoard() {
           </aside>
         </div>
       </main>
-    </div>
+    </PhotonShell>
   );
 }
 

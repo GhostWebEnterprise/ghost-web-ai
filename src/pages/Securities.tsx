@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/ghost/AppNav";
+import { PhotonShell } from "@/components/ghost/PhotonShell";
 import { Button } from "@/components/ui/button";
 import { useSecurities } from "@/hooks/use-securities";
 import {
@@ -116,8 +116,7 @@ export default function Securities() {
     );
 
   return (
-    <div className="nb-grid-paper min-h-screen bg-background text-foreground">
-      <AppNav active="securities" />
+    <PhotonShell active="securities">
 
       <main className="mx-auto max-w-[900px] px-3 pb-16 pt-6 sm:px-4 sm:pt-8">
         {/* header */}
@@ -317,6 +316,6 @@ export default function Securities() {
           </Section>
         </div>
       </main>
-    </div>
+    </PhotonShell>
   );
 }

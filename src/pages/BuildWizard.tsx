@@ -1,7 +1,7 @@
 import { useAction, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { AppNav } from "@/components/ghost/AppNav";
+import { PhotonShell } from "@/components/ghost/PhotonShell";
 import { GhostMark } from "@/components/ghost/GhostMark";
 import {
   GitHubSync,
@@ -253,11 +253,9 @@ export default function BuildWizard() {
   };
 
   return (
-    <div className="mx-page min-h-screen">
+    <PhotonShell active="build" contentClassName="px-build-shell">
+      <div className="mx-page" style={{ minHeight: "auto", background: "transparent" }}>
       <MatrixRain />
-      <div className="mx-embed relative z-[2]">
-        <AppNav active="build" />
-      </div>
 
       {/* header + step rail */}
       <header className="relative z-[2] border-b border-[var(--mx-border)] bg-[var(--mx-panel)]/90 backdrop-blur">
@@ -721,5 +719,6 @@ export default function BuildWizard() {
         </aside>
       </main>
     </div>
+    </PhotonShell>
   );
 }
