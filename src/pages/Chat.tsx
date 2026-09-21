@@ -223,7 +223,18 @@ export default function Chat() {
           capability,
           agent,
           pipeline: seededPipeline,
-        }).catch(() => toast.error("The agent run stopped unexpectedly."));
+        }).catch((err) => {
+          const msg =
+            err instanceof Error && err.message
+              ? err.message
+              : "The agent run stopped unexpectedly.";
+          // Ignore quiet stop when the conversation was deleted mid-run.
+          if (msg === "run-stopped") return;
+          console.error("runTask failed:", err);
+          toast.error(
+            msg.length > 160 ? "The agent run failed — check the stage log." : msg,
+          );
+        });
       }
       toast.success("Ghost is on it", { duration: 2500 });
     } catch (err) {
