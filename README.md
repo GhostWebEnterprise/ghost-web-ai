@@ -12,10 +12,9 @@ AI-assisted software delivery: plan, code, test, heal, verify, and ship through 
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android%20%7C%20Desktop-3DDC84?style=plastic&logo=android&logoColor=white)](https://github.com/GhostWebEnterprise/ghost-web-ai)
 [![Release](https://img.shields.io/github/v/release/GhostWebEnterprise/ghost-web-ai?style=plastic&label=GhostWeb%20AI)](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
 [![License](https://img.shields.io/badge/License-Open%20Source-blue?style=plastic)](https://github.com/GhostWebEnterprise/ghost-web-ai)
-
 [![Test](https://img.shields.io/github/actions/workflow/status/GhostWebEnterprise/ghost-web-ai/ci.yml?branch=main&style=plastic&label=Test)](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/workflows/ci.yml)
 [![Dependabot](https://img.shields.io/github/issues/GhostWebEnterprise/ghost-web-ai/dependabot?style=plastic&label=Dependabot)](https://github.com/GhostWebEnterprise/ghost-web-ai/network/updates)
-[![Website](https://img.shields.io/badge/Website-GhostWeb-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostweb.is-a.dev)
+[![Website](https://img.shields.io/badge/Website-ghostweb.bot.cd-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostweb.bot.cd)
 
 </div>
 
@@ -30,10 +29,9 @@ AI-assisted software delivery: plan, code, test, heal, verify, and ship through 
 | **GhostWeb Signal** | Privacy-focused Android messaging and calling | **Available** |
 | **GhostWeb VPN** | Browser and network protection | **Available** |
 | **GhostWeb AI** | AI client, agents, and software delivery | **Available** |
+| **GhostOS** | Privacy-focused custom Android ROM | **In development** |
 
-**Project hub:** https://ghostwebenterprise.github.io/ghostweb.signal/
-
----
+**Official project hub:** https://ghostweb.bot.cd
 
 ## 🧠 What GhostWeb AI does
 
@@ -43,134 +41,18 @@ GhostWeb AI turns a plain-language request into a structured software-delivery w
 
 ### Highlights
 
-| Area | GhostWeb AI |
-|---|---|
-| 🧠 Planning | Classifies the request and creates an implementation plan |
-| 👥 Agent chain | 10-stage delivery pipeline |
-| 🤖 Task force | 15-agent `/team` graph with approval gates |
-| 🔐 Source gate | Security and open-source licence checks |
-| 📂 Repository context | Plans against real repository files and structure |
-| 🛠️ Implementation | Generates complete reviewable file changes |
-| 🛡️ Guardian | Reviews generated changes before CI |
-| 🔄 Self-healing | Detect → diagnose → fix → re-run |
-| 🧪 CI | Install → build → typecheck → first-error capture |
-| 🐙 GitHub | Branches, commits, sync, releases, and pull requests |
-| 🔌 MCP / A2A | Agent-addressable tooling and execution |
-| 🔑 Providers | OpenRouter, Ollama, direct providers, Puter.js, and local fallback |
-| 💳 Pricing model | Zero built-in credit meter |
-| 🌐 Client | React + TypeScript + Vite |
-| 📱 Responsive | Phone, tablet, and desktop layouts |
-| 💻 Releases | Web, Android, and desktop release automation |
-
-## 🤖 Delivery chain
-
-```text
-Request
-   ↓
-01 Security / Licence
-   ↓
-02 AI Core — Plan
-   ↓
-03 Git — Branch
-   ↓
-04 Web / Android / Desktop — Implement
-   ↓
-05 Guardian — Detect & self-heal
-   ↓
-06 CI — Build gate
-   ↓
-07 AI Core — Fix loop
-   ↓
-08 Git — Commit & push
-   ↓
-09 GitHub — Pull request
-   ↓
-10 CI / GitHub — Verify
-   ↓
-Ready to merge
-```
-
-## 👥 15-agent task force
-
-The `/team` board coordinates 15 specialized agents with shared state, approval gates, parallel execution waves, and serialized final writes.
-
-| # | Agent | Role |
-|---|---|---|
-| 1 | **Orchestrator** | Task graph, shared state, assignments, approval gates |
-| 2 | **Architect** | Plan and acceptance criteria |
-| 3 | **Web Agent** | React/TypeScript UI and browser compatibility |
-| 4 | **App Agent** | Android-first implementation |
-| 5 | **Git Agent** | Branches and commits |
-| 6 | **GitHub Agent** | PRs, Actions, releases, artifacts |
-| 7 | **Build Agent** | Reproducible builds and checksums |
-| 8 | **Test/E2E Agent** | Unit, integration, browser regression |
-| 9 | **Repair Agent** | First-error diagnosis and targeted fixes |
-| 10 | **API/Provider Agent** | Providers, BYOK, routing and fallbacks |
-| 11 | **Security Agent** | Blocking security gate |
-| 12 | **License Agent** | Blocking licence gate |
-| 13 | **Release Agent** | CI, artifacts and release readiness |
-| 14 | **Documentation Agent** | README and operational documentation |
-| 15 | **Compatibility Agent** | Web, Android and desktop validation |
+- Coordinated multi-agent software delivery
+- Repository-aware implementation and review
+- Security and licence gates
+- Self-healing CI loop
+- GitHub branch, commit, PR, release, and artifact workflows
+- Web, Android, and desktop delivery targets
+- MCP / A2A tooling
+- OpenRouter, Ollama, direct providers, Puter.js, and local fallback
 
 ## 🔐 Security & privacy
 
-Security and licence verification are delivery gates rather than optional documentation.
-
-- GitHub credentials remain server-side during OAuth flows.
-- Repository content is treated as untrusted data.
-- Open-source sources are checked before integration.
-- Generated changes receive Guardian review.
-- Diffs and pipeline stages remain reviewable.
-- Required CI gates must pass before release/merge readiness.
-- Secrets must never be committed to source control.
-
-## 🔑 Providers & zero-credit operation
-
-Provider keys are optional. Ghost uses the first configured provider that responds successfully, then falls back to the deterministic local engine.
-
-| Variable | Purpose | Required? |
-|---|---|---|
-| `OPENROUTER_API_KEY` | Multi-model OpenAI-compatible gateway with free routing | No |
-| `OPENROUTER_MODEL` | Optional explicit OpenRouter model ID | No |
-| `OLLAMA_ENABLED` | Enables keyless self-hosted Ollama routing | No |
-| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Ollama endpoint and model configuration | No |
-| `ANTHROPIC_API_KEY` | Direct Anthropic fallback | No |
-| `SAMBANOVA_API_KEY` / `SAMBA_API_KEY` | Direct SambaNova fallback | No |
-| `OPENAI_API_KEY` + `OPENAI_BASE_URL` | OpenAI-compatible fallback endpoint | No |
-| `GITHUB_CLIENT_ID` | GitHub OAuth application ID | OAuth only |
-| `GITHUB_CLIENT_SECRET` | GitHub OAuth secret | OAuth only |
-| `GITHUB_PAT` / `GITHUB_TOKEN` | Alternative GitHub access | Optional |
-| `SITE_URL` | Convex OAuth callback configuration | Managed |
-
-The server-side routing order is Ollama → OpenRouter → Anthropic → SambaNova → OpenAI-compatible → local. Puter.js is a separate, explicitly selected browser mode for prompts without repository targets; it authenticates the user in Puter and does not receive private repository context.
-
-See [`integrations.md`](integrations.md) for setup, routing, and security details. Never place API keys, OAuth secrets, or personal access tokens directly in source code.
-
-## 🐙 GitHub workflow
-
-GhostWeb AI is designed to work through the full repository delivery loop:
-
-```text
-Connected repository
-       ↓
-Feature branch
-       ↓
-Real file changes
-       ↓
-Build + typecheck
-       ↓
-First real CI error
-       ↓
-Targeted repair
-       ↓
-Commit + push
-       ↓
-Pull request
-       ↓
-Green checks / review
-```
-
-GitHub operations use repository APIs; the live publish path does not require a local `git` binary.
+Security and licence verification are delivery gates rather than optional documentation. Credentials remain server-side during OAuth flows, repository content is treated as untrusted data, generated changes receive Guardian review, required CI gates must pass before release readiness, and secrets must never be committed to source control.
 
 ## 🚀 Quick Start
 
@@ -184,144 +66,6 @@ bun test
 bun run dev
 ```
 
-Additional commands:
-
-```bash
-bun run e2e
-bun run build
-bun run manifest
-bun run icons
-```
-
-## 🧪 Verification & CI
-
-GhostWeb AI uses explicit delivery gates instead of treating code generation as completion.
-
-| Gate | Verification |
-|---|---|
-| 01 | Source / licence gate |
-| 02 | Task classification and plan |
-| 03 | Feature branch creation |
-| 04 | Repository-aware implementation |
-| 05 | Guardian review / pre-CI repair |
-| 06 | Install + build + typecheck |
-| 07 | First real error → targeted fix loop |
-| 08 | Commit + push |
-| 09 | Pull request creation |
-| 10 | CI / preview / merge-readiness verification |
-
-**Green CI is a delivery gate, not merely a status badge.**
-
-The repository CI workflow runs typecheck → tests → production build → SHA-256 artifact manifest and icon sanity checks on every push and pull request.
-
-## 🧭 Architecture
-
-```text
-┌─────────────────────────────────────┐
-│          GhostWeb AI Client         │
-│ Landing · Build · Team · Dashboard  │
-└──────────────────┬──────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────┐
-│          Ghost Agent Engine         │
-│ Plan · Context · Chain · Task force │
-└───────────────┬───────────────┬─────┘
-                │               │
-                ▼               ▼
-        Repository Context   Guardian
-                │               │
-                └───────┬───────┘
-                        ▼
-┌─────────────────────────────────────┐
-│          CI / Verification          │
-│ install · build · typecheck · fix   │
-└──────────────────┬──────────────────┘
-                   │
-                   ▼
-┌─────────────────────────────────────┐
-│          GitHub Integration         │
-│ branch · files · commit · pull req. │
-└─────────────────────────────────────┘
-```
-
-## 🧱 Tech stack
-
-- **React 19** — web UI
-- **TypeScript** — application and type safety
-- **Vite** — frontend build tooling
-- **Convex** — backend, database and functions
-- **Convex Auth** — authentication
-- **Tailwind CSS v4** — styling
-- **shadcn/ui** — interface components
-- **Framer Motion** — interaction and motion
-- **Bun** — runtime, tests and package management
-
-## 🌐 Routes
-
-| Route | Purpose |
-|---|---|
-| `/` | Landing page |
-| `/auth` | Authentication |
-| `/chat` | Agent console |
-| `/build` | Guided build wizard |
-| `/team` | 15-agent task-force board |
-| `/dashboard` | Build and GitHub dashboard |
-| `/settings` | Engine and repository settings |
-| `/securities` | Ghost Securities posture and scans |
-
-## 💻 Supported platforms
-
-| Platform | Status |
-|---|---|
-| 🌐 Web / PWA | ✅ Supported |
-| 🤖 Android | ✅ Release pipeline |
-| 🍎 iOS | 🚧 In development |
-| 💻 macOS | 🚧 In development |
-| 🐧 Linux | 🚧 In development |
-| 🪟 Windows | 🚧 In development |
-
-## 📁 Project structure
-
-```text
-ghost-web-ai/
-├── src/
-│   ├── convex/                  # agent engine, security, GitHub, MCP
-│   ├── components/ghost/        # Ghost UI components
-│   └── pages/                   # application routes
-├── scripts/                     # E2E, manifests, icons
-├── public/                      # web assets and icons
-├── .github/workflows/           # CI and release automation
-├── package.json
-└── README.md
-```
-
-## ⚠️ Limitations
-
-- Local deterministic execution does not replace a strong hosted/open LLM for every task.
-- GitHub operations require appropriate authentication and repository permissions.
-- CI verification depends on the target repository's build and test configuration.
-- Generated pull requests still require appropriate human review before merging production changes.
-- Provider availability, rate limits, and free-tier terms are controlled by each provider.
-
-## 🗺️ Roadmap
-
-- [x] 10-stage AI delivery chain
-- [x] Repository-aware planning
-- [x] Guardian pre-CI review
-- [x] First-real-error repair loop
-- [x] GitHub branch / commit / PR workflow
-- [x] Zero-credit local execution path
-- [x] Multi-provider fallback chain (OpenRouter, Ollama, direct providers)
-- [x] Optional user-authorized Puter.js browser AI
-- [x] MCP / A2A integrations
-- [x] Android/Desktop implementation workflows
-- [x] Release automation and artifact verification
-- [x] Responsive mobile + desktop UI
-- [ ] Expanded iOS/macOS/Linux shells
-- [ ] App-store distribution
-- [ ] Code-signed desktop and iOS builds
-
 ## 🤝 Contributing
 
 Issues, improvements, security reports, documentation updates, and pull requests are welcome. Keep changes focused, preserve the security/licence gates, avoid hard-coded credentials, and keep CI green.
@@ -329,6 +73,7 @@ Issues, improvements, security reports, documentation updates, and pull requests
 - [Issues](https://github.com/GhostWebEnterprise/ghost-web-ai/issues)
 - [Pull requests](https://github.com/GhostWebEnterprise/ghost-web-ai/pulls)
 - [Releases](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
+- [GhostWeb project hub](https://ghostweb.bot.cd)
 
 ## 📬 Contact
 
