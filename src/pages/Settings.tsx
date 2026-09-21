@@ -1,4 +1,4 @@
-import { AppNav } from "@/components/ghost/AppNav";
+import { PhotonShell } from "@/components/ghost/PhotonShell";
 import { Button } from "@/components/ui/button";
 import { useAppSettings } from "@/hooks/use-app-settings";
 import {
@@ -168,10 +168,8 @@ export default function Settings() {
   };
 
   return (
-    <div className="nb-grid-paper min-h-screen bg-background text-foreground">
-      <AppNav active="settings" />
-
-      <main className="mx-auto max-w-[900px] px-3 pb-16 pt-6 sm:px-4 sm:pt-8">
+    <PhotonShell active="settings">
+      <main className="mx-auto max-w-[900px] px-1 pb-8 pt-2 sm:px-2 sm:pt-4">
         {/* header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -400,7 +398,7 @@ export default function Settings() {
           </Section>
         </div>
       </main>
-    </div>
+    </PhotonShell>
   );
 }
 
