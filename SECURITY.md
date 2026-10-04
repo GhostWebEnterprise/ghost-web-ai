@@ -26,7 +26,7 @@ desktop compatibility shells** and **desktop installer packaging** (macOS
 
 ## Reporting a Vulnerability
 
-**Primary channel:** email [ghostweb@ghostbin.cfd](mailto:ghostweb@ghostbin.cfd)
+**Primary channel:** email [support-ghostweb@proton.me](mailto:support-ghostweb@proton.me)
 
 Please include:
 
