@@ -97,7 +97,7 @@ Issues, improvements, security reports, documentation updates and pull requests 
 
 ## 📬 Contact
 
-Questions, feature ideas or support requests: **ghostweb@ghostbin.cfd**
+Questions, feature ideas or support requests: **support-ghostweb@proton.me**
 
 ---
 
