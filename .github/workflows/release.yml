@@ -281,7 +281,7 @@ jobs:
               # does not carry them, so supply via -c overrides.
               npx electron-builder --config electron-builder.config.js --linux AppImage --linux deb \
                 -c.extraMetadata.version="$VER" \
-                -c.linux.maintainer="Ghost Web AI <ghostweb@ghostbin.cfd>" \
+                -c.linux.maintainer="Ghost Web AI <support-ghostweb@proton.me>" \
                 -c.extraMetadata.homepage="https://github.com/${GITHUB_REPOSITORY}" \
                 --publish never
               ;;
