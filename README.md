@@ -15,7 +15,7 @@ AI-assisted software delivery: plan, code, test, heal, verify and ship through c
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android%20%7C%20Desktop-3DDC84?style=plastic&logo=android&logoColor=white)](https://github.com/GhostWebEnterprise/ghost-web-ai)
 [![Release](https://img.shields.io/github/v/release/GhostWebEnterprise/ghost-web-ai?style=plastic&label=GhostWeb%20AI)](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
 [![Test](https://img.shields.io/github/actions/workflow/status/GhostWebEnterprise/ghost-web-ai/ci.yml?branch=main&style=plastic&label=Test)](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/workflows/ci.yml)
-[![Website](https://img.shields.io/badge/Project%20Hub-ghostwebenterprise.github.io-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostwebenterprise.github.io/ai.html)
+[![Website](https://img.shields.io/badge/Project%20Hub-ghostwebenterprise.github.io-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostwebenterprise.github.io/ai.html)\n[![Need support?](https://img.shields.io/badge/Need%20support%3F-Contact%3A%20support--ghostweb%40proton.me-6D4AFF?style=plastic&logo=protonmail&logoColor=white)](mailto:support-ghostweb@proton.me)
 
 </div>
 
