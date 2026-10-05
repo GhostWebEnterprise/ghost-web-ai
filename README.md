@@ -15,7 +15,7 @@ AI-assisted software delivery: plan, code, test, heal, verify and ship through c
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android%20%7C%20Desktop-3DDC84?style=plastic&logo=android&logoColor=white)](https://github.com/GhostWebEnterprise/ghost-web-ai)
 [![Release](https://img.shields.io/github/v/release/GhostWebEnterprise/ghost-web-ai?style=plastic&label=GhostWeb%20AI)](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
 [![Test](https://img.shields.io/github/actions/workflow/status/GhostWebEnterprise/ghost-web-ai/ci.yml?branch=main&style=plastic&label=Test)](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/workflows/ci.yml)
-[![Website](https://img.shields.io/badge/Project%20Hub-ghostwebenterprise.github.io-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostwebenterprise.github.io/ai.html)[![Need support?](https://img.shields.io/badge/Need%20support%3F-Contact%3A%20support--ghostweb%40proton.me-6D4AFF?style=plastic&logo=protonmail&logoColor=white)](mailto:support-ghostweb@proton.me)
+[![Website](https://img.shields.io/badge/Project%20Hub-ghostweb.bot.cd-0b57d0?style=plastic&logo=googlechrome&logoColor=white)](https://ghostweb.bot.cd/ai.html)[![Need support?](https://img.shields.io/badge/Need%20support%3F-Contact%3A%20support--ghostweb%40proton.me-6D4AFF?style=plastic&logo=protonmail&logoColor=white)](mailto:support-ghostweb@proton.me)
 
 </div>
 
@@ -32,7 +32,7 @@ GhostWeb AI is the AI and software-delivery project in the GhostWeb open-source 
 | **GhostWeb AI** | Multi-model AI, agents and software delivery | **Under development** |
 | **GhostOS** | Privacy-focused custom Android ROM | **In development · not public** |
 
-**Project hub:** https://ghostwebenterprise.github.io/
+**Project hub:** https://ghostweb.bot.cd/
 
 ## 🚧 Current status
 
@@ -93,7 +93,7 @@ Issues, improvements, security reports, documentation updates and pull requests 
 - [Issues](https://github.com/GhostWebEnterprise/ghost-web-ai/issues)
 - [Pull requests](https://github.com/GhostWebEnterprise/ghost-web-ai/pulls)
 - [Releases](https://github.com/GhostWebEnterprise/ghost-web-ai/releases)
-- [GhostWeb AI development page](https://ghostwebenterprise.github.io/ai.html)
+- [GhostWeb AI development page](https://ghostweb.bot.cd/ai.html)
 
 ## 📬 Contact
 
