@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="public/icon.svg" width="128" alt="GhostWeb AI icon" />
+<img src="file_00000000c71082469ef2926b516ace7f.png" width="220" alt="GhostWeb AI logo" />
 
 # GhostWeb AI
 
