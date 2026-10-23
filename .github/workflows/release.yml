@@ -53,6 +53,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md
+          draft: true
           files: |
             dist/artifacts.sha256
 
@@ -197,6 +198,10 @@ jobs:
           }
           (cd verified-assets && sha256sum -- ./*.apk)
           echo "Verified immutable release APK SHA-256 against local build."
+          # Publish only after the signed APK has been verified against the release asset.
+          if [ "$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" = true ]; then
+            gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false
+          fi
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
@@ -206,7 +211,7 @@ jobs:
           retention-days: 14
 
   desktop-installers:
-    needs: build-and-release
+    needs: [build-and-release, android-apk]
     strategy:
       # Keep every OS running to its own conclusion so one failure does not
       # cancel the other installer builds mid-flight.
