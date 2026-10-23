@@ -195,7 +195,7 @@ jobs:
           cmp -s "${APK_PATH}" "verified-assets/${ASSET_NAME}" || {
             echo "::error::Downloaded release APK differs" >&2; exit 1;
           }
-          (cd verified-assets && sha256sum *.apk)
+          (cd verified-assets && sha256sum -- ./*.apk)
           echo "Verified immutable release APK SHA-256 against local build."
 
       - name: Upload APK workflow artifact
