@@ -176,7 +176,7 @@ jobs:
           # The release must exist before the asset upload. If it was deleted,
           # recreate it automatically; otherwise keep the existing release.
           if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}"               --title "Ghost Web AI ${RELEASE_TAG}"               --generate-notes               --repo "${GITHUB_REPOSITORY}"
+            gh release create "${RELEASE_TAG}" --draft --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
           fi
 
           # Existing releases are immutable: never clobber an APK.
