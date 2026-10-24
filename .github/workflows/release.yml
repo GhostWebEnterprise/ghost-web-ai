@@ -354,11 +354,12 @@ jobs:
           find desktop-out -maxdepth 1 -type f -print -quit | grep -q . \
             || { echo "no installers staged"; exit 1; }
 
-      - name: Attach desktop installers to the GitHub release
+      # The Android job can publish the release before desktop installers finish.
+      # Do not allow late desktop uploads to mutate an already published release.
+      # A separate draft-only staging/publish gate is required for desktop assets.
+      - name: Hold desktop installers as workflow artifacts
         if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: desktop-out/*
+        run: echo "Desktop installers are retained as workflow artifacts; public release assets remain immutable."
 
       - name: Upload desktop workflow artifact
         uses: actions/upload-artifact@v4
