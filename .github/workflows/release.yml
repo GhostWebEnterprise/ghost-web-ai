@@ -48,6 +48,17 @@ jobs:
             echo "All gates green: typecheck, tests, build. SHA-256 manifest attached."
           } > RELEASE_NOTES.md
 
+      - name: Refuse modifications to published release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)"
+            test "$is_draft" = true || { echo "::error::Refusing to modify published release $GITHUB_REF_NAME" >&2; exit 1; }
+          fi
+
       - name: Create GitHub release with artifacts
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -179,7 +190,9 @@ jobs:
             gh release create "${RELEASE_TAG}" --draft --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
           fi
 
-          # Existing releases are immutable: never clobber an APK.
+          # A published release must never gain or replace assets, even when the APK name is absent.
+          is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
+          test "$is_draft" = true || { echo "::error::Refusing to modify published release ${RELEASE_TAG}" >&2; exit 1; }
           (cd apk-out && sha256sum --check SHA256SUMS)
           ASSET_NAME="ghost-web-ai-${RELEASE_TAG}.apk"
           mkdir -p existing-assets
