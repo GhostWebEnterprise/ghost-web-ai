@@ -48,11 +48,23 @@ jobs:
             echo "All gates green: typecheck, tests, build. SHA-256 manifest attached."
           } > RELEASE_NOTES.md
 
+      - name: Refuse modifications to published release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            is_draft="$(gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)"
+            test "$is_draft" = true || { echo "::error::Refusing to modify published release $GITHUB_REF_NAME" >&2; exit 1; }
+          fi
+
       - name: Create GitHub release with artifacts
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           body_path: RELEASE_NOTES.md
+          draft: true
           files: |
             dist/artifacts.sha256
 
@@ -106,41 +118,52 @@ jobs:
       - name: Configure signed release build (version stamp + keystore)
         env:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          set -euo pipefail
           RELEASE_REF="${GITHUB_REF_NAME}"
           if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_REF="v0.2.0"
           fi
           node scripts/android-release-config.cjs "${RELEASE_REF}"
-          test -f android/release-env.txt || { echo "release env file missing"; exit 1; }
-          cat android/release-env.txt
 
       - name: Assemble signed release APK
         working-directory: android
+        env:
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
+          set -euo pipefail
           test -f gradlew || { echo "gradlew not scaffolded"; exit 1; }
           chmod +x gradlew
-          set -a
-          . ./release-env.txt
-          set +a
           sh gradlew assembleRelease --no-daemon
 
       - name: Verify signature and stage APK with release name
         env:
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
-          APK=$(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name "app-release*.apk" -print -quit 2>/dev/null)
+          set -euo pipefail
+          mapfile -t APKS < <(find android/app/build/outputs/apk/release -maxdepth 1 -type f -name '*.apk' 2>/dev/null)
+          test "${#APKS[@]}" -eq 1 || { echo "::error::Expected exactly one release APK"; exit 1; }
+          APK="${APKS[0]}"
+          [[ "$APK" != *unsigned* ]] || { echo "::error::Unsigned APK refused"; exit 1; }
           test -n "$APK" || { echo "release APK missing"; find android/app/build/outputs/apk/ -maxdepth 2 -type f 2>/dev/null; exit 1; }
-          APKSIGNER=$(find "$ANDROID_HOME"/build-tools -type f -name apksigner -print 2>/dev/null | sort -V | tail -1 || true)
-          if [ -n "$APKSIGNER" ]; then
-            "$APKSIGNER" verify --print-certs "$APK" | head -5
-          fi
+          APKSIGNER=$(find "$ANDROID_HOME"/build-tools -type f -name apksigner -print | sort -V | tail -1)
+          test -n "$APKSIGNER" && test -x "$APKSIGNER" || { echo "::error::apksigner missing"; exit 1; }
+          "$APKSIGNER" verify --verbose --print-certs "$APK"
+          sha256sum "$APK"
           mkdir -p apk-out
           RELEASE_ASSET_VERSION="${GITHUB_REF_NAME}"
           if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_ASSET_VERSION="v0.2.0"
           fi
           cp "$APK" "apk-out/ghost-web-ai-${RELEASE_ASSET_VERSION}.apk"
+          (cd apk-out && sha256sum ./*.apk > SHA256SUMS)
+          (cd apk-out && sha256sum --check SHA256SUMS)
 
       - name: Attach APK to the GitHub release
         if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
@@ -164,26 +187,44 @@ jobs:
           # The release must exist before the asset upload. If it was deleted,
           # recreate it automatically; otherwise keep the existing release.
           if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}"               --title "Ghost Web AI ${RELEASE_TAG}"               --generate-notes               --repo "${GITHUB_REPOSITORY}"
+            gh release create "${RELEASE_TAG}" --draft --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
           fi
 
-          # Idempotent asset replacement: the same release asset is safely
-          # replaced on retries/re-runs.
-          gh release upload "${RELEASE_TAG}" "${APK_PATH}"             --clobber             --repo "${GITHUB_REPOSITORY}"
-
-          # Verify the exact release asset through GitHub before declaring
-          # the attach gate green.
-          gh release view "${RELEASE_TAG}"             --repo "${GITHUB_REPOSITORY}"             --json assets             --jq '.assets[].name' | grep -Fx "ghost-web-ai-${RELEASE_TAG}.apk"
+          # A published release must never gain or replace assets, even when the APK name is absent.
+          is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
+          test "$is_draft" = true || { echo "::error::Refusing to modify published release ${RELEASE_TAG}" >&2; exit 1; }
+          (cd apk-out && sha256sum --check SHA256SUMS)
+          ASSET_NAME="ghost-web-ai-${RELEASE_TAG}.apk"
+          mkdir -p existing-assets
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name' | grep -Fxq "${ASSET_NAME}"; then
+            gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${ASSET_NAME}" --dir existing-assets
+            cmp -s "${APK_PATH}" "existing-assets/${ASSET_NAME}" || {
+              echo "::error::Existing APK differs; refusing overwrite" >&2; exit 1;
+            }
+          else
+            gh release upload "${RELEASE_TAG}" "${APK_PATH}" --repo "${GITHUB_REPOSITORY}"
+          fi
+          mkdir -p verified-assets
+          gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${ASSET_NAME}" --dir verified-assets
+          cmp -s "${APK_PATH}" "verified-assets/${ASSET_NAME}" || {
+            echo "::error::Downloaded release APK differs" >&2; exit 1;
+          }
+          (cd verified-assets && sha256sum -- ./*.apk)
+          echo "Verified immutable release APK SHA-256 against local build."
+          # Publish only after the signed APK has been verified against the release asset.
+          if [ "$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" = true ]; then
+            gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false
+          fi
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-${{ github.ref_name }}
-          path: apk-out/*.apk
+          path: apk-out/
           retention-days: 14
 
   desktop-installers:
-    needs: build-and-release
+    needs: [build-and-release, android-apk]
     strategy:
       # Keep every OS running to its own conclusion so one failure does not
       # cancel the other installer builds mid-flight.
