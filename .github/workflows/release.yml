@@ -210,7 +210,23 @@ jobs:
             echo "::error::Downloaded release APK differs" >&2; exit 1;
           }
           (cd verified-assets && sha256sum -- ./*.apk)
-          echo "Verified immutable release APK SHA-256 against local build."
+          # Publish the APK checksum manifest alongside the APK. The earlier
+          # dist/artifacts.sha256 covers web files, not the Android release APK.
+          CHECKSUM_ASSET="SHA256SUMS"
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name' | grep -Fxq "${CHECKSUM_ASSET}"; then
+            gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${CHECKSUM_ASSET}" --dir existing-assets
+            cmp -s "apk-out/${CHECKSUM_ASSET}" "existing-assets/${CHECKSUM_ASSET}" || {
+              echo "::error::Existing APK checksum manifest differs; refusing overwrite" >&2; exit 1;
+            }
+          else
+            gh release upload "${RELEASE_TAG}" "apk-out/${CHECKSUM_ASSET}" --repo "${GITHUB_REPOSITORY}"
+          fi
+          gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${CHECKSUM_ASSET}" --dir verified-assets
+          cmp -s "apk-out/${CHECKSUM_ASSET}" "verified-assets/${CHECKSUM_ASSET}" || {
+            echo "::error::Downloaded APK checksum manifest differs" >&2; exit 1;
+          }
+          (cd verified-assets && sha256sum --check "${CHECKSUM_ASSET}")
+          echo "Verified immutable release APK and published SHA-256 manifest against local build."
           # Publish only after the signed APK has been verified against the release asset.
           if [ "$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" = true ]; then
             gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false
