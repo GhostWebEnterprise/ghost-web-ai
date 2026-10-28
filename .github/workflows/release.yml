@@ -71,7 +71,7 @@ jobs:
       - name: Upload dist artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-${{ github.run_id }}
           path: dist/
           retention-days: 14
 
@@ -96,7 +96,7 @@ jobs:
       - name: Download verified web build
         uses: actions/download-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-${{ github.run_id }}
           path: dist/
 
       - name: Scaffold the Android shell (Capacitor)
@@ -158,6 +158,9 @@ jobs:
           sha256sum "$APK"
           mkdir -p apk-out
           RELEASE_ASSET_VERSION="${GITHUB_REF_NAME}"
+          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
+            RELEASE_ASSET_VERSION="ci-${GITHUB_RUN_NUMBER}"
+          fi
           if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
             RELEASE_ASSET_VERSION="v0.2.0"
           fi
@@ -235,7 +238,7 @@ jobs:
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: android-apk-${{ github.ref_name }}
+          name: android-apk-${{ github.run_id }}
           path: apk-out/
           retention-days: 14
 
@@ -271,7 +274,7 @@ jobs:
       - name: Download verified web build
         uses: actions/download-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-${{ github.run_id }}
           path: dist/
 
       - name: Scaffold the Electron desktop shell (Capacitor Electron)
@@ -400,7 +403,7 @@ jobs:
       - name: Download verified web build
         uses: actions/download-artifact@v4
         with:
-          name: dist-${{ github.ref_name }}
+          name: dist-${{ github.run_id }}
           path: dist/
 
       - name: Scaffold the iOS shell (Capacitor)
