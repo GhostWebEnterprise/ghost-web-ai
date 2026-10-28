@@ -1,0 +1,45 @@
+import { expect, test } from "bun:test";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const script = fileURLToPath(new URL("./android-release-config.cjs", import.meta.url));
+const repoRoot = path.resolve(path.dirname(script), "..");
+const signingSecrets = [
+  "ANDROID_KEYSTORE_BASE64",
+  "ANDROID_KEYSTORE_PASSWORD",
+  "ANDROID_KEY_ALIAS",
+  "ANDROID_KEY_PASSWORD",
+];
+
+function runConfig(env: NodeJS.ProcessEnv) {
+  return spawnSync("node", [script, "v1.2.3"], {
+    cwd: repoRoot,
+    env,
+    encoding: "utf8",
+  });
+}
+
+test("Android release configuration fails closed when signing secrets are absent", () => {
+  const env = { ...process.env };
+  for (const key of signingSecrets) delete env[key];
+
+  const result = runConfig(env);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("ANDROID_KEYSTORE_BASE64 is required for release signing");
+  expect(result.stderr).not.toContain("self-signed");
+});
+
+test("Android release configuration rejects malformed keystore base64 before touching the scaffold", () => {
+  const env = { ...process.env };
+  env.ANDROID_KEYSTORE_BASE64 = "not-base64!";
+  env.ANDROID_KEYSTORE_PASSWORD = "test-store-password";
+  env.ANDROID_KEY_ALIAS = "test-alias";
+  env.ANDROID_KEY_PASSWORD = "test-key-password";
+
+  const result = runConfig(env);
+
+  expect(result.status).not.toBe(0);
+  expect(result.stderr).toContain("ANDROID_KEYSTORE_BASE64 must be valid base64");
+});
