@@ -77,7 +77,7 @@ jobs:
 
   android-apk:
     # Only build/sign Android APKs for an explicit release context; generic main pushes still run web/desktop CI.
-    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK')) || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: build-and-release
     runs-on: ubuntu-latest
     steps:
