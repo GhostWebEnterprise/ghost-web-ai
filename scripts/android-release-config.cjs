@@ -8,10 +8,7 @@
  *
  *   1. versionCode / versionName stamped from the git tag (e.g. v0.1.4 -> 14, "0.1.4")
  *   2. a `release` signingConfig, sourced from:
- *      - repo secrets ANDROID_KEYSTORE_B64 / ANDROID_KEYSTORE_PASSWORD /
- *        ANDROID_KEY_ALIAS / ANDROID_KEY_PASSWORD (decoded to android/release.keystore), or
- *      - a freshly generated self-signed keystore (fallback, so release builds
- *        always produce an installable APK without secrets)
+ *      - all four ANDROID_KEYSTORE_* signing secrets (no generated fallback)
  *   3. release buildType wired to that signing config
  *
  * Idempotent: safe to re-run. Usage: node scripts/android-release-config.js [tag]
@@ -57,38 +54,20 @@ const versionCode = tagMatch
   : 1;
 
 // ---------------------------------------------------------------------------
-// 2. Keystore: secrets decode, else self-signed generation
+// 2. Keystore: require repository signing secrets; no fallback
 // ---------------------------------------------------------------------------
 const keystorePath = path.join(ROOT, "android", "release.keystore");
-const secretB64 = process.env.ANDROID_KEYSTORE_B64 || "";
-
-let signingSource = "self-signed (generated)";
-if (secretB64) {
-  must(/\S/.test(process.env.ANDROID_KEYSTORE_PASSWORD || ""), "ANDROID_KEYSTORE_PASSWORD is required when ANDROID_KEYSTORE_B64 is set");
-  must(/\S/.test(process.env.ANDROID_KEY_ALIAS || ""), "ANDROID_KEY_ALIAS is required when ANDROID_KEYSTORE_B64 is set");
-  must(/\S/.test(process.env.ANDROID_KEY_PASSWORD || ""), "ANDROID_KEY_PASSWORD is required when ANDROID_KEYSTORE_B64 is set");
-  fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
-  fs.writeFileSync(keystorePath, Buffer.from(secretB64, "base64"));
-  signingSource = "repository secrets";
-} else {
-  // Deterministic-enough fallback keystore so release builds never fail for
-  // lack of secrets. Production teams should set the ANDROID_* secrets.
-  const alias = process.env.ANDROID_KEY_ALIAS || "ghost-release";
-  const pass = process.env.ANDROID_KEY_PASSWORD || "ghostwebai";
-  try {
-    sh(
-      `keytool -genkeypair -v -keystore '${keystorePath}' -alias '${alias}' ` +
-        `-keyalg RSA -keysize 2048 -validity 10000 -storepass '${pass}' -keypass '${pass}' ` +
-        `-dname 'CN=Ghost Web AI, OU=Ghost Securities, O=GhostWebEnterprise, C=US'`
-    );
-  } catch {
-    // keytool missing — gradle will surface a clear error if signing fails.
-  }
-  process.env.ANDROID_KEY_ALIAS = alias;
-  process.env.ANDROID_KEY_PASSWORD = pass;
-  process.env.ANDROID_KEYSTORE_PASSWORD = pass;
+for (const key of ["ANDROID_KEYSTORE_BASE64", "ANDROID_KEYSTORE_PASSWORD", "ANDROID_KEY_ALIAS", "ANDROID_KEY_PASSWORD"]) {
+  must((process.env[key] || "").trim().length > 0, key + " is required for release signing");
 }
-const hasKeystore = fs.existsSync(keystorePath);
+const encoded = process.env.ANDROID_KEYSTORE_BASE64.replace(/\s/g, "");
+must(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(encoded),
+  "ANDROID_KEYSTORE_BASE64 must be valid base64");
+const decoded = Buffer.from(encoded, "base64");
+must(decoded.length > 0 && decoded.toString("base64") === encoded,
+  "ANDROID_KEYSTORE_BASE64 must decode to a nonempty keystore");
+fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
+fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
 
 // ---------------------------------------------------------------------------
 // 3. Patch app/build.gradle
@@ -151,14 +130,7 @@ fs.writeFileSync(APP_GRADLE, patched);
 // ---------------------------------------------------------------------------
 // 4. Report
 // ---------------------------------------------------------------------------
-const q = (v) => `'${String(v || "").replace(/'/g, "'\\''")}'`;
-const vars =
-  `ANDROID_TAG_VERSION=${q(versionName)}\n` +
-  `ANDROID_KEYSTORE_PASSWORD=${q(process.env.ANDROID_KEYSTORE_PASSWORD)}\n` +
-  `ANDROID_KEY_ALIAS=${q(process.env.ANDROID_KEY_ALIAS)}\n` +
-  `ANDROID_KEY_PASSWORD=${q(process.env.ANDROID_KEY_PASSWORD)}\n`;
-fs.writeFileSync(path.join(ROOT, "android", "release-env.txt"), vars);
 
 console.log(`android-release-config: version ${versionName} (code ${versionCode})`);
-console.log(`android-release-config: signing: ${signingSource}${hasKeystore ? " [keystore present]" : ""}`);
+console.log("android-release-config: repository keystore configured");
 console.log("android-release-config: app/build.gradle patched for signed release builds");
