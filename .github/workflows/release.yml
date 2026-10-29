@@ -113,7 +113,6 @@ jobs:
           fi
           node scripts/android-release-config.cjs "${RELEASE_REF}"
           test -f android/release-env.txt || { echo "release env file missing"; exit 1; }
-          cat android/release-env.txt
 
       - name: Assemble signed release APK
         working-directory: android
