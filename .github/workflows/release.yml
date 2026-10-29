@@ -76,6 +76,8 @@ jobs:
           retention-days: 14
 
   android-apk:
+    # Only build/sign Android APKs for an explicit release context; generic main pushes still run web/desktop CI.
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK')) || github.event_name == 'workflow_dispatch'
     needs: build-and-release
     runs-on: ubuntu-latest
     steps:
@@ -243,7 +245,7 @@ jobs:
           retention-days: 14
 
   desktop-installers:
-    needs: [build-and-release, android-apk]
+    needs: build-and-release
     strategy:
       # Keep every OS running to its own conclusion so one failure does not
       # cancel the other installer builds mid-flight.
