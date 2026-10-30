@@ -5,6 +5,11 @@ on:
     tags: ["v*"]
     branches: ["main"]
   workflow_dispatch:
+    inputs:
+      release_version:
+        description: "Release tag to build and publish (for example v0.2.4)"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -89,6 +94,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Validate Android release tag and published-version guard
+        env:
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          RELEASE_VERSION: ${{ inputs.release_version || '' }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          RELEASE_TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_NAME}" = "main" ]; then
+            if [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
+              RELEASE_TAG="v0.2.0"
+            else
+              RELEASE_TAG="${RELEASE_VERSION}"
+            fi
+          fi
+          [[ "${RELEASE_TAG}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
+            echo "::error::Invalid Android release tag: ${RELEASE_TAG}" >&2
+            exit 1
+          }
+          all_published_tags="$(gh release list --repo "${GITHUB_REPOSITORY}" --limit 1000 --json tagName,isDraft --jq '.[] | select(.isDraft == false) | .tagName')"
+          published_tags="$(printf '%s\n' "${all_published_tags}" | grep -E '^v[0-9]+(\.[0-9]+)*(-[0-9]+)?$' || true)"
+          latest_tag="$(printf '%s\n' "${published_tags}" | sort -V | tail -n 1)"
+          if [ -n "${latest_tag}" ]; then
+            highest_tag="$(printf '%s\n%s\n' "${latest_tag}" "${RELEASE_TAG}" | sort -V | tail -n 1)"
+            if [ "${highest_tag}" != "${RELEASE_TAG}" ]; then
+              echo "::error::Refusing non-monotonic Android release ${RELEASE_TAG}; latest published release is ${latest_tag}" >&2
+              exit 1
+            fi
+          fi
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
+            test "${is_draft}" = true || {
+              echo "::error::Refusing to modify published Android release ${RELEASE_TAG}" >&2
+              exit 1
+            }
+          fi
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> "${GITHUB_ENV}"
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -125,18 +168,14 @@ jobs:
 
       - name: Configure signed release build (version stamp + keystore)
         env:
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           set -euo pipefail
-          RELEASE_REF="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
-            RELEASE_REF="v0.2.0"
-          fi
-          node scripts/android-release-config.cjs "${RELEASE_REF}"
+          : "${RELEASE_TAG:?validated release tag missing}"
+          node scripts/android-release-config.cjs "${RELEASE_TAG}"
 
       - name: Assemble signed release APK
         working-directory: android
@@ -165,28 +204,18 @@ jobs:
           "$APKSIGNER" verify --verbose --print-certs "$APK"
           sha256sum "$APK"
           mkdir -p apk-out
-          RELEASE_ASSET_VERSION="${GITHUB_REF_NAME}"
-          if [[ ! "${GITHUB_REF_NAME}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([.-].*)?$ ]]; then
-            RELEASE_ASSET_VERSION="ci-${GITHUB_RUN_NUMBER}"
-          fi
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
-            RELEASE_ASSET_VERSION="v0.2.0"
-          fi
-          cp "$APK" "apk-out/ghost-web-ai-${RELEASE_ASSET_VERSION}.apk"
+          : "${RELEASE_TAG:?validated release tag missing}"
+          cp "$APK" "apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
           (cd apk-out && sha256sum ./*.apk > SHA256SUMS)
           (cd apk-out && sha256sum --check SHA256SUMS)
 
       - name: Attach APK to the GitHub release
-        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
+        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, 'v0.2.0 APK') || github.event_name == 'workflow_dispatch'))
         env:
           GH_TOKEN: ${{ github.token }}
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          RELEASE_TAG="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
-            RELEASE_TAG="v0.2.0"
-          fi
+          : "${RELEASE_TAG:?validated release tag missing}"
 
           APK_PATH="apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
           test -f "${APK_PATH}" || {
@@ -258,16 +287,12 @@ jobs:
           }
 
       - name: Publish verified Android release
-        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
+        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && (contains(github.event.head_commit.message, 'v0.2.0 APK') || github.event_name == 'workflow_dispatch'))
         env:
           GH_TOKEN: ${{ github.token }}
-          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
         run: |
           set -euo pipefail
-          RELEASE_TAG="${GITHUB_REF_NAME}"
-          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
-            RELEASE_TAG="v0.2.0"
-          fi
+          : "${RELEASE_TAG:?validated release tag missing}"
           is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
           test "$is_draft" = true || {
             echo "::error::Refusing to publish a missing or already-published Android release" >&2
