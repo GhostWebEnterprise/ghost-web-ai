@@ -242,7 +242,7 @@ jobs:
             object_sha="$(jq -r '.object.sha' <<< "${ref_json}")"
             object_type="$(jq -r '.object.type' <<< "${ref_json}")"
             case "${object_type}" in
-              commit) printf '%s\\n' "${object_sha}" ;;
+              commit) printf '%s\n' "${object_sha}" ;;
               tag) gh api "repos/${GITHUB_REPOSITORY}/git/tags/${object_sha}" --jq '.object.sha' ;;
               *) echo "::error::Unexpected Git tag object type: ${object_type}" >&2; return 1 ;;
             esac
@@ -268,8 +268,7 @@ jobs:
           fi
 
           if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}" --draft --target "${GITHUB_SHA}" \\
-              --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
+            gh release create "${RELEASE_TAG}" --draft --target "${GITHUB_SHA}" --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
           fi
 
           tag_commit="$(resolve_tag_commit)"
