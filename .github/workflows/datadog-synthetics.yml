@@ -16,6 +16,8 @@ on:
 jobs:
   # Detect whether the Datadog credentials exist before committing to the run.
   secret-presence:
+    # Datadog credentials are never read by pull_request jobs.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
       present: ${{ steps.check.outputs.present }}
@@ -34,7 +36,7 @@ jobs:
 
   build:
     needs: secret-presence
-    if: needs.secret-presence.outputs.present == 'true'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.secret-presence.outputs.present == 'true'
     runs-on: ubuntu-latest
 
     steps:
