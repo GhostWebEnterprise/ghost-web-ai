@@ -211,6 +211,14 @@ jobs:
             echo "::error::Expected exactly one APK signer" >&2
             exit 1
           }
+          # Preserve the signing identity of the already-published v0.2.3 APK.
+          # A different certificate would make this same-package update
+          # uninstall/reinstall-only, so fail closed rather than publish it.
+          EXPECTED_SIGNER_SHA256="556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006"
+          grep -Fq "$EXPECTED_SIGNER_SHA256" apk-out/apksigner.txt || {
+            echo "::error::APK signer differs from published v0.2.3 identity; refusing update-incompatible release" >&2
+            exit 1
+          }
           sha256sum "$APK"
           : "${RELEASE_TAG:?validated release tag missing}"
           cp "$APK" "apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
