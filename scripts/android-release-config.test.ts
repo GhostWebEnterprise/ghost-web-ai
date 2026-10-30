@@ -62,4 +62,8 @@ test("Android release keystore is removed before the draft release is published"
   expect(cleanup).toContain("if: always()");
   expect(cleanup).toContain("rm -f android/release.keystore");
   expect(cleanup).toContain("test ! -e android/release.keystore");
+  const publish = workflow.slice(publishIndex);
+  expect(publish).toContain('test "$is_draft" = true');
+  expect(publish).toContain('gh release edit "${RELEASE_TAG}"');
+  expect(publish).toContain('test "$is_draft" = false');
 });
