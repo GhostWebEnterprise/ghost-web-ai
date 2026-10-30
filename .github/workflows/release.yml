@@ -7,10 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   build-and-release:
+    # Release-write token is limited to trusted main and version-tag builds.
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +80,11 @@ jobs:
           retention-days: 14
 
   android-apk:
+    # Only build/sign Android APKs for an explicit trusted release context.
+    if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK')) || (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main')
     needs: build-and-release
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -231,14 +239,13 @@ jobs:
           (cd verified-assets && sha256sum --check "${CHECKSUM_ASSET}")
           echo "Verified immutable release APK and published SHA-256 manifest against local build."
 
+
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-${{ github.run_id }}
           path: apk-out/
           retention-days: 14
-
-
       - name: Remove Android signing material
         if: always()
         shell: bash
@@ -249,7 +256,6 @@ jobs:
             echo "::error::Android release keystore cleanup failed" >&2
             exit 1
           }
-
 
       - name: Publish verified Android release
         if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
@@ -273,6 +279,7 @@ jobs:
             echo "::error::GitHub did not publish the verified Android release" >&2
             exit 1
           }
+
 
   desktop-installers:
     needs: build-and-release
