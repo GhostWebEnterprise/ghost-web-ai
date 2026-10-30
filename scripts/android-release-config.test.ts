@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import { spawnSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -42,4 +43,23 @@ test("Android release configuration rejects malformed keystore base64 before tou
 
   expect(result.status).not.toBe(0);
   expect(result.stderr).toContain("ANDROID_KEYSTORE_BASE64 must be valid base64");
+});
+
+
+test("Android release keystore is removed before the draft release is published", () => {
+  const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
+  const attachIndex = workflow.indexOf("- name: Attach APK to the GitHub release");
+  const cleanupIndex = workflow.indexOf("- name: Remove Android signing material");
+  const publishIndex = workflow.indexOf("- name: Publish verified Android release");
+
+  expect(attachIndex).toBeGreaterThan(-1);
+  expect(cleanupIndex).toBeGreaterThan(attachIndex);
+  expect(publishIndex).toBeGreaterThan(cleanupIndex);
+
+  const attach = workflow.slice(attachIndex, cleanupIndex);
+  const cleanup = workflow.slice(cleanupIndex, publishIndex);
+  expect(attach).not.toContain("gh release edit");
+  expect(cleanup).toContain("if: always()");
+  expect(cleanup).toContain("rm -f android/release.keystore");
+  expect(cleanup).toContain("test ! -e android/release.keystore");
 });
