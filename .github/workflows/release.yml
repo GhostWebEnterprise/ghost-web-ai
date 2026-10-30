@@ -275,7 +275,7 @@ jobs:
           }
 
   desktop-installers:
-    needs: [build-and-release, android-apk]
+    needs: build-and-release
     strategy:
       # Keep every OS running to its own conclusion so one failure does not
       # cancel the other installer builds mid-flight.
