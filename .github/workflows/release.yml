@@ -242,6 +242,18 @@ jobs:
           path: apk-out/
           retention-days: 14
 
+
+      - name: Remove Android signing material
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm -f android/release.keystore
+          test ! -e android/release.keystore || {
+            echo "::error::Android release keystore cleanup failed" >&2
+            exit 1
+          }
+
   desktop-installers:
     needs: [build-and-release, android-apk]
     strategy:
