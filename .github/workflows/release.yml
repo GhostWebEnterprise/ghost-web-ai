@@ -224,11 +224,59 @@ jobs:
             exit 1
           }
 
-          # The release must exist before the asset upload. If it was deleted,
-          # recreate it automatically; otherwise keep the existing release.
-          if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
-            gh release create "${RELEASE_TAG}" --draft --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
+          # Bind the release tag to this exact build commit before creating or
+          # attaching assets. Existing draft releases are reusable only at this SHA.
+          resolve_tag_commit() {
+            local ref_json object_sha object_type ref_error
+            ref_error="$(mktemp)"
+            if ! ref_json="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}" 2>"${ref_error}")"; then
+              if grep -q '404' "${ref_error}"; then
+                rm -f "${ref_error}"
+                return 2
+              fi
+              cat "${ref_error}" >&2
+              rm -f "${ref_error}"
+              return 1
+            fi
+            rm -f "${ref_error}"
+            object_sha="$(jq -r '.object.sha' <<< "${ref_json}")"
+            object_type="$(jq -r '.object.type' <<< "${ref_json}")"
+            case "${object_type}" in
+              commit) printf '%s\\n' "${object_sha}" ;;
+              tag) gh api "repos/${GITHUB_REPOSITORY}/git/tags/${object_sha}" --jq '.object.sha' ;;
+              *) echo "::error::Unexpected Git tag object type: ${object_type}" >&2; return 1 ;;
+            esac
+          }
+
+          tag_commit=""
+          if tag_commit="$(resolve_tag_commit)"; then
+            test "${tag_commit}" = "${GITHUB_SHA}" || {
+              echo "::error::Release tag resolves to ${tag_commit}, not this build commit ${GITHUB_SHA}" >&2
+              exit 1
+            }
+          else
+            resolve_status=$?
+            test "${resolve_status}" -eq 2 || exit "${resolve_status}"
+            if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+              echo "::error::Tag-triggered Android release tag is missing" >&2
+              exit 1
+            fi
+            if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+              echo "::error::Draft release exists but its Git tag is missing; refusing implicit repair" >&2
+              exit 1
+            fi
           fi
+
+          if ! gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
+            gh release create "${RELEASE_TAG}" --draft --target "${GITHUB_SHA}" \\
+              --title "Ghost Web AI ${RELEASE_TAG}" --generate-notes --repo "${GITHUB_REPOSITORY}"
+          fi
+
+          tag_commit="$(resolve_tag_commit)"
+          test "${tag_commit}" = "${GITHUB_SHA}" || {
+            echo "::error::Release tag does not point to this build commit after draft creation" >&2
+            exit 1
+          }
 
           # A published release must never gain or replace assets, even when the APK name is absent.
           is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
@@ -293,6 +341,16 @@ jobs:
         run: |
           set -euo pipefail
           : "${RELEASE_TAG:?validated release tag missing}"
+          tag_ref="$(gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${RELEASE_TAG}")"
+          tag_sha="$(jq -r '.object.sha' <<< "${tag_ref}")"
+          tag_type="$(jq -r '.object.type' <<< "${tag_ref}")"
+          if [ "${tag_type}" = "tag" ]; then
+            tag_sha="$(gh api "repos/${GITHUB_REPOSITORY}/git/tags/${tag_sha}" --jq '.object.sha')"
+          fi
+          test "${tag_sha}" = "${GITHUB_SHA}" || {
+            echo "::error::Refusing to publish: release tag no longer points to this verified build commit" >&2
+            exit 1
+          }
           is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
           test "$is_draft" = true || {
             echo "::error::Refusing to publish a missing or already-published Android release" >&2
