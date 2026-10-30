@@ -203,7 +203,19 @@ jobs:
           test -n "$APKSIGNER" && test -x "$APKSIGNER" || { echo "::error::apksigner missing" >&2; exit 1; }
           mkdir -p apk-out
           "$APKSIGNER" verify --verbose --print-certs "$APK" | tee apk-out/apksigner.txt
-          grep -q '^Verifies          cp "$APK" "apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
+          grep -Fq "Verifies" apk-out/apksigner.txt || {
+            echo "::error::APK signature verification did not report Verifies" >&2
+            exit 1
+          }
+          grep -Fq "Number of signers: 1" apk-out/apksigner.txt || {
+            echo "::error::Expected exactly one APK signer" >&2
+            exit 1
+          }
+          sha256sum "$APK"
+          : "${RELEASE_TAG:?validated release tag missing}"
+          cp "$APK" "apk-out/ghost-web-ai-${RELEASE_TAG}.apk"
+          (cd apk-out && sha256sum ./*.apk > SHA256SUMS)
+          (cd apk-out && sha256sum --check SHA256SUMS)
           (cd apk-out && sha256sum ./*.apk > SHA256SUMS)
           (cd apk-out && sha256sum --check SHA256SUMS)
 
