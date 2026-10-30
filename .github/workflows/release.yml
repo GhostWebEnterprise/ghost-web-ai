@@ -230,10 +230,6 @@ jobs:
           }
           (cd verified-assets && sha256sum --check "${CHECKSUM_ASSET}")
           echo "Verified immutable release APK and published SHA-256 manifest against local build."
-          # Publish only after the signed APK has been verified against the release asset.
-          if [ "$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)" = true ]; then
-            gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false
-          fi
 
       - name: Upload APK workflow artifact
         uses: actions/upload-artifact@v4
@@ -251,6 +247,30 @@ jobs:
           rm -f android/release.keystore
           test ! -e android/release.keystore || {
             echo "::error::Android release keystore cleanup failed" >&2
+            exit 1
+          }
+
+
+      - name: Publish verified Android release
+        if: startsWith(github.ref, 'refs/tags/v') || (github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'v0.2.0 APK'))
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          set -euo pipefail
+          RELEASE_TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_NAME}" = "main" ] && [[ "${HEAD_COMMIT_MESSAGE}" == *"v0.2.0 APK"* ]]; then
+            RELEASE_TAG="v0.2.0"
+          fi
+          is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
+          test "$is_draft" = true || {
+            echo "::error::Refusing to publish a missing or already-published Android release" >&2
+            exit 1
+          }
+          gh release edit "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --draft=false
+          is_draft="$(gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json isDraft --jq .isDraft)"
+          test "$is_draft" = false || {
+            echo "::error::GitHub did not publish the verified Android release" >&2
             exit 1
           }
 
