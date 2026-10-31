@@ -46,6 +46,11 @@ test("Android release configuration rejects malformed keystore base64 before tou
 });
 
 
+test("Android release keystore enforces private permissions for reused paths", () => {
+  const source = readFileSync(script, "utf8");
+  expect(source).toContain("fs.chmodSync(keystorePath, 0o600);");
+});
+
 test("Android release keystore is removed before the draft release is published", () => {
   const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
   const attachIndex = workflow.indexOf("- name: Attach APK to the GitHub release");
