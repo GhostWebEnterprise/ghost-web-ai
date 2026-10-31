@@ -46,6 +46,18 @@ test("Android release configuration rejects malformed keystore base64 before tou
 });
 
 
+test("Android release requires APK Signature Scheme v2", () => {
+  const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
+  expect(workflow).toContain(
+    'grep -Fq "Verified using v2 scheme (APK Signature Scheme v2): true" apk-out/apksigner.txt',
+  );
+});
+
+test("Android release keystore enforces private permissions for reused paths", () => {
+  const source = readFileSync(script, "utf8");
+  expect(source).toContain("fs.chmodSync(keystorePath, 0o600);");
+});
+
 test("Android release keystore is removed before the draft release is published", () => {
   const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
   const attachIndex = workflow.indexOf("- name: Attach APK to the GitHub release");
@@ -66,4 +78,12 @@ test("Android release keystore is removed before the draft release is published"
   expect(publish).toContain('test "$is_draft" = true');
   expect(publish).toContain('gh release edit "${RELEASE_TAG}"');
   expect(publish).toContain('test "$is_draft" = false');
+});
+
+test("Android release never writes or prints a plaintext signing environment file", () => {
+  const source = readFileSync(script, "utf8");
+  const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
+
+  expect(source).not.toContain("release-env.txt");
+  expect(workflow).not.toContain("cat android/release-env.txt");
 });
