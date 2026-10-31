@@ -68,6 +68,8 @@ must(decoded.length > 0 && decoded.toString("base64") === encoded,
   "ANDROID_KEYSTORE_BASE64 must decode to a nonempty keystore");
 fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
 fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
+// writeFileSync's mode only applies to newly created files; enforce it for reused paths too.
+fs.chmodSync(keystorePath, 0o600);
 
 // ---------------------------------------------------------------------------
 // 3. Patch app/build.gradle
