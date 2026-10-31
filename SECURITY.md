@@ -12,11 +12,13 @@ receives security updates; older releases are documented for reference only.
 | 0.1.0    | :white_check_mark: | Superseded; security fixes ride forward            |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
-The current release train is **v0.1.4**: typecheck, tests and build verified,
-checksummed web release, **signed release APK** (version-stamped from the tag,
-signed with repository secrets when provided or a generated keystore otherwise,
-signature verified with `apksigner` before attach) assembled on GitHub runners
-and attached alongside its checksum manifest. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
+The latest published release is **v0.2.3**. Its Android APK was signed with a
+temporary self-signed RSA-2048 keystore generated on the GitHub Actions runner.
+The historical run has no downloadable artifact containing that private
+keystore, so update-signing continuity is not established. Future Android
+releases must use the existing signing identity and fail closed if it cannot
+be reproduced; a replacement key must not be published as an in-place update
+for the same Android application ID. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
 live publishing (with truthful sync status and actionable 401/403/404 error
 hints in the UI), a fully responsive mobile/desktop UI, a per-user Settings
 tab (engine mode, plan-only publishing, repo defaults), **iOS/macOS/Linux
@@ -125,13 +127,17 @@ must pass before the maintenance release tag moves.
   `OPENAI_API_KEY`) out of source and out of the browser bundle.
 - Set `SITE_URL` to your Convex site URL so the OAuth callback
   (`/github/callback`) resolves to your deployment only.
-- Verify APK releases against the attached `artifacts.sha256` before
-  installing on a device. The release APK is signed with the keystore from the
-  `ANDROID_KEYSTORE_B64` / `ANDROID_KEYSTORE_PASSWORD` / `ANDROID_KEY_ALIAS` /
-  `ANDROID_KEY_PASSWORD` repository secrets when present; otherwise a generated
-  self-signed keystore is used (fine for direct install, not for store
-  distribution). The signature is verified with `apksigner` before the APK is
-  attached, and the keystore itself is never committed.
+- Verify APK releases against the attached `SHA256SUMS` before
+  installing on a device. Android release signing requires **all four**
+  repository secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
+  `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`. There is **no generated
+  keystore fallback**: a missing, invalid, or mismatched keystore blocks the
+  release. To preserve in-place updates from v0.2.3, the signer must match
+  certificate SHA-256
+  `556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006`.
+  The workflow verifies the APK with `apksigner`, requires exactly one signer,
+  downloads the published asset again for byte comparison, and removes the
+  temporary keystore after the job.
 - Desktop installers (.dmg/.zip/.exe/.AppImage/.deb) are unsigned by default;
   verify them against `artifacts.sha256` and prefer the checksummed release
   tag over mirrors. Add code-signing certificates as CI secrets before
