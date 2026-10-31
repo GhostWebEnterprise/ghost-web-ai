@@ -79,3 +79,11 @@ test("Android release keystore is removed before the draft release is published"
   expect(publish).toContain('gh release edit "${RELEASE_TAG}"');
   expect(publish).toContain('test "$is_draft" = false');
 });
+
+test("Android release never writes or prints a plaintext signing environment file", () => {
+  const source = readFileSync(script, "utf8");
+  const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
+
+  expect(source).not.toContain("release-env.txt");
+  expect(workflow).not.toContain("cat android/release-env.txt");
+});
