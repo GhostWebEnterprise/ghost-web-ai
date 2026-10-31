@@ -46,6 +46,13 @@ test("Android release configuration rejects malformed keystore base64 before tou
 });
 
 
+test("Android release requires APK Signature Scheme v2", () => {
+  const workflow = readFileSync(path.join(repoRoot, ".github", "workflows", "release.yml"), "utf8");
+  expect(workflow).toContain(
+    'grep -Fq "Verified using v2 scheme (APK Signature Scheme v2): true" apk-out/apksigner.txt',
+  );
+});
+
 test("Android release keystore enforces private permissions for reused paths", () => {
   const source = readFileSync(script, "utf8");
   expect(source).toContain("fs.chmodSync(keystorePath, 0o600);");
