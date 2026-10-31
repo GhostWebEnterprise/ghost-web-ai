@@ -127,8 +127,13 @@ must pass before the maintenance release tag moves.
   `OPENAI_API_KEY`) out of source and out of the browser bundle.
 - Set `SITE_URL` to your Convex site URL so the OAuth callback
   (`/github/callback`) resolves to your deployment only.
-- Verify APK releases against the attached `SHA256SUMS` before
-  installing on a device. Android release signing requires **all four**
+- The published v0.2.3 APK has GitHub asset SHA-256
+  `88d37d30d236201fb5bb586825a08065f1d067cde8d5cb7d5e679f30641a2e20`;
+  its release did **not** include a separate APK `SHA256SUMS` asset (the
+  `artifacts.sha256` file covers the web build only). For subsequent Android
+  releases, the fail-closed workflow attaches `SHA256SUMS` and verifies the
+  downloaded APK and manifest bytes before publishing. Android release signing
+  requires **all four**
   repository secrets: `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
   `ANDROID_KEY_ALIAS`, and `ANDROID_KEY_PASSWORD`. There is **no generated
   keystore fallback**: a missing, invalid, or mismatched keystore blocks the
