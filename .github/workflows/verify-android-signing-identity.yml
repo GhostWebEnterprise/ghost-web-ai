@@ -1,0 +1,94 @@
+name: Verify Android signing identity
+
+on:
+  push:
+    branches:
+      - automation/verify-android-signing-identity
+    paths:
+      - .github/workflows/verify-android-signing-identity.yml
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify existing v0.2.3 signer without publishing
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Verify required signing secrets and certificate identity
+        shell: bash
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          EXPECTED_SIGNER_SHA256: "556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006"
+        run: |
+          set -euo pipefail
+          set +x
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "::error::Required signing secret is missing: $name"
+              exit 1
+            fi
+          done
+
+          umask 077
+          KEYSTORE="$RUNNER_TEMP/ghostweb-ai-signing-check.jks"
+          TEMP_P12="$RUNNER_TEMP/ghostweb-ai-signing-check.p12"
+          META="$RUNNER_TEMP/ghostweb-ai-signing-metadata.txt"
+          IMPORT_LOG="$RUNNER_TEMP/ghostweb-ai-signing-import.log"
+          TMP_PASSWORD="$(openssl rand -hex 24)"
+          cleanup() {
+            rm -f "$KEYSTORE" "$TEMP_P12" "$META" "$IMPORT_LOG"
+          }
+          trap cleanup EXIT
+
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$KEYSTORE"
+          test -s "$KEYSTORE" || {
+            echo "::error::Decoded Android keystore is empty"
+            exit 1
+          }
+
+          # Importing the selected private-key entry verifies both store and key passwords.
+          if ! keytool -importkeystore -noprompt \
+            -srckeystore "$KEYSTORE" \
+            -srcstorepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -srcalias "$ANDROID_KEY_ALIAS" \
+            -srckeypass "$ANDROID_KEY_PASSWORD" \
+            -destkeystore "$TEMP_P12" \
+            -deststoretype PKCS12 \
+            -deststorepass "$TMP_PASSWORD" \
+            -destkeypass "$TMP_PASSWORD" >"$IMPORT_LOG" 2>&1; then
+            echo "::error::Keystore, alias, or private-key password validation failed; secret values are not printed."
+            exit 1
+          fi
+
+          keytool -list -v \
+            -keystore "$KEYSTORE" \
+            -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+            -alias "$ANDROID_KEY_ALIAS" > "$META"
+
+          ACTUAL="$(awk -F': ' '/SHA256:/{print $2; exit}' "$META" | tr -d ':[:space:]' | tr '[:upper:]' '[:lower:]')"
+          EXPECTED="$(printf '%s' "$EXPECTED_SIGNER_SHA256" | tr '[:upper:]' '[:lower:]')"
+          [[ "$ACTUAL" =~ ^[0-9a-f]{64}$ ]] || {
+            echo "::error::Could not extract one valid SHA-256 certificate fingerprint"
+            exit 1
+          }
+          if [[ "$ACTUAL" != "$EXPECTED" ]]; then
+            echo "::error::Configured Android signing identity does not match the published v0.2.3 signer."
+            echo "::error::Expected SHA-256: $EXPECTED"
+            echo "::error::Actual SHA-256:   $ACTUAL"
+            exit 1
+          fi
+
+          echo "Verified Android signing certificate SHA-256: $ACTUAL"
+          echo "All four required signing secrets are present; no release or tag was created."
