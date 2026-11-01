@@ -333,7 +333,34 @@ jobs:
             echo "::error::Downloaded APK checksum manifest differs" >&2; exit 1;
           }
           (cd verified-assets && sha256sum --check "${CHECKSUM_ASSET}")
-          echo "Verified immutable release APK and published SHA-256 manifest against local build."
+
+          # Publish the public apksigner report as a separate immutable evidence asset.
+          # The report contains certificate metadata only; no private signing material.
+          SIGNATURE_ASSET="apksigner.txt"
+          EXPECTED_SIGNER_SHA256="556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006"
+          grep -Fq "Verifies" "apk-out/${SIGNATURE_ASSET}"
+          grep -Fq "Verified using v2 scheme (APK Signature Scheme v2): true" "apk-out/${SIGNATURE_ASSET}"
+          grep -Fq "Number of signers: 1" "apk-out/${SIGNATURE_ASSET}"
+          grep -Fq "certificate SHA-256 digest: ${EXPECTED_SIGNER_SHA256}" "apk-out/${SIGNATURE_ASSET}"
+          if gh release view "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --json assets --jq '.assets[].name' | grep -Fxq "${SIGNATURE_ASSET}"; then
+            gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${SIGNATURE_ASSET}" --dir existing-assets
+            cmp -s "apk-out/${SIGNATURE_ASSET}" "existing-assets/${SIGNATURE_ASSET}" || {
+              echo "::error::Existing APK signature evidence differs; refusing overwrite" >&2; exit 1;
+            }
+          else
+            gh release upload "${RELEASE_TAG}" "apk-out/${SIGNATURE_ASSET}" --repo "${GITHUB_REPOSITORY}"
+          fi
+          gh release download "${RELEASE_TAG}" --repo "${GITHUB_REPOSITORY}" --pattern "${SIGNATURE_ASSET}" --dir verified-assets
+          cmp -s "apk-out/${SIGNATURE_ASSET}" "verified-assets/${SIGNATURE_ASSET}" || {
+            echo "::error::Downloaded APK signature evidence differs" >&2; exit 1;
+          }
+
+          EXPECTED_APK_SHA256="$(awk 'NR == 1 {print $1}' "apk-out/${CHECKSUM_ASSET}")"
+          ACTUAL_APK_SHA256="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.assets[] | select(.name=="'"${ASSET_NAME}"'") | .digest' | sed 's/^sha256://')"
+          test -n "${ACTUAL_APK_SHA256}" && test "${EXPECTED_APK_SHA256}" = "${ACTUAL_APK_SHA256}" || {
+            echo "::error::GitHub APK asset digest differs from the verified checksum manifest" >&2; exit 1;
+          }
+          echo "Verified immutable APK, SHA-256 manifest, GitHub asset digest and apksigner evidence against local build."
 
 
       - name: Upload APK workflow artifact
