@@ -34,12 +34,16 @@ jobs:
         run: |
           set -euo pipefail
           set +x
+          missing=()
           for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
             if [[ -z "${!name:-}" ]]; then
-              echo "::error::Required signing secret is missing: $name"
-              exit 1
+              missing+=("$name")
             fi
           done
+          if (( ${#missing[@]} > 0 )); then
+            printf '::error::Required signing secrets are missing: %s\n' "${missing[*]}"
+            exit 1
+          fi
 
           umask 077
           KEYSTORE="$RUNNER_TEMP/ghostweb-ai-signing-check.jks"
