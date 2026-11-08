@@ -15,7 +15,12 @@ receives security updates; older releases are documented for reference only.
 The latest published release is **v0.2.3**. Its Android APK was signed with a
 temporary self-signed RSA-2048 keystore generated on the GitHub Actions runner.
 The historical run has no downloadable artifact containing that private
-keystore, so update-signing continuity is not established. Future Android
+keystore, so update-signing continuity is not established. Inspection of the
+historical public Actions log also found that the generated keystore's store
+and key passwords were printed in plaintext; treat those values as compromised
+and never reuse them. If a private-keystore backup is recovered outside GitHub,
+rotate both passwords before placing it in Actions, then verify that its
+certificate SHA-256 still matches the published v0.2.3 signer. Future Android
 releases must use the existing signing identity and fail closed if it cannot
 be reproduced; a replacement key must not be published as an in-place update
 for the same Android application ID. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
