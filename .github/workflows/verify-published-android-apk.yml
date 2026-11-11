@@ -1,0 +1,126 @@
+name: Verify published Android APK
+
+on:
+  push:
+    branches:
+      - docs/v023-signature-evidence-boundary-20261111
+    paths:
+      - ".github/workflows/verify-published-android-apk.yml"
+  pull_request:
+    paths:
+      - ".github/workflows/verify-published-android-apk.yml"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Published GhostWeb AI Android release tag"
+        required: true
+        default: "v0.2.3"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify published APK signature and digest
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.release_tag || 'v0.2.3' }}
+      EXPECTED_SIGNER_SHA256: "556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006"
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
+
+      - name: Install Android build tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sdkmanager "build-tools;37.0.0"
+          test -x "$ANDROID_HOME/build-tools/37.0.0/apksigner"
+
+      - name: Download published APK and verify release digest
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]] || {
+            echo "::error::Invalid release tag: $RELEASE_TAG" >&2
+            exit 1
+          }
+
+          release_json="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG")"
+          is_draft="$(jq -r '.draft' <<< "$release_json")"
+          test "$is_draft" = false || {
+            echo "::error::Refusing to audit a draft release" >&2
+            exit 1
+          }
+
+          asset_name="ghost-web-ai-$RELEASE_TAG.apk"
+          published_digest="$(jq -r --arg name "$asset_name" '.assets[] | select(.name == $name) | .digest // empty' <<< "$release_json")"
+          [[ "$published_digest" =~ ^sha256:[0-9a-f]{64}$ ]] || {
+            echo "::error::Published GitHub asset SHA-256 digest is missing" >&2
+            exit 1
+          }
+
+          mkdir -p audit
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \\
+            --pattern "$asset_name" --dir audit
+          apk="audit/$asset_name"
+          test -s "$apk" || {
+            echo "::error::Published APK download is missing or empty" >&2
+            exit 1
+          }
+
+          actual_sha256="$(sha256sum "$apk" | awk '{print $1}')"
+          test "sha256:$actual_sha256" = "$published_digest" || {
+            echo "::error::Downloaded APK does not match GitHub's published asset digest" >&2
+            exit 1
+          }
+          printf '%s  %s\\n' "$actual_sha256" "$asset_name" > audit/SHA256SUMS
+          (cd audit && sha256sum --check SHA256SUMS)
+
+          apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          "$apksigner" verify --verbose --print-certs "$apk" > audit/apksigner.txt
+          grep -Fq "Verifies" audit/apksigner.txt || {
+            echo "::error::apksigner did not report a valid APK signature" >&2
+            exit 1
+          }
+          grep -Fq "Verified using v2 scheme (APK Signature Scheme v2): true" audit/apksigner.txt || {
+            echo "::error::APK Signature Scheme v2 is not verified" >&2
+            exit 1
+          }
+          grep -Fq "Number of signers: 1" audit/apksigner.txt || {
+            echo "::error::Expected exactly one APK signer" >&2
+            exit 1
+          }
+
+          actual_signer="$(sed -nE 's/.*certificate SHA-256 digest: ([0-9A-Fa-f:]+).*/\\1/p' audit/apksigner.txt | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          test "$actual_signer" = "$EXPECTED_SIGNER_SHA256" || {
+            echo "::error::Published APK signer does not match the recorded v0.2.3 certificate" >&2
+            exit 1
+          }
+
+          {
+            echo "Release tag: $RELEASE_TAG"
+            echo "APK asset: $asset_name"
+            echo "GitHub asset digest: $published_digest"
+            echo "Downloaded APK SHA-256: $actual_sha256"
+            echo "Signer certificate SHA-256: $actual_signer"
+            echo "APK Signature Scheme v2: verified"
+            echo "Signer count: 1"
+            echo "Private signing material: not accessed"
+          } > audit/verification-summary.txt
+
+      - name: Upload verification evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-signature-audit-${{ github.run_id }}
+          path: audit/
+          if-no-files-found: error
+          retention-days: 90
