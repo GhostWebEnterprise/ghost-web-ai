@@ -23,7 +23,18 @@ rotate both passwords before placing it in Actions, then verify that its
 certificate SHA-256 still matches the published v0.2.3 signer. Future Android
 releases must use the existing signing identity and fail closed if it cannot
 be reproduced; a replacement key must not be published as an in-place update
-for the same Android application ID. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
+for the same Android application ID.
+
+**Historical signature-evidence limitation:** the v0.2.3 workflow made `apksigner`
+optional and ran `apksigner verify --print-certs` through `head` without
+`pipefail` or an explicit verification-result assertion. The log records a V2
+signer certificate fingerprint, but a successful job does not prove that the
+verification command's exit status was enforced. Treat v0.2.3 as not
+independently signature-verified until the exact published APK is checked
+separately. Future releases use the fail-closed verifier and publish its
+signature report alongside the APK.
+
+This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
 live publishing (with truthful sync status and actionable 401/403/404 error
 hints in the UI), a fully responsive mobile/desktop UI, a per-user Settings
 tab (engine mode, plan-only publishing, repo defaults), **iOS/macOS/Linux
