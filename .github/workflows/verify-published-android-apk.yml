@@ -49,7 +49,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          [[ "$RELEASE_TAG" =~ ^v[0-9]+\\.[0-9]+\\.[0-9]+$ ]] || {
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || {
             echo "::error::Invalid release tag: $RELEASE_TAG" >&2
             exit 1
           }
@@ -69,8 +69,7 @@ jobs:
           }
 
           mkdir -p audit
-          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" \\
-            --pattern "$asset_name" --dir audit
+          gh release download "$RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --pattern "$asset_name" --dir audit
           apk="audit/$asset_name"
           test -s "$apk" || {
             echo "::error::Published APK download is missing or empty" >&2
@@ -82,7 +81,7 @@ jobs:
             echo "::error::Downloaded APK does not match GitHub's published asset digest" >&2
             exit 1
           }
-          printf '%s  %s\\n' "$actual_sha256" "$asset_name" > audit/SHA256SUMS
+          printf '%s  %s\n' "$actual_sha256" "$asset_name" > audit/SHA256SUMS
           (cd audit && sha256sum --check SHA256SUMS)
 
           apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
@@ -100,7 +99,7 @@ jobs:
             exit 1
           }
 
-          actual_signer="$(sed -nE 's/.*certificate SHA-256 digest: ([0-9A-Fa-f:]+).*/\\1/p' audit/apksigner.txt | head -n 1 | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          actual_signer="$(awk -F': ' '/certificate SHA-256 digest:/ {print $2; exit}' audit/apksigner.txt | tr -d ':' | tr '[:upper:]' '[:lower:]')"
           test "$actual_signer" = "$EXPECTED_SIGNER_SHA256" || {
             echo "::error::Published APK signer does not match the recorded v0.2.3 certificate" >&2
             exit 1
