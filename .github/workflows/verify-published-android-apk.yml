@@ -42,6 +42,7 @@ jobs:
           set -euo pipefail
           sdkmanager "build-tools;37.0.0"
           test -x "$ANDROID_HOME/build-tools/37.0.0/apksigner"
+          test -x "$ANDROID_HOME/build-tools/37.0.0/aapt"
 
       - name: Download published APK and verify release digest
         shell: bash
@@ -94,6 +95,13 @@ jobs:
             echo "::error::APK Signature Scheme v2 is not verified" >&2
             exit 1
           }
+          if (( min_sdk < 24 )); then
+            grep -Fq "Verified using v1 scheme (JAR signing): true" audit/apksigner.txt || {
+              echo "::error::APK minSdk is below 24 but V1/JAR signature verification is not valid" >&2
+              exit 1
+            }
+          fi
+          v1_meta_warning_count="$(grep -c '^WARNING: META-INF/' audit/apksigner.txt || true)"
           grep -Fq "Number of signers: 1" audit/apksigner.txt || {
             echo "::error::Expected exactly one APK signer" >&2
             exit 1
@@ -114,8 +122,15 @@ jobs:
             echo "APK asset: $asset_name"
             echo "GitHub asset digest: $published_digest"
             echo "Downloaded APK SHA-256: $actual_sha256"
-            echo "Signer certificate SHA-256: $actual_signer"
+            echo "Minimum SDK: $min_sdk"
+            if (( min_sdk < 24 )); then
+              echo "APK Signature Scheme v1: verified (required for API below 24)"
+            else
+              echo "APK Signature Scheme v1: not required by minimum SDK"
+            fi
             echo "APK Signature Scheme v2: verified"
+            echo "V1 META-INF unprotected-entry warning count: $v1_meta_warning_count"
+            echo "Signer certificate SHA-256: $actual_signer"
             echo "Signer count: 1"
             echo "Private signing material: not accessed"
           } > audit/verification-summary.txt
