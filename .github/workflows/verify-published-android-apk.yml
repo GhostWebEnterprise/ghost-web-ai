@@ -85,6 +85,14 @@ jobs:
           printf '%s  %s\n' "$actual_sha256" "$asset_name" > audit/SHA256SUMS
           (cd audit && sha256sum --check SHA256SUMS)
 
+          aapt="$ANDROID_HOME/build-tools/37.0.0/aapt"
+          "$aapt" dump badging "$apk" > audit/apk-badging.txt
+          min_sdk="$(sed -n "s/^sdkVersion:'\([0-9][0-9]*\)'.*/\1/p" audit/apk-badging.txt | head -n 1)"
+          [[ "$min_sdk" =~ ^[0-9]+$ ]] || {
+            echo "::error::Could not determine the published APK minimum SDK" >&2
+            exit 1
+          }
+
           apksigner="$ANDROID_HOME/build-tools/37.0.0/apksigner"
           "$apksigner" verify --verbose --print-certs "$apk" > audit/apksigner.txt
           grep -Fq "Verifies" audit/apksigner.txt || {
