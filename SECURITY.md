@@ -27,12 +27,17 @@ for the same Android application ID.
 
 **Historical signature-evidence limitation:** the v0.2.3 workflow made `apksigner`
 optional and ran `apksigner verify --print-certs` through `head` without
-`pipefail` or an explicit verification-result assertion. The log records a V2
-signer certificate fingerprint, but a successful job does not prove that the
-verification command's exit status was enforced. Treat v0.2.3 as not
-independently signature-verified until the exact published APK is checked
-separately. Future releases use the fail-closed verifier and publish its
-signature report alongside the APK.
+`pipefail` or an explicit verification-result assertion. The original release
+job therefore did not enforce the verifier's exit status. The exact published
+APK was independently downloaded and verified on 2026-11-12 by
+[GitHub Actions run #43170557364](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/runs/43170557364):
+the downloaded bytes matched GitHub's asset SHA-256, `apksigner` verified V1
+and V2, exactly one signer was present, and its certificate SHA-256 matched
+`556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006`.
+That audit did not access private signing material and does not establish that
+the original private keystore can be recovered for future in-place updates.
+Future releases use the fail-closed verifier and publish its signature report
+alongside the APK.
 
 This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
 live publishing (with truthful sync status and actionable 401/403/404 error
