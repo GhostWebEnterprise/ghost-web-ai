@@ -211,6 +211,22 @@ jobs:
             echo "::error::APK Signature Scheme v2 is required" >&2
             exit 1
           }
+          AAPT=$(find "$ANDROID_HOME"/build-tools -type f -name aapt -print | sort -V | tail -1)
+          test -n "$AAPT" && test -x "$AAPT" || { echo "::error::aapt missing" >&2; exit 1; }
+          "$AAPT" dump badging "$APK" | tee apk-out/apk-badging.txt
+          MIN_SDK="$(sed -n "s/^sdkVersion:'\([0-9][0-9]*\)'.*/\1/p" apk-out/apk-badging.txt | head -n 1)"
+          [[ "$MIN_SDK" =~ ^[0-9]+$ ]] || { echo "::error::Could not determine APK minimum SDK" >&2; exit 1; }
+          if (( MIN_SDK < 24 )); then
+            grep -Fq "Verified using v1 scheme (JAR signing): true" apk-out/apksigner.txt || {
+              echo "::error::APK minSdk is below 24 but V1/JAR signature verification is not valid" >&2
+              exit 1
+            }
+          fi
+          V1_META_WARNING_COUNT="$(grep -c '^WARNING: META-INF/' apk-out/apksigner.txt || true)"
+          {
+            echo "Minimum SDK: $MIN_SDK"
+            echo "V1 META-INF unprotected-entry warning count: $V1_META_WARNING_COUNT"
+          } >> "$GITHUB_STEP_SUMMARY"
           grep -Fq "Number of signers: 1" apk-out/apksigner.txt || {
             echo "::error::Expected exactly one APK signer" >&2
             exit 1
