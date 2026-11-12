@@ -99,7 +99,11 @@ jobs:
             exit 1
           }
 
-          actual_signer="$(awk -F': ' '/certificate SHA-256 digest:/ {print $2; exit}' audit/apksigner.txt | tr -d ':' | tr '[:upper:]' '[:lower:]')"
+          signer_lines="$(grep -E 'certificate SHA-256 digest:' audit/apksigner.txt || true)"
+          printf '%s\n' "$signer_lines"
+          actual_signer="$(printf '%s\n' "$signer_lines" | sed -nE 's/^.*certificate SHA-256 digest:[[:space:]]*([0-9A-Fa-f:]+).*$/\1/p' | head -n 1 | tr -d '[:space:]:' | tr '[:upper:]' '[:lower:]')"
+          echo "Observed signer certificate SHA-256: ${actual_signer:-<missing>}"
+          echo "Expected signer certificate SHA-256: $EXPECTED_SIGNER_SHA256"
           test "$actual_signer" = "$EXPECTED_SIGNER_SHA256" || {
             echo "::error::Published APK signer does not match the recorded v0.2.3 certificate" >&2
             exit 1
@@ -116,10 +120,11 @@ jobs:
             echo "Private signing material: not accessed"
           } > audit/verification-summary.txt
 
-      - name: Upload verification evidence
+      - name: Upload verification evidence (including failed audits)
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: android-apk-signature-audit-${{ github.run_id }}
           path: audit/
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
