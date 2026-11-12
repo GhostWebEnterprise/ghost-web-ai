@@ -36,6 +36,15 @@ and V2, exactly one signer was present, and its certificate SHA-256 matched
 `556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006`.
 That audit did not access private signing material and does not establish that
 the original private keystore can be recovered for future in-place updates.
+
+The audit also recorded **38 unprotected META-INF entries under the V1/JAR
+signature**. The APK declares minSdk 23, so Android API 23 relies on V1 and does
+not receive V2's whole-APK integrity protection. Android API 24 and later can
+verify the APK Signature Scheme V2 signature. The release workflow now refuses
+future Android releases with minSdk below 24 whenever apksigner reports any
+unprotected META-INF entries; the historical v0.2.3 asset remains published
+with this limitation documented.
+
 Future releases use the fail-closed verifier and publish its signature report
 alongside the APK.
 
