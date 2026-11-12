@@ -8,7 +8,7 @@ receives security updates; older releases are documented for reference only.
 
 | Version  | Supported          | Notes                                              |
 | -------- | ------------------ | -------------------------------------------------- |
-| 0.2.x    | :white_check_mark: | Latest line — Android release signing is fail-closed; web and desktop security updates |
+| 0.2.x    | :white_check_mark: | Web/desktop updates; future Android releases fail closed (v0.2.3 exception) |
 | 0.1.x    | :x:                | Superseded by v0.2.x; no further security updates  |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
