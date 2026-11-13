@@ -8,7 +8,7 @@ receives security updates; older releases are documented for reference only.
 
 | Version  | Supported          | Notes                                              |
 | -------- | ------------------ | -------------------------------------------------- |
-| 0.2.x    | :white_check_mark: | Latest line — Android release signing is fail-closed; web and desktop security updates |
+| 0.2.x    | :white_check_mark: | Web/desktop updates; future Android releases fail closed (v0.2.3 exception) |
 | 0.1.x    | :x:                | Superseded by v0.2.x; no further security updates  |
 | < 0.1.0  | :x:                | Pre-release history, not supported                 |
 
@@ -23,7 +23,32 @@ rotate both passwords before placing it in Actions, then verify that its
 certificate SHA-256 still matches the published v0.2.3 signer. Future Android
 releases must use the existing signing identity and fail closed if it cannot
 be reproduced; a replacement key must not be published as an in-place update
-for the same Android application ID. This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
+for the same Android application ID.
+
+**Historical signature-evidence limitation:** the v0.2.3 workflow made `apksigner`
+optional and ran `apksigner verify --print-certs` through `head` without
+`pipefail` or an explicit verification-result assertion. The original release
+job therefore did not enforce the verifier's exit status. The exact published
+APK was independently downloaded and verified on 2026-11-12 by
+[GitHub Actions run #43170557364](https://github.com/GhostWebEnterprise/ghost-web-ai/actions/runs/43170557364):
+the downloaded bytes matched GitHub's asset SHA-256, `apksigner` verified V1
+and V2, exactly one signer was present, and its certificate SHA-256 matched
+`556745ef7356f3debfac112a66bbfe67d96fcb303c44d1b66d17bd8d5f209006`.
+That audit did not access private signing material and does not establish that
+the original private keystore can be recovered for future in-place updates.
+
+The audit also recorded **38 unprotected META-INF entries under the V1/JAR
+signature**. The APK declares minSdk 23, so Android API 23 relies on V1 and does
+not receive V2's whole-APK integrity protection. Android API 24 and later can
+verify the APK Signature Scheme V2 signature. The release workflow now refuses
+future Android releases with minSdk below 24 whenever apksigner reports any
+unprotected META-INF entries; the historical v0.2.3 asset remains published
+with this limitation documented.
+
+Future releases use the fail-closed verifier and publish its signature report
+alongside the APK.
+
+This release adds the deployment-wide `GITHUB_PAT` fallback for repo sync and
 live publishing (with truthful sync status and actionable 401/403/404 error
 hints in the UI), a fully responsive mobile/desktop UI, a per-user Settings
 tab (engine mode, plan-only publishing, repo defaults), **iOS/macOS/Linux
