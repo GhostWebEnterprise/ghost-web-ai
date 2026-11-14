@@ -376,7 +376,12 @@ jobs:
           }
 
           EXPECTED_APK_SHA256="$(awk 'NR == 1 {print $1}' "apk-out/${CHECKSUM_ASSET}")"
-          ACTUAL_APK_SHA256="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${RELEASE_TAG}" --jq '.assets[] | select(.name=="'"${ASSET_NAME}"'") | .digest' | sed 's/^sha256://')"
+          # Draft releases may return 404 from the release-by-tag endpoint.
+          # The releases collection includes drafts and exposes uploaded asset digests.
+          release_json="$(gh api "repos/${GITHUB_REPOSITORY}/releases?per_page=100")"
+          ACTUAL_APK_SHA256="$(jq -r --arg tag "${RELEASE_TAG}" --arg name "${ASSET_NAME}" \
+            '.[] | select(.tag_name == $tag) | .assets[]? | select(.name == $name) | .digest // empty' \
+            <<< "${release_json}" | sed 's/^sha256://')"
           test -n "${ACTUAL_APK_SHA256}" && test "${EXPECTED_APK_SHA256}" = "${ACTUAL_APK_SHA256}" || {
             echo "::error::GitHub APK asset digest differs from the verified checksum manifest" >&2; exit 1;
           }
