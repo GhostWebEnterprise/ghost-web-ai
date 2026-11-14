@@ -152,7 +152,7 @@ jobs:
             case "$status" in
               200) ;;
               301|302|303|307|308)
-                location="$(awk 'tolower($1) == "location:" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\\r$/, ""); print; exit }' "$headers")"
+                location="$(awk 'tolower($1) == "location:" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit }' "$headers")"
                 test -n "$location" || {
                   rm -f "$headers" "$destination"
                   echo "::error::GitHub asset redirect omitted its download URL" >&2
@@ -519,7 +519,7 @@ jobs:
             case "$status" in
               200) ;;
               301|302|303|307|308)
-                location="$(awk 'tolower($1) == "location:" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\\r$/, ""); print; exit }' "$headers")"
+                location="$(awk 'tolower($1) == "location:" { sub(/^[^:]*:[[:space:]]*/, ""); sub(/\r$/, ""); print; exit }' "$headers")"
                 test -n "$location" || {
                   rm -f "$headers" "$destination"
                   echo "::error::GitHub asset redirect omitted its download URL" >&2
