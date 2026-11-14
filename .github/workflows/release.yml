@@ -436,7 +436,7 @@ jobs:
             object_sha="$(jq -r '.object.sha' <<< "${ref_json}")"
             object_type="$(jq -r '.object.type' <<< "${ref_json}")"
             case "${object_type}" in
-              commit) printf '%s\\n' "${object_sha}" ;;
+              commit) printf '%s\n' "${object_sha}" ;;
               tag) gh api "repos/${GITHUB_REPOSITORY}/git/tags/${object_sha}" --jq '.object.sha' ;;
               *) echo "::error::Unexpected Git tag object type: ${object_type}" >&2; return 1 ;;
             esac
