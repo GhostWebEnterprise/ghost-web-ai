@@ -75,9 +75,9 @@ test("Android release keystore is removed before the draft release is published"
   expect(cleanup).toContain("rm -f android/release.keystore");
   expect(cleanup).toContain("test ! -e android/release.keystore");
   const publish = workflow.slice(publishIndex);
-  expect(publish).toContain('test "$is_draft" = true');
-  expect(publish).toContain('gh release edit "${RELEASE_TAG}"');
-  expect(publish).toContain('test "$is_draft" = false');
+  expect(publish).toContain("test \"$(jq -r '.draft' <<< \"${release_record}\")\" = true");
+  expect(publish).toContain("gh api --method PATCH -F draft=false");
+  expect(publish).toContain("jq -e '.draft == false and .published_at != null'");
 });
 
 test("Android release never writes or prints a plaintext signing environment file", () => {
