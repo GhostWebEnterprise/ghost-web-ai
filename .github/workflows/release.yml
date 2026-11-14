@@ -292,7 +292,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download verified web build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist-${{ github.run_id }}
           path: dist/
@@ -730,7 +730,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download verified web build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist-${{ github.run_id }}
           path: dist/
@@ -859,7 +859,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Download verified web build
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: dist-${{ github.run_id }}
           path: dist/
