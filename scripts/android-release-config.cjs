@@ -151,7 +151,7 @@ if (!patched.includes("signingConfig signingConfigs.release")) {
 
 fs.writeFileSync(APP_GRADLE, patched);
 
- // Only materialize private signing material after all scaffold/configuration
+// Only materialize private signing material after all scaffold/configuration
  // validation and Gradle edits have succeeded. On a partial write or chmod
  // failure, remove the file rather than leave an unusable private-key copy.
 try {
@@ -165,7 +165,7 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Report
+// 5. Report
 // ---------------------------------------------------------------------------
 
 console.log(`android-release-config: version ${versionName} (code ${versionCode})`);

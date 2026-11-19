@@ -108,7 +108,7 @@ function testInvalidScaffoldFailsBeforeKeystoreWrite() {
     const keystorePath = path.join(fixture.root, "android", "release.keystore");
     fs.writeFileSync(
       variablesPath,
-      "ext {\\n    minSdkVersion = 23\\n    minSdkVersion = 24\\n}\\n"
+      "ext {\n    minSdkVersion = 23\n    minSdkVersion = 24\n}\n"
     );
     const result = spawnSync(process.execPath, [fixture.script, "v0.2.4"], {
       cwd: fixture.root,
@@ -135,7 +135,7 @@ function testMissingAppGradleFailsBeforeKeystoreWrite() {
       encoding: "utf8",
     });
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /android\\/app\\/build.gradle not found/);
+    assert.match(result.stderr, /android\/app\/build.gradle not found/);
     assert.equal(fs.existsSync(keystorePath), false);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
