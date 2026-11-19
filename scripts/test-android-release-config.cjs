@@ -71,8 +71,8 @@ function testMinSdk(initial, expected) {
     assert.ok(variables.includes("minSdkVersion = " + expected + "\n"));
     assert.match(output, new RegExp("minimum SDK " + expected));
     assert.match(gradle, /versionCode 204/);
-    assert.match(gradle, /versionName "0\\.2\\.4"/);
-    assert.match(gradle, /signingConfig signingConfigs\\.release/);
+    assert.match(gradle, /versionName "0\.2\.4"/);
+    assert.match(gradle, /signingConfig signingConfigs\.release/);
     assert.equal(fs.statSync(keystorePath).mode & 0o777, 0o600);
 
     const firstVariables = variables;
