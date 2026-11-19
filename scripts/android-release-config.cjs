@@ -82,14 +82,14 @@ fs.chmodSync(keystorePath, 0o600);
 const MIN_SUPPORTED_ANDROID_API = 24;
 must(fs.existsSync(VARIABLES_GRADLE), "android/variables.gradle not found — run `bunx cap add android` first");
 let variables = fs.readFileSync(VARIABLES_GRADLE, "utf8");
-const minSdkLines = variables.match(/^[ \\t]*minSdkVersion[ \\t]*=[ \\t]*\\d+[ \\t]*$/gm) || [];
+const minSdkLines = variables.match(/^[ \t]*minSdkVersion[ \t]*=[ \t]*\d+[ \t]*$/gm) || [];
 must(minSdkLines.length === 1, "expected exactly one numeric minSdkVersion in android/variables.gradle");
-const minSdkMatch = /^([ \\t]*minSdkVersion[ \\t]*=[ \\t]*)(\\d+)([ \\t]*)$/m.exec(variables);
+const minSdkMatch = /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m.exec(variables);
 must(minSdkMatch, "could not parse android/variables.gradle minSdkVersion");
 let minSdkVersion = Number(minSdkMatch[2]);
 if (minSdkVersion < MIN_SUPPORTED_ANDROID_API) {
   variables = variables.replace(
-    /^([ \\t]*minSdkVersion[ \\t]*=[ \\t]*)(\\d+)([ \\t]*)$/m,
+    /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m,
     (_line, prefix, _current, suffix) => prefix + MIN_SUPPORTED_ANDROID_API + suffix
   );
   fs.writeFileSync(VARIABLES_GRADLE, variables);
