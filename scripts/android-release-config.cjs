@@ -20,6 +20,7 @@ const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
 const APP_GRADLE = path.join(ROOT, "android", "app", "build.gradle");
+const VARIABLES_GRADLE = path.join(ROOT, "android", "variables.gradle");
 
 function must(cond, msg) {
   if (!cond) {
@@ -66,13 +67,35 @@ must(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(enc
 const decoded = Buffer.from(encoded, "base64");
 must(decoded.length > 0 && decoded.toString("base64") === encoded,
   "ANDROID_KEYSTORE_BASE64 must decode to a nonempty keystore");
-fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
-fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
-// writeFileSync's mode only applies to newly created files; enforce it for reused paths too.
-fs.chmodSync(keystorePath, 0o600);
+// ---------------------------------------------------------------------------
+// 3. Enforce the Android 7.0+ signature-verification baseline
+// ---------------------------------------------------------------------------
+// The release workflow requires APK Signature Scheme v2. Android versions
+// below API 24 rely on V1/JAR verification, which cannot authenticate the
+// META-INF entries emitted by the current Capacitor scaffold. Keep the
+// release APK's minimum SDK aligned with that existing fail-closed gate.
+const MIN_SUPPORTED_ANDROID_API = 24;
+must(fs.existsSync(VARIABLES_GRADLE), "android/variables.gradle not found — run `bunx cap add android` first");
+let variables = fs.readFileSync(VARIABLES_GRADLE, "utf8");
+let variablesChanged = false;
+const minSdkLines = variables.match(/^[ \t]*minSdkVersion[ \t]*=[ \t]*\d+[ \t]*$/gm) || [];
+must(minSdkLines.length === 1, "expected exactly one numeric minSdkVersion in android/variables.gradle");
+const minSdkMatch = /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m.exec(variables);
+must(minSdkMatch, "could not parse android/variables.gradle minSdkVersion");
+let minSdkVersion = Number(minSdkMatch[2]);
+if (minSdkVersion < MIN_SUPPORTED_ANDROID_API) {
+  variables = variables.replace(
+    /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m,
+    (_line, prefix, _current, suffix) => prefix + MIN_SUPPORTED_ANDROID_API + suffix
+  );
+  variablesChanged = true;
+  minSdkVersion = MIN_SUPPORTED_ANDROID_API;
+}
+must(minSdkVersion >= MIN_SUPPORTED_ANDROID_API, "Android release minSdkVersion must be at least API 24");
+
 
 // ---------------------------------------------------------------------------
-// 3. Patch app/build.gradle
+// 4. Patch app/build.gradle
 // ---------------------------------------------------------------------------
 must(fs.existsSync(APP_GRADLE), "android/app/build.gradle not found — run `bunx cap add android` first");
 
@@ -128,11 +151,27 @@ if (!patched.includes("signingConfig signingConfigs.release")) {
 }
 
 fs.writeFileSync(APP_GRADLE, patched);
+if (variablesChanged)
+  fs.writeFileSync(VARIABLES_GRADLE, variables);
+
+// Only materialize private signing material after all scaffold/configuration
+ // validation and Gradle edits have succeeded. On a partial write or chmod
+ // failure, remove the file rather than leave an unusable private-key copy.
+try {
+  fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
+  fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
+  // writeFileSync's mode only applies to newly created files; enforce it for reused paths too.
+  fs.chmodSync(keystorePath, 0o600);
+} catch (error) {
+  fs.rmSync(keystorePath, { force: true });
+  throw error;
+}
 
 // ---------------------------------------------------------------------------
-// 4. Report
+// 5. Report
 // ---------------------------------------------------------------------------
 
 console.log(`android-release-config: version ${versionName} (code ${versionCode})`);
 console.log("android-release-config: repository keystore configured");
 console.log("android-release-config: app/build.gradle patched for signed release builds");
+console.log("android-release-config: minimum SDK " + minSdkVersion + " (Android 7.0 or later)");

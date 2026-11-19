@@ -25,6 +25,9 @@ jobs:
       - name: Unit tests
         run: bun test
 
+      - name: Android release config regression tests
+        run: node scripts/test-android-release-config.cjs
+
       - name: Production build
         run: npx vite build
 

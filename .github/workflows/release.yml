@@ -35,6 +35,7 @@ jobs:
         run: |
           bunx tsc -b --noEmit
           bun test
+          node scripts/test-android-release-config.cjs
 
       - name: Production build
         run: npx vite build
