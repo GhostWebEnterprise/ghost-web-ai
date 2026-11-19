@@ -126,6 +126,7 @@ function testInvalidScaffoldFailsBeforeKeystoreWrite() {
 function testMissingAppGradleFailsBeforeKeystoreWrite() {
   const fixture = createFixture(23);
   try {
+    const variablesPath = path.join(fixture.root, "android", "variables.gradle");
     const appGradlePath = path.join(fixture.root, "android", "app", "build.gradle");
     const keystorePath = path.join(fixture.root, "android", "release.keystore");
     const originalVariables = fs.readFileSync(variablesPath, "utf8");
