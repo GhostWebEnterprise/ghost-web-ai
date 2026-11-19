@@ -67,11 +67,6 @@ must(/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(enc
 const decoded = Buffer.from(encoded, "base64");
 must(decoded.length > 0 && decoded.toString("base64") === encoded,
   "ANDROID_KEYSTORE_BASE64 must decode to a nonempty keystore");
-fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
-fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
-// writeFileSync's mode only applies to newly created files; enforce it for reused paths too.
-fs.chmodSync(keystorePath, 0o600);
-
 // ---------------------------------------------------------------------------
 // 3. Enforce the Android 7.0+ signature-verification baseline
 // ---------------------------------------------------------------------------
@@ -155,6 +150,19 @@ if (!patched.includes("signingConfig signingConfigs.release")) {
 }
 
 fs.writeFileSync(APP_GRADLE, patched);
+
+ // Only materialize private signing material after all scaffold/configuration
+ // validation and Gradle edits have succeeded. On a partial write or chmod
+ // failure, remove the file rather than leave an unusable private-key copy.
+try {
+  fs.mkdirSync(path.dirname(keystorePath), { recursive: true });
+  fs.writeFileSync(keystorePath, decoded, { mode: 0o600 });
+  // writeFileSync's mode only applies to newly created files; enforce it for reused paths too.
+  fs.chmodSync(keystorePath, 0o600);
+} catch (error) {
+  fs.rmSync(keystorePath, { force: true });
+  throw error;
+}
 
 // ---------------------------------------------------------------------------
 // 4. Report

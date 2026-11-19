@@ -101,7 +101,50 @@ function testMissingSecretFailsClosed() {
   }
 }
 
+function testInvalidScaffoldFailsBeforeKeystoreWrite() {
+  const fixture = createFixture(23);
+  try {
+    const variablesPath = path.join(fixture.root, "android", "variables.gradle");
+    const keystorePath = path.join(fixture.root, "android", "release.keystore");
+    fs.writeFileSync(
+      variablesPath,
+      "ext {\\n    minSdkVersion = 23\\n    minSdkVersion = 24\\n}\\n"
+    );
+    const result = spawnSync(process.execPath, [fixture.script, "v0.2.4"], {
+      cwd: fixture.root,
+      env: { ...process.env, ...secrets },
+      encoding: "utf8",
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /expected exactly one numeric minSdkVersion/);
+    assert.equal(fs.existsSync(keystorePath), false);
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+}
+
+function testMissingAppGradleFailsBeforeKeystoreWrite() {
+  const fixture = createFixture(23);
+  try {
+    const appGradlePath = path.join(fixture.root, "android", "app", "build.gradle");
+    const keystorePath = path.join(fixture.root, "android", "release.keystore");
+    fs.rmSync(appGradlePath);
+    const result = spawnSync(process.execPath, [fixture.script, "v0.2.4"], {
+      cwd: fixture.root,
+      env: { ...process.env, ...secrets },
+      encoding: "utf8",
+    });
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /android\\/app\\/build.gradle not found/);
+    assert.equal(fs.existsSync(keystorePath), false);
+  } finally {
+    fs.rmSync(fixture.root, { recursive: true, force: true });
+  }
+}
+
 testMinSdk(23, 24);
 testMinSdk(26, 26);
 testMissingSecretFailsClosed();
-console.log("Android release config tests passed: API 23 is raised to 24, newer minSdk is preserved, config is idempotent, and missing signing secrets fail closed.");
+testInvalidScaffoldFailsBeforeKeystoreWrite();
+testMissingAppGradleFailsBeforeKeystoreWrite();
+console.log("Android release config tests passed: minSdk normalization, idempotence, missing-secret fail-closed behavior, and no keystore write before scaffold validation.");
