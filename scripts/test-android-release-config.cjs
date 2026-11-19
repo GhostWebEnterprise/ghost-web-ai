@@ -68,7 +68,7 @@ function testMinSdk(initial, expected) {
     const variables = fs.readFileSync(variablesPath, "utf8");
     const gradle = fs.readFileSync(gradlePath, "utf8");
 
-    assert.match(variables, new RegExp("minSdkVersion = " + expected + "\\\\n"));
+    assert.ok(variables.includes("minSdkVersion = " + expected + "\n"));
     assert.match(output, new RegExp("minimum SDK " + expected));
     assert.match(gradle, /versionCode 20400/);
     assert.match(gradle, /versionName "0\\.2\\.4"/);
