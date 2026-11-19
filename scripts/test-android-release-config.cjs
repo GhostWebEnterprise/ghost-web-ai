@@ -128,6 +128,7 @@ function testMissingAppGradleFailsBeforeKeystoreWrite() {
   try {
     const appGradlePath = path.join(fixture.root, "android", "app", "build.gradle");
     const keystorePath = path.join(fixture.root, "android", "release.keystore");
+    const originalVariables = fs.readFileSync(variablesPath, "utf8");
     fs.rmSync(appGradlePath);
     const result = spawnSync(process.execPath, [fixture.script, "v0.2.4"], {
       cwd: fixture.root,
@@ -136,6 +137,7 @@ function testMissingAppGradleFailsBeforeKeystoreWrite() {
     });
     assert.notEqual(result.status, 0);
     assert.match(result.stderr, /android\/app\/build.gradle not found/);
+    assert.equal(fs.readFileSync(variablesPath, "utf8"), originalVariables);
     assert.equal(fs.existsSync(keystorePath), false);
   } finally {
     fs.rmSync(fixture.root, { recursive: true, force: true });
