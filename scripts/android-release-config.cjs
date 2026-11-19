@@ -77,6 +77,7 @@ must(decoded.length > 0 && decoded.toString("base64") === encoded,
 const MIN_SUPPORTED_ANDROID_API = 24;
 must(fs.existsSync(VARIABLES_GRADLE), "android/variables.gradle not found — run `bunx cap add android` first");
 let variables = fs.readFileSync(VARIABLES_GRADLE, "utf8");
+let variablesChanged = false;
 const minSdkLines = variables.match(/^[ \t]*minSdkVersion[ \t]*=[ \t]*\d+[ \t]*$/gm) || [];
 must(minSdkLines.length === 1, "expected exactly one numeric minSdkVersion in android/variables.gradle");
 const minSdkMatch = /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m.exec(variables);
@@ -87,7 +88,7 @@ if (minSdkVersion < MIN_SUPPORTED_ANDROID_API) {
     /^([ \t]*minSdkVersion[ \t]*=[ \t]*)(\d+)([ \t]*)$/m,
     (_line, prefix, _current, suffix) => prefix + MIN_SUPPORTED_ANDROID_API + suffix
   );
-  fs.writeFileSync(VARIABLES_GRADLE, variables);
+  variablesChanged = true;
   minSdkVersion = MIN_SUPPORTED_ANDROID_API;
 }
 must(minSdkVersion >= MIN_SUPPORTED_ANDROID_API, "Android release minSdkVersion must be at least API 24");
@@ -150,6 +151,8 @@ if (!patched.includes("signingConfig signingConfigs.release")) {
 }
 
 fs.writeFileSync(APP_GRADLE, patched);
+if (variablesChanged)
+  fs.writeFileSync(VARIABLES_GRADLE, variables);
 
 // Only materialize private signing material after all scaffold/configuration
  // validation and Gradle edits have succeeded. On a partial write or chmod
